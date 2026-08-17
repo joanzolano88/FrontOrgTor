@@ -1,0 +1,27 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>
+      Login
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+<ion-content [fullscreen]="true" class="ion-text-center">
+  <form (ngSubmit)="onSubmit(f)" #f="ngForm">
+    <ion-list>
+      <ion-item class="ion-padding-horizontal">
+        <ion-input label="Numero de Celular" labelPlacement="floating" required name="celular"
+            [(ngModel)]="login.identificacion"></ion-input>
+      </ion-item>
+      <ion-item class="ion-padding-horizontal">
+        <ion-input type="password" label="Contraseña" labelPlacement="floating" required name="contrasena"
+            [(ngModel)]="login.contrasena"></ion-input>
+      </ion-item>
+    </ion-list>
+    <ion-button class="w-100 ion-margin-top ion-padding-horizontal" type="submit">
+      Iniciar Sesion
+    </ion-button>
+  </form>
+  <ion-button class="w-100 ion-margin-top ion-padding-horizontal" (click)="registrarUsuario()">
+    Registrar
+  </ion-button>
+</ion-content>

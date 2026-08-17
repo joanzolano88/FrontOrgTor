@@ -1,0 +1,56 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button text="" defaultHref="/tabs/torneos"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Agregar Partidos</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-grid>
+    <ion-row>
+      <ion-col>
+        <ion-button expand="block" (click)="generarPartidos()">Generar {{cantidadPartidos}} partidos</ion-button>
+      </ion-col>
+    </ion-row>
+    <!--
+    <ion-row>
+      <ion-col>
+        <ion-label>Fecha y hora de inicio de partido</ion-label>
+      </ion-col>
+    </ion-row>
+    <ion-row>
+      <ion-col>
+        <ion-datetime-button datetime="datetime"></ion-datetime-button>
+        <ion-modal [keepContentsMounted]="true">
+          <ng-template>
+            <ion-datetime id="datetime" [(ngModel)]="fecha" minuteValues="0,10,15,20,25,30,35,40,45,50,55"></ion-datetime>
+          </ng-template>
+        </ion-modal>
+      </ion-col>
+    </ion-row>
+    <ion-row>
+      <ion-col>
+        <ion-input label="Cantidad Partidos del dia" labelPlacement="floating" name="nombre" [(ngModel)]="cantidadPartidos" type="number"
+        required minlength="3" [counter]="true"></ion-input>
+      </ion-col>
+    </ion-row>
+    <ion-row>
+      <ion-col>
+        <ion-label>Duracion de cada partido</ion-label>
+      </ion-col>
+    </ion-row>
+    <ion-row>
+      <ion-col class="date-time-cong">
+        <ion-datetime presentation="time" hourCycle="h23" [(ngModel)]="hora" minuteValues="0,10,15,20,25,30,35,40,45,50,55"></ion-datetime>
+      </ion-col>
+    </ion-row>
+    <ion-row>
+      <ion-col>
+        <ion-button expand="block" (click)="generarPartido()">Generar partido</ion-button>
+      </ion-col>
+    </ion-row>
+    -->
+  </ion-grid>
+</ion-content>

@@ -1,0 +1,26 @@
+.eliminatorias {
+    background-color: #4d8dff;
+    border-radius: 10px;
+    min-width: 120px;
+}
+.tabla-eliminatorias {
+    display: flex;
+    justify-content: space-around;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    ion-item {
+        padding: 5px 0;
+    }
+}
+.tabla-scroll-x {
+    flex-wrap: nowrap;
+    overflow-x: scroll;
+}
+.texto-llaves {
+    display: flex;
+    justify-content: space-between;
+    p {
+     margin: 0;   
+    }
+}

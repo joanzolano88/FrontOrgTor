@@ -1,0 +1,30 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>participantes-configurar</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <form #f="ngForm" (ngSubmit)="onSubmit(f)">
+    <ion-list>
+      <ion-item class="ion-padding-horizontal" [ngClass]="{'error-input': f.submitted && f.controls['nombre-delegado'].errors}"
+        [ngStyle]="{'--border-color': f.submitted && f.controls['nombre-delegado'].errors ? '#f44336' : '#404040'}">
+        <ion-input label="Nombre Delegado" labelPlacement="floating" name="nombre-delegado" [(ngModel)]="delegado.nombre"
+            required minlength="6" [counter]="true"></ion-input>
+      </ion-item>
+      <ion-item class="ion-padding-horizontal" [ngClass]="{'error-input': f.submitted && f.controls['numero-celular'].errors}"
+        [ngStyle]="{'--border-color': f.submitted && f.controls['numero-celular'].errors ? '#f44336' : '#404040'}">
+        <ion-input label="Numero Celular" labelPlacement="floating" name="numero-celular" type="tel" [(ngModel)]="delegado.numeroCelular"
+            required minlength="6" [counter]="true"></ion-input>
+      </ion-item>
+      <ion-item class="ion-padding-horizontal" [ngClass]="{'error-input': f.submitted && identificacionDelegado == null}"
+        [ngStyle]="{'--border-color': f.submitted && identificacionDelegado == null ? '#f44336' : '#404040'}">
+        <ion-label position="floating">Cargar Identificacion</ion-label>
+        <ion-input type="file" class="ion-hide" #fileEsc (change)="cargaridentificacion($event)" accept="application/pdf" required></ion-input>
+        <ion-input (click)="activarSubirArchivo(fileEsc)" [disabled]="true" [(ngModel)]="nombreIdentificacion" class="flex-reverse" labelPlacement="floating" name="identificacion">
+          <ion-icon name="document" size="large" class="ion-margin-bottom"></ion-icon>
+        </ion-input>
+      </ion-item>
+    </ion-list>
+  </form>
+</ion-content>

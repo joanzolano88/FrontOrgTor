@@ -1,0 +1,13 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button text="" defaultHref="/tabs/torneos"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Torneo</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <app-informacion-torneo [torneo]="torneo" [validarOrganizador]="validarOrganizador"></app-informacion-torneo>
+  <app-torneo [validarOrganizador]="validarOrganizador"></app-torneo>
+</ion-content>

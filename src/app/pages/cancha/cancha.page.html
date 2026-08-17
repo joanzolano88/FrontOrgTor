@@ -1,0 +1,41 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button text="" defaultHref="/tabs/torneos"></ion-back-button>
+    </ion-buttons>
+    <ion-title>{{tituloTab()}} Cancha</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <form #f="ngForm" (ngSubmit)="onSubmit(f)">
+    <ion-list>
+      <ion-item class="ion-padding-horizontal" [ngClass]="{'error-input': f.submitted && f.controls['nombre'].errors}"
+        [ngStyle]="{'--border-color': f.submitted && f.controls['nombre'].errors ? '#f44336' : '#404040'}">
+        <ion-input label="Nombre cancha" labelPlacement="floating" name="nombre" [(ngModel)]="cancha.nombre"
+            required minlength="6" [counter]="true"></ion-input>
+      </ion-item>
+      <ion-item class="ion-padding-horizontal" [ngClass]="{'error-input': f.submitted && f.controls['direecion'].errors}"
+        [ngStyle]="{'--border-color': f.submitted && f.controls['direecion'].errors ? '#f44336' : '#404040'}">
+        <ion-input label="Direccion" labelPlacement="floating" name="direecion" [(ngModel)]="cancha.direccion"
+            required minlength="6" [counter]="true"></ion-input>
+      </ion-item>
+      <ion-item class="ion-padding-horizontal" [ngClass]="{'error-input': f.submitted && f.controls['largo'].errors}"
+        [ngStyle]="{'--border-color': f.submitted && f.controls['largo'].errors ? '#f44336' : '#404040'}">
+        <ion-input label="Largo" labelPlacement="floating" name="largo" type="number" [(ngModel)]="cancha.largo"
+            required minlength="6" [counter]="true"></ion-input>
+      </ion-item>
+      <ion-item class="ion-padding-horizontal" [ngClass]="{'error-input': f.submitted && f.controls['ancho'].errors}"
+        [ngStyle]="{'--border-color': f.submitted && f.controls['ancho'].errors ? '#f44336' : '#404040'}">
+        <ion-input label="Ancho" labelPlacement="floating" name="ancho" type="number" [(ngModel)]="cancha.ancho"
+            required minlength="6" [counter]="true"></ion-input>
+      </ion-item>
+      <ion-item class="ion-padding-horizontal" [ngClass]="{'error-input': f.submitted && f.controls['ubicaion'].errors}"
+        [ngStyle]="{'--border-color': f.submitted && f.controls['ubicaion'].errors ? '#f44336' : '#404040'}">
+        <ion-input label="Ubicacion" labelPlacement="floating" name="ubicaion" type="tel" [(ngModel)]="ubicacion"
+            required minlength="6" [counter]="true"></ion-input>
+      </ion-item>
+    </ion-list>
+    <ion-button expand="block" class="ion-margin-top ion-margin-horizontal" type="submit">Guardar</ion-button>
+  </form>
+</ion-content>

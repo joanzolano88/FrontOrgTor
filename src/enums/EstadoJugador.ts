@@ -1,0 +1,3 @@
+export enum EstadoJugador {
+    ACTIVO="ACTIVO",INACTIVO="INACTIVO",SUSPENDIDO="SUSPENDIDO"
+}

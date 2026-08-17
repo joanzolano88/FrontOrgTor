@@ -1,0 +1,88 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button text="" defaultHref="/tabs/torneos"></ion-back-button>
+    </ion-buttons>
+    <ion-title>cambiarFaseTorneo</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-grid>
+    <ion-row>
+      <ion-col>
+        <ion-button (click)="cambiarFase()" expand="block">Cambiar Fase</ion-button>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+  <ion-grid>
+    <ion-row cdkDropListGroup>
+      <ion-col>
+        <div *ngFor="let grupo of listaEuiposGrupos; let j = index">
+          <ion-accordion-group>
+            <ion-accordion value="first">
+              <ion-item slot="header" color="light">
+                <ion-label *ngIf="torneo.faseTorneo == 'FASE_GRUPOS' || torneo.faseTorneo == 'ELIMINATORIAS_GRUPOS'">Grupo <ng-container *ngIf="torneo.faseTorneo == 'ELIMINATORIAS_GRUPOS'">Elimi. </ng-container>{{ grupo[0].grupo }}</ion-label>
+                <ion-label *ngIf="torneo.faseTorneo != 'FASE_GRUPOS' && torneo.faseTorneo != 'ELIMINATORIAS_GRUPOS'">Llave</ion-label>
+              </ion-item>
+              <div slot="content" id="grupoE{{grupo[0].grupo}}" 
+                cdkDropList [cdkDropListData]="grupo" [cdkDropListEnterPredicate]="evenPredicateGrupo"
+                class="example-list" cdkDropListSortingDisabled (cdkDropListDropped)="drop($event)">
+                <ion-row *ngFor="let equipo of grupo; let i = index" [cdkDragData]="equipo" class="example-box" cdkDrag>
+                  <ion-col size="2" *ngIf="torneo.faseTorneo == 'FASE_GRUPOS' || torneo.faseTorneo == 'ELIMINATORIAS_GRUPOS'">
+                    {{ puntosEquipo(equipo) }}
+                  </ion-col>
+                  <ion-col size="3" *ngIf="torneo.faseTorneo != 'FASE_GRUPOS' && torneo.faseTorneo != 'ELIMINATORIAS_GRUPOS'">
+                    {{ resulatdoLlaves(equipo) }}
+                  </ion-col>
+                  <ion-col size="9">{{ equipo.nombre }}</ion-col>
+                </ion-row>
+              </div>
+            </ion-accordion>
+          </ion-accordion-group>
+        </div>
+      </ion-col>
+      <ion-col *ngIf="torneo.faseTorneo == 'ELIMINATORIAS_GRUPOS'">
+        <div *ngFor="let grupo of listaLlaves; let j = index">
+          <ion-accordion-group>
+            <ion-accordion value="first">
+              <ion-item slot="header" color="light">
+                <ion-label>Grupo {{ j + 1 }}</ion-label>
+              </ion-item>
+              <div slot="content" id="grupoG{{j}}" cdkDropList [cdkDropListData]="grupo" [cdkDropListEnterPredicate]="evenPredicate"
+                class="example-list" cdkDropListSortingDisabled (cdkDropListDropped)="drop($event)">
+                <ion-row *ngFor="let equipo of grupo; let i = index" [cdkDragData]="equipo" class="example-box" cdkDrag>
+                  <ion-col size="10">{{ equipo.nombre }}</ion-col>
+                </ion-row>
+              </div>
+            </ion-accordion>
+          </ion-accordion-group>
+        </div>
+      </ion-col>
+      <ion-col *ngIf="torneo.faseTorneo != 'ELIMINATORIAS_GRUPOS'">
+        <ion-content style="height: 80vh;">
+        <ion-list *ngFor="let llave of listaLlaves; let i = index">
+          <ion-item>
+            <label for="">Llave</label>
+          </ion-item>
+          <ion-item>
+            <ion-grid id="grupoG{{i}}" cdkDropList [cdkDropListData]="llave"
+              class="example-list" (cdkDropListDropped)="drop($event)"
+              [cdkDropListEnterPredicate]="evenPredicate">
+              <ion-row *ngFor="let equipo of llave" [cdkDragData]="equipo" class="example-box" cdkDrag>
+              <ion-col size="10">{{ equipo.nombre }}</ion-col>
+            </ion-row>
+            </ion-grid>
+          </ion-item>
+        </ion-list>
+        </ion-content>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+  <ion-alert
+  [isOpen]="isAlertOpen"
+  header="Cambio de Fase completa"
+  [buttons]="alertButtons"
+  (didDismiss)="setOpen(false)"
+  ></ion-alert>
+</ion-content>

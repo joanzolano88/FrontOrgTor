@@ -1,0 +1,69 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button text="" defaultHref="/tabs/torneos"></ion-back-button>
+    </ion-buttons>
+    <ion-title>{{tituloTab()}} Torneo</ion-title>
+  </ion-toolbar>
+</ion-header>
+<ion-content [fullscreen]="true">
+  <form (ngSubmit)="onSubmit(f)" #f="ngForm">
+    <ion-list>
+      <ion-item class="ion-padding-horizontal" [ngClass]="{'error-input': f.submitted && f.controls['nombre'].errors}"
+        [ngStyle]="{'--border-color': f.submitted && f.controls['nombre'].errors ? '#f44336' : '#404040'}">
+        <ion-input [(ngModel)]="torneo.nombre" label="Nombre" labelPlacement="floating" name="nombre"
+            required minlength="6" [counter]="true"></ion-input>
+      </ion-item>
+      <ion-item class="ion-padding-horizontal" [ngClass]="{'error-input': f.submitted && f.controls['valor-ins'].errors}"
+        [ngStyle]="{'--border-color': f.submitted && f.controls['valor-ins'].errors ? '#f44336' : '#404040'}">
+        <ion-input [(ngModel)]="torneo.valorInscripcion" type="number" label="Valor Inscripcion" labelPlacement="floating" 
+        name="valor-ins" required ></ion-input>
+      </ion-item>
+      <ion-item class="ion-padding-horizontal" [ngClass]="{'error-input': f.submitted && f.controls['modalidad'].errors}"
+        [ngStyle]="{'--border-color': f.submitted && f.controls['modalidad'].errors ? '#f44336' : '#404040'}">
+        <ion-select interface="action-sheet" [(ngModel)]="torneo.modalidadTorneo" label="Modalidad Torneo" labelPlacement="floating" name="modalidad" 
+          required>
+          <ion-select-option *ngFor="let item of listaModalidadToreno" value="{{item}}">{{ item.replace('_', ' ') | titlecase}}</ion-select-option>
+        </ion-select>
+      </ion-item>
+      <ion-item class="ion-padding-horizontal" [ngClass]="{'error-input': f.submitted && f.controls['modalidad'].errors}"
+        [ngStyle]="{'--border-color': f.submitted && f.controls['modalidad'].errors ? '#f44336' : '#404040'}"  *ngIf="torneo.modalidadTorneo == 'GRUPOS' || torneo.modalidadTorneo == 'LIGA' || torneo.modalidadTorneo == 'ELIMINATORIAS_GRUPOS'">
+        <ion-select interface="action-sheet" [(ngModel)]="torneo.modalidadGrupos" label="Modalidad Grupos" labelPlacement="floating" 
+            name="modalidadG" required>
+          <ion-select-option *ngFor="let item of listaModalidadFase" value="{{item}}">{{ item.replace('_', ' ') | titlecase}}</ion-select-option>
+        </ion-select>
+      </ion-item>
+      <ion-item class="ion-padding-horizontal" [ngClass]="{'error-input': f.submitted && f.controls['modalidad'].errors}"
+        [ngStyle]="{'--border-color': f.submitted && f.controls['modalidad'].errors ? '#f44336' : '#404040'}">
+        <ion-select interface="action-sheet" [(ngModel)]="torneo.modalidadEliminatorias" label="Modalidad Eliminatorias" labelPlacement="floating"
+            name="modalidadF" required>
+          <ion-select-option *ngFor="let item of listaModalidadFase" value="{{item}}">{{ item.replace('_', ' ') | titlecase}}</ion-select-option>
+        </ion-select>
+      </ion-item>
+      <ion-item *ngIf="torneo.modalidadTorneo == 'GRUPOS' || torneo.modalidadTorneo == 'ELIMINATORIAS_GRUPOS'" class="ion-padding-horizontal" [ngClass]="{'error-input': f.submitted && f.controls['grupos'] != undefined && f.controls['grupos'].errors}"
+        [ngStyle]="{'--border-color': f.submitted && f.controls['grupos'] != undefined && f.controls['grupos'].errors ? '#f44336' : '#404040'}">
+        <ion-input type="number" [(ngModel)]="torneo.cantidadGrupos" label="Cantidad de Grupos" labelPlacement="floating" name="grupos"
+           required></ion-input>
+      </ion-item>
+      <ion-item class="ion-padding-horizontal" [ngClass]="{'error-input': f.submitted && f.controls['cantidad-equi'].errors}"
+        [ngStyle]="{'--border-color': f.submitted && f.controls['cantidad-equi'].errors ? '#f44336' : '#404040'}">
+        <ion-input type="number" [(ngModel)]="torneo.cantidadEquipos" label="Cantidad de Equipos {{textoCantidadEquipos()}}" labelPlacement="floating"
+          name="cantidad-equi" required></ion-input>
+      </ion-item>
+      <!--
+      <ion-item class="ion-padding-horizontal" [ngClass]="{'error-input': f.submitted && archivo == null}"
+        [ngStyle]="{'--border-color': f.submitted && archivo == null ? '#f44336' : '#404040'}">
+        <ion-label position="floating">Cargar Reglamento</ion-label>
+        <ion-input type="file" class="ion-hide" #file (change)="cargarArchivo($event)" accept="application/pdf" required></ion-input>
+        <ion-input (click)="activarSubirArchivo(file)" [disabled]="true" [(ngModel)]="nombreArchivo" class="flex-reverse" labelPlacement="floating" name="reglamento">
+          <ion-icon name="document" size="large" class="ion-margin-bottom"></ion-icon>
+        </ion-input>
+      </ion-item>
+      -->
+    </ion-list>
+    <ion-button expand="block" class="ion-margin-top ion-margin-horizontal" type="submit">Guardar</ion-button>
+  </form>
+  <ion-alert
+    [isOpen]="isAlertOpen" header="Campos invalidos"
+    [buttons]="['Aceptar']" (didDismiss)="isAlertOpen = false"></ion-alert>
+</ion-content>

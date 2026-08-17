@@ -1,0 +1,12 @@
+<ion-list>
+  <ng-container *ngFor="let torneo of listaToneos">
+    <ion-card color="primary" (click)="verTorneo(torneo.id)">
+      <ion-card-header class="ion-float-left" style="padding-right: 10px;">
+        <ion-card-title>{{ torneo.nombre }}</ion-card-title>
+        <ion-card-subtitle>{{ torneo.modalidadTorneo }}</ion-card-subtitle>
+      </ion-card-header>
+      <ion-img src="https://ionicframework.com/docs/img/demos/thumbnail.svg" class="ion-float-right w-25 ion-margin"
+        alt="The Wisconsin State Capitol building in Madison, WI at night"></ion-img>
+    </ion-card>
+  </ng-container>
+</ion-list>

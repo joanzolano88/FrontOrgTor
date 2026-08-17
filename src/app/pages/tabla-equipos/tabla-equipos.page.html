@@ -1,0 +1,90 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button text="" defaultHref="/tabs/torneos"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Tabla Equipos</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-segment [value]="torneo.faseTorneo" [(ngModel)]="tipoTabla" name="tabla"
+      [scrollable]="true" (ngModelChange)="cambioTabla()">
+    <ion-segment-button [value]="fase" content-id="opc{{i}}" *ngFor="let fase of listaFases; let i = index">
+      <ion-label>{{ textoFases(fase) }}</ion-label>
+    </ion-segment-button>
+  </ion-segment>
+  <ng-container *ngIf=" (tipoTabla == 'ELIMINATORIAS_GRUPOS' ||  tipoTabla == 'GRUPOS') && mensajeError == undefined ; else elseTemplate">
+    <ion-grid class="scroll-h" *ngFor="let grupo of listaEuiposGrupos; let i = index">
+      <label for="">Grupo {{i+1}}</label>
+      <ion-row class="flex-nowrap">
+        <ion-col size="5">Equipo</ion-col>
+        <ion-col size="2">PJ </ion-col>
+        <ion-col size="2">Pts</ion-col>
+        <ion-col size="2">G </ion-col>
+        <ion-col size="2">E </ion-col>
+        <ion-col size="2">P </ion-col>
+        <ion-col size="2">DG </ion-col>
+        <ion-col size="2">GF </ion-col>
+        <ion-col size="2">GC </ion-col>
+        @if (validarOrganizador) {
+          <ion-col size="3">Acciones </ion-col>
+        }
+      </ion-row>
+      <ion-row class="flex-nowrap" *ngFor="let equipo of grupo; let j = index">
+        <ion-col size="1">{{j+1}}</ion-col>
+        <ion-col size="4">{{ equipo.nombre }}</ion-col>
+        <ion-col size="2">{{ partidosJugados(equipo) }}</ion-col>
+        <ion-col size="2">{{ puntos(equipo) }}</ion-col>
+        <ion-col size="2">{{ partidosGanados(equipo) }}</ion-col>
+        <ion-col size="2">{{ partidosEmpatados(equipo) }}</ion-col>
+        <ion-col size="2">{{ partidosPerdidos(equipo) }}</ion-col>
+        <ion-col size="2">{{ calcularDG(equipo) }}</ion-col>
+        <ion-col size="2">{{ anotacionesAFavor(equipo) }}</ion-col>
+        <ion-col size="2">{{ anotacionesEnContra(equipo) }}</ion-col>
+        @if (validarOrganizador) {
+          <ion-col size="2">
+            <ion-icon name="ellipsis-horizontal" size="small" (click)="setOpen(true, equipo)"></ion-icon>
+          </ion-col>
+        }
+      </ion-row>
+      <ion-action-sheet [isOpen]="isActionSheetOpen" header="Acciones" [buttons]="actionSheetButtons"
+        (didDismiss)="accionesEquipo($event); setOpen(false)"></ion-action-sheet>
+    </ion-grid>
+  </ng-container>
+  <ng-template #elseTemplate>
+    @if (listaPartidosEliminatorias.length == 0) {
+      <ion-item>
+        <ion-badge color="danger" class="mat-headline-6 w-100" style="margin-top: 16px">{{mensajeError}}</ion-badge>
+      </ion-item>
+    }
+    <ion-item *ngIf="torneo.faseTorneo != 'ELIMINATORIAS_GRUPOS'">
+      <ion-content style="height: 80vh;">
+        <ion-grid>
+          <ion-row class="tabla-scroll-x">
+            @for (partidosLlave of listaPartidosEliminatorias; track $index) {
+            <ion-col>
+              <ion-list class="tabla-eliminatorias">
+                @for (partido of partidosLlave; track partido.id) {
+                  <ion-item lines="none">
+                      <ion-col class="eliminatorias">
+                        <label class="texto-llaves">
+                          <p>{{partido.equipoLocal?.nombre}}</p> <p>{{partido.anotacionesEquipoLocal}} {{ganadorPenaltis(partido,'L')}}</p>
+                        </label>
+                        vs
+                        <label class="texto-llaves">
+                          <p>{{partido.equipoVisitante?.nombre}}</p> <p>{{partido.anotacionesEquipoVisitante}} {{ganadorPenaltis(partido,'V')}}</p>
+                        </label>
+                      </ion-col>
+                  </ion-item>
+                }
+              </ion-list>
+            </ion-col>
+            }
+          </ion-row>
+        </ion-grid>
+      </ion-content>
+    </ion-item>
+  </ng-template>
+  
+</ion-content>

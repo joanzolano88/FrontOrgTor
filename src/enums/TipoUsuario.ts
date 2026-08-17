@@ -1,0 +1,3 @@
+export enum TipoUsuario {
+    ORGANIZADOR="ORGANIZADOR",JUGADOR="JUGADOR"
+}

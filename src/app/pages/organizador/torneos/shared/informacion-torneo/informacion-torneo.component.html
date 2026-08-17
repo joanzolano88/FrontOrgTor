@@ -1,0 +1,46 @@
+<ion-item>
+  <ion-thumbnail slot="start">
+    <img alt="Silhouette of mountains" src="https://ionicframework.com/docs/img/demos/thumbnail.svg" />
+  </ion-thumbnail>
+  <ion-label>
+    <h3>{{ torneo.nombre }}</h3>
+  </ion-label>
+  <!--<ion-icon name="document-text-sharp"  size="large" class="ion-margin-end" (click)="reglamentoD.click()"></ion-icon>
+  <a download='Reglamento {{torneo.nombre}}' href="data:application/pdf;base64,{{documento}}" title='Descargar' #reglamentoD>
+  </a>-->
+  @if (validarOrganizador) {
+    <ion-icon name="construct-sharp" size="large" (click)="configurarTorneo()"></ion-icon>
+  }
+</ion-item>
+<ion-item>
+  <ion-label>Encargado: </ion-label>
+  <ion-note color="dark">{{ torneo.encargadoTorneo?.nombre }}</ion-note>
+</ion-item>
+<ion-item>
+  <ion-label>Modalidad: </ion-label>
+  <ion-badge color="primary">{{ torneo.modalidadTorneo }}</ion-badge>
+</ion-item>
+<ion-item *ngIf="torneo.modalidadTorneo == 'ELIMINATORIAS_GRUPOS'">
+  <ion-label>Cant Grupos Eliminatorias:</ion-label>
+  <ion-badge color="primary">{{ torneo.cantidadGruposEliminatoriaGrupos }}</ion-badge>
+</ion-item>
+<ion-item  *ngIf="torneo.modalidadTorneo == 'ELIMINATORIAS_GRUPOS'">
+  <ion-label>Cant Equipos Eliminatorias:</ion-label>
+  <ion-badge color="primary">{{ (torneo.cantidadEquiposEliminatoriaGrupos! * torneo.cantidadGruposEliminatoriaGrupos!) }}</ion-badge>
+</ion-item>
+<ion-item  *ngIf="torneo.modalidadTorneo == 'ELIMINATORIAS_GRUPOS' || torneo.modalidadTorneo == 'GRUPOS'">
+  <ion-label>Cant Grupos:</ion-label>
+  <ion-badge color="primary">{{ torneo.cantidadGrupos }}</ion-badge>
+</ion-item>
+<ion-item>
+  <ion-label>Cant Equipos:</ion-label>
+  <ion-badge color="primary">{{ cantidadEquipos() }}</ion-badge>
+</ion-item>
+<ion-item>
+  <ion-label>Valor Incripcion:</ion-label>
+  <ion-badge color="primary">{{ torneo.valorInscripcion | currency:'COP':'symbol-narrow':'3.0'}}</ion-badge>
+</ion-item>
+<ion-item>
+  <ion-label>Fase del Torneo:</ion-label>
+  <ion-badge color="primary" (click)="cambiarFase()">{{ torneo.faseTorneo }}</ion-badge>
+</ion-item>

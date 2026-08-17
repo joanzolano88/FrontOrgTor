@@ -1,0 +1,97 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button text="" defaultHref="{{urlBack}}"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Partido</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-button (click)="eventosPartido(btnModalPenaltis)" expand="block" shape="round" 
+  *ngIf="partido?.estadoPartido == 'EN_PROCESO' || partido?.estadoPartido == 'PROGRAMADO'">
+    {{textoBtnoPartido()}}
+  </ion-button>
+  <ion-grid [fixed]="true">
+    <ion-row class="ion-justify-content-center">
+      <ion-col size="12" class="ion-text-center">
+        <ion-grid>
+          <ion-row>
+            <ion-col size="6" offset="3">
+              <ion-label>{{partido.faseEncuentro}}</ion-label>
+            </ion-col>
+            <ion-col size="6" offset="3">
+              <ion-badge class="mat-headline-6 m-0" color="{{colorEstadoPartido(partido)}}">{{ partido.estadoPartido }}</ion-badge>
+            </ion-col>
+            @if (validarOrganizador) {
+              <ion-col offset="2" size="1" *ngIf="partido?.estadoPartido == 'TERMINADO'">
+                <ion-icon name="pencil-sharp"  size="large" class="ion-margin-end" (click)="modalModificarMarcador(btnModalModifica)"></ion-icon>
+              </ion-col>
+            }
+          </ion-row>
+        </ion-grid>
+      </ion-col>
+      <ion-col size="auto">
+        <ion-badge class="mat-headline-6 m-0 ion-color-light text-font-1-1" (click)="verUbicacion(btnModalUbicacion)">{{ partido.cancha?.nombre }} <br> Direccion: {{ this.partido.cancha?.direccion }}</ion-badge>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+  <ion-grid>
+    <ion-row>
+      <ion-col>
+        <h1 class="ion-text-center">{{partido.equipoLocal?.nombre}}</h1>
+      </ion-col>
+      <ion-col><h1 class="ion-text-center"> VS </h1></ion-col>
+      <ion-col>
+        <h1 class="ion-text-center">{{partido.equipoVisitante?.nombre}}</h1>
+      </ion-col>
+    </ion-row>
+    <ion-row>
+      <ion-col class="ion-text-center mat-headline-6 ion-align-self-center m-0">
+        <img [src]="mostrarEscudo(partido.equipoLocal?.escudo)" alt="" (click)="sumarGol('anotacionesEquipoLocal', btnModalGol, partido.equipoLocal?.nombre)">
+      </ion-col>
+      <ion-col class="ion-text-center ion-align-self-center">-</ion-col>
+      <ion-col class="ion-text-center mat-headline-6 ion-align-self-center m-0">
+        <img [src]="mostrarEscudo(partido.equipoVisitante?.escudo)" alt="" (click)="sumarGol('anotacionesEquipoVisitante', btnModalGol, partido.equipoVisitante?.nombre)">
+      </ion-col>
+    </ion-row>
+    <ion-row>
+      <ion-col class="ion-text-center mat-headline-6 ion-align-self-center m-0">
+        {{partido.anotacionesEquipoLocal}}
+      </ion-col>
+      <ion-col class="ion-text-center ion-align-self-center">Goles</ion-col>
+      <ion-col class="ion-text-center mat-headline-6 ion-align-self-center m-0">
+        {{partido.anotacionesEquipoVisitante}}
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+  <ion-button id="gol-alert" #btnModalGol class="ion-hide"></ion-button>
+  <ion-alert
+    trigger="gol-alert"
+    header="Anotar gol a {{nombreEquipoAnotacion}}!"
+    [buttons]="alertButtons"
+    (didDismiss)="anotarGol($event)"
+  ></ion-alert>
+  <ion-button id="cancha-modal" #btnModalUbicacion class="ion-hide"></ion-button>
+  <ion-alert
+    trigger="cancha-modal"
+    header="¿Deseas ver la Ubicacion en el mapa?"
+    [buttons]="alertButtons"
+    (didDismiss)="modalUbicacion($event)"
+  ></ion-alert>
+  <ion-button id="penaltis-alert" #btnModalPenaltis class="ion-hide"></ion-button>
+  <ion-alert
+    trigger="penaltis-alert"
+    header="Selecciona el equipo ganador de los penaltis"
+    [buttons]="alertButtonsPenalties"
+    (didDismiss)="gandorPenaltis($event)"
+  ></ion-alert>
+  <ion-button id="modifica-marcador-modal" #btnModalModifica class="ion-hide"></ion-button>
+  <ion-alert
+    trigger="modifica-marcador-modal"
+    header="¿Deseas Cambair marcador?"
+    [buttons]="alertButtons"
+    [inputs]="alertInputs"
+    (didDismiss)="modificarPartido($event)"
+  ></ion-alert>
+</ion-content>

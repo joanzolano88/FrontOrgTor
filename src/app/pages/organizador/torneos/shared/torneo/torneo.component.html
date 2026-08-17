@@ -1,0 +1,74 @@
+
+<ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
+    <ion-refresher-content>
+    </ion-refresher-content>
+  </ion-refresher>
+  <ion-list>
+    <ion-item  lines="none">
+      <ion-label>Estado:</ion-label>
+    </ion-item>
+    <ion-item>
+      <ion-segment value="default" color="primary" [(ngModel)]="torneo.estadoTorneo"
+        [disabled]="!validarOrganizador">
+        <ion-segment-button value="INSCRIPCIONES">
+          <ion-label>Inscripciones</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="INSCRIPCIONES_ACRIVO">
+          <ion-label>Insc. Activo</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="ACTIVO">
+          <ion-label>Activo</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="FINALIZADO">
+          <ion-label>Terminado</ion-label>
+        </ion-segment-button>
+      </ion-segment>
+    </ion-item>
+  </ion-list>
+  <ion-grid>
+    <ion-row>
+      <ion-col>
+        <ion-button expand="block"  (click)="tablaEquipos()">Ver Tabla</ion-button>
+      </ion-col>
+      @if (validarOrganizador) {
+        <ion-col>
+          <ion-button expand="block" (click)="listaPartidos()">Ver Partidos</ion-button>
+        </ion-col>
+        <ion-col>
+          <ion-button expand="block" (click)="agregarPartido()">Agregar Partidos</ion-button>
+        </ion-col>
+        <ion-col>
+          <ion-button expand="block" (click)="agregarEquipo()">Agregar Equipo</ion-button>
+        </ion-col>
+      }
+    </ion-row>
+  </ion-grid>
+  <ion-list>
+    <ion-list-header>
+      <ion-label>Canchas</ion-label>
+      @if (validarOrganizador) {
+        <ion-button (click)="agregarCancha()">Agregar <ion-icon name="add-circle-sharp"></ion-icon></ion-button>
+      }
+    </ion-list-header>
+    <ng-container *ngFor="let cancha of listCancha">
+      <ion-item lines="none">
+        <ion-thumbnail slot="start">
+          <img alt="Silhouette of mountains" src="https://ionicframework.com/docs/img/demos/thumbnail.svg" />
+        </ion-thumbnail>
+        <ion-label>Nombre: {{cancha.nombre}}</ion-label>
+        <ion-icon name="map-sharp" size="large" class="ion-margin-end" (click)="verUbicacion(cancha)"></ion-icon>
+        @if (validarOrganizador) {
+          <ion-icon name="construct-sharp" size="large" (click)="configurarCancha(cancha.id)"></ion-icon>
+        }
+      </ion-item>
+      <ion-item>
+        <ion-label>Direccion:</ion-label>
+        <ion-note color="primary">{{cancha.direccion}}</ion-note>
+      </ion-item>
+    </ng-container>
+  </ion-list>
+  <ion-alert
+  [isOpen]="isAlertOpen"
+  header="{{mensajeError}}"
+  [buttons]="alertButtons"
+  (didDismiss)="setOpen(false)"></ion-alert>
