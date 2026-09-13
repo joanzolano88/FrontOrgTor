@@ -1,0 +1,151 @@
+.filtros-torneos {
+  background: transparent;
+  padding: 0 12px 8px;
+}
+
+.filtro-busqueda {
+  --background: rgba(255, 255, 255, 0.04);
+  border-radius: 14px;
+  margin-bottom: 10px;
+}
+
+.filtro-busqueda ion-searchbar {
+  --background: transparent;
+  --box-shadow: none;
+  --color: #ffffff;
+  --placeholder-color: #c7d1df;
+  --icon-color: #c7d1df;
+  padding: 0;
+}
+
+.filtro-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.filtro-grid ion-item {
+  --background: rgba(255, 255, 255, 0.04);
+  border-radius: 12px;
+  min-height: 52px;
+}
+
+.filtro-grid ion-select,
+.toggle-item ion-label,
+.toggle-item ion-toggle {
+  --placeholder-color: #dfe7f3;
+  color: #f5f7fb;
+}
+
+.toggle-item {
+  --background: rgba(255, 255, 255, 0.04);
+  border-radius: 12px;
+  margin-top: 10px;
+}
+
+.lista-torneos {
+  background: transparent;
+  padding: 0 12px 12px;
+}
+
+.tarjeta-torneo {
+  --background: linear-gradient(135deg, #3d8bfd, #3ea1ff);
+  border-radius: 18px;
+  margin: 8px 0;
+  box-shadow: none;
+}
+
+.tarjeta-main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 14px 14px 16px;
+}
+
+.tarjeta-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.tarjeta-info h3 {
+  margin: 0 0 6px;
+  color: #ffffff;
+  font-size: 1.1rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.tarjeta-info p,
+.tarjeta-info small {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.tarjeta-info p {
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.72rem;
+  margin-bottom: 8px;
+}
+
+.tarjeta-info small {
+  display: block;
+  margin-top: 6px;
+}
+
+.estado {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: rgba(0, 0, 0, 0.12);
+  color: #fff;
+}
+
+.estado.inscripciones,
+.estado.inscripciones_activo,
+.estado.inscripciones_acrivo {
+  background: rgba(44, 211, 132, 0.25);
+}
+
+.estado.activo {
+  background: rgba(59, 130, 246, 0.25);
+}
+
+.estado.finalizado {
+  background: rgba(239, 68, 68, 0.25);
+}
+
+.tarjeta-main ion-img {
+  width: 92px;
+  height: 92px;
+  border-radius: 18px;
+  object-fit: cover;
+  background: rgba(12, 20, 32, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+.empty-state {
+  --background: transparent;
+  color: #dfe7f3;
+  text-align: center;
+}
+
+@media (max-width: 420px) {
+  .filtro-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .tarjeta-main {
+    gap: 10px;
+  }
+
+  .tarjeta-main ion-img {
+    width: 74px;
+    height: 74px;
+  }
+}

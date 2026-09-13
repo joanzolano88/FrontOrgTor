@@ -5,12 +5,14 @@
     </ion-title>
   </ion-toolbar>
 </ion-header>
+
+
 <ion-content [fullscreen]="true">
   <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
     <ion-refresher-content></ion-refresher-content>
   </ion-refresher>
   <ion-list>
-    <ion-item>
+    <ion-item class="filters-panel">
       <ion-datetime-button datetime="datetime" class="MuiDialog-paperFullScreen"></ion-datetime-button>
       <ion-modal [keepContentsMounted]="true">
         <ng-template>
@@ -18,47 +20,49 @@
         </ng-template>
       </ion-modal>
     </ion-item>
-    <ion-item>
+    <ion-item class="filters-panel">
       <ion-select label="Selecionar Torneo" [(ngModel)]="torneoId">
         <ion-select-option [value]="toreno.id" *ngFor="let toreno of listaTorneo">
           {{ toreno.nombre }}
         </ion-select-option>
       </ion-select>
     </ion-item>
-    <ion-item>
-      <ion-button expand="block" size="default" class="MuiDialog-paperFullScreen mat-h2 m-0"
+    <ion-item class="filters-panel">
+      <ion-button expand="block" size="default" class="search-button"
         (click)="listarPartidosFechaTorneo(fecha!, torneoId!)">
         Buscar
       </ion-button>
     </ion-item>
     @for (partido of listaPartidos; track partido.id) {
-    <ion-card color="primary" (click)="verPartido(partido.id!)">
-      <ion-card-header>
-        <ion-card-title class="d-flex ion-justify-content-between">
-          <ion-grid style="padding: 0;">
-            <ion-row>
-              <ion-col size="9" style="margin-left: -10px;">
-                <ion-badge color="{{colorGanador(partido, partido.equipoLocal!)}}" class="mat-headline-5 centrar-text-v m-0 text-bold" style="font-size: 1.75rem;"
-                [ngStyle]="{'color': confirmarGanador(partido) == partido.equipoLocal?.nombre ? '#428cff' : '#fff'}">{{partido.equipoLocal?.nombre}}</ion-badge>
-              </ion-col>
-              <ion-col size="3">{{partido.anotacionesEquipoLocal}} {{partido.penaltisEquipoLocal! > partido.penaltisEquipoVisitante! ? 'P': ''}}</ion-col>
-            </ion-row>
-            <ion-row>
-              <ion-col size="2" style="padding-top: -2px;" >VS</ion-col>
-            </ion-row>
-            <ion-row>
-              <ion-col size="9"  style="margin-left: -10px;">
-                <ion-badge color="{{colorGanador(partido, partido.equipoVisitante!)}}" class="mat-headline-5 centrar-text-v m-0 text-bold" style="font-size: 1.75rem;"
-                [ngStyle]="{'color': confirmarGanador(partido) == partido.equipoVisitante?.nombre ? '#428cff' : '#fff'}">{{partido.equipoVisitante?.nombre}}</ion-badge></ion-col>
-              <ion-col size="3">{{partido.anotacionesEquipoVisitante}} {{partido.penaltisEquipoLocal! < partido.penaltisEquipoVisitante! ? 'P': ''}}</ion-col>
-            </ion-row>
-          </ion-grid>
-        </ion-card-title>
-        <ion-card-subtitle>{{partido.faseEncuentro}}
-          <br> {{partido.cancha?.nombre}} ({{ mostrarFecha(partido.fechaPartido!) }})
-          <br> <ion-badge color="{{colorEstadoPartido(partido)}}">{{partido.estadoPartido}}</ion-badge>
-        </ion-card-subtitle>
+    <ion-card class="partido-card" (click)="verPartido(partido.id!)">
+      <ion-card-header class="partido-card-top">
+        <span>{{ partido.faseEncuentro }}</span>
+        <ion-badge color="{{colorEstadoPartido(partido)}}">{{ partido.estadoPartido }}</ion-badge>
       </ion-card-header>
+      <ion-card-content>
+        <div class="teams-line">
+          <div class="team team-home">
+            <span>{{ partido.equipoLocal?.nombre }}</span>
+            <img [src]="escudoEquipo(partido.equipoLocal)" alt="">
+          </div>
+          <div class="score-preview">
+            <strong>{{ partido.anotacionesEquipoLocal ?? '-' }}</strong>
+            <small>VS</small>
+            <strong>{{ partido.anotacionesEquipoVisitante ?? '-' }}</strong>
+          </div>
+          <div class="team team-away">
+            <img [src]="escudoEquipo(partido.equipoVisitante)" alt="">
+            <span>{{ partido.equipoVisitante?.nombre }}</span>
+          </div>
+        </div>
+        <div class="penalty-score" *ngIf="(partido.penaltisEquipoLocal ?? 0) > 0 || (partido.penaltisEquipoVisitante ?? 0) > 0">
+          Penaltis: {{ partido.penaltisEquipoLocal ?? 0 }} - {{ partido.penaltisEquipoVisitante ?? 0 }}
+        </div>
+        <div class="partido-card-bottom">
+          <span>{{ partido.cancha?.nombre || 'Cancha pendiente' }}</span>
+          <span>{{ mostrarFecha(partido.fechaPartido!) }}</span>
+        </div>
+      </ion-card-content>
     </ion-card>
     }
   </ion-list>

@@ -1,12 +1,56 @@
-<ion-list>
-  <ng-container *ngFor="let torneo of listaToneos">
-    <ion-card color="primary" (click)="verTorneo(torneo.id)">
-      <ion-card-header class="ion-float-left" style="padding-right: 10px;">
-        <ion-card-title>{{ torneo.nombre }}</ion-card-title>
-        <ion-card-subtitle>{{ torneo.modalidadTorneo }}</ion-card-subtitle>
-      </ion-card-header>
-      <ion-img src="https://ionicframework.com/docs/img/demos/thumbnail.svg" class="ion-float-right w-25 ion-margin"
-        alt="The Wisconsin State Capitol building in Madison, WI at night"></ion-img>
+<ion-list class="filtros-torneos">
+  <ion-item lines="none" class="filtro-busqueda">
+    <ion-searchbar [(ngModel)]="filtroNombre" (ionInput)="filtrar()" placeholder="Buscar por nombre" mode="ios"></ion-searchbar>
+  </ion-item>
+
+  <div class="filtro-grid">
+    <ion-item lines="none">
+      <ion-select [(ngModel)]="filtroPais" (ionChange)="filtrar()" interface="popover" placeholder="País">
+        <ion-select-option *ngFor="let pais of paises" [value]="pais">{{ pais }}</ion-select-option>
+      </ion-select>
+    </ion-item>
+
+    <ion-item lines="none">
+      <ion-select [(ngModel)]="filtroDepartamento" (ionChange)="cambiarDepartamento()" interface="popover" placeholder="Departamento">
+        <ion-select-option *ngFor="let departamento of departamentos" [value]="departamento">{{ departamento }}</ion-select-option>
+      </ion-select>
+    </ion-item>
+
+    <ion-item lines="none">
+      <ion-select [(ngModel)]="filtroCiudad" (ionChange)="filtrar()" interface="popover" placeholder="Ciudad">
+        <ion-select-option *ngFor="let ciudad of ciudadesPorDepartamento" [value]="ciudad">{{ ciudad }}</ion-select-option>
+      </ion-select>
+    </ion-item>
+
+    <ion-item lines="none">
+      <ion-select [(ngModel)]="filtroEstado" (ionChange)="filtrar()" interface="popover" placeholder="Estado">
+        <ion-select-option *ngFor="let estado of estadosTorneo" [value]="estado">{{ estado }}</ion-select-option>
+      </ion-select>
+    </ion-item>
+  </div>
+
+  <ion-item lines="none" *ngIf="esOrganizador" class="toggle-item">
+    <ion-label>Solo mis torneos</ion-label>
+    <ion-toggle [(ngModel)]="mostrarSoloMios" (ionChange)="filtrar()"></ion-toggle>
+  </ion-item>
+</ion-list>
+
+<ion-list class="lista-torneos">
+  <ng-container *ngFor="let torneo of listaTorneosFiltrados">
+    <ion-card class="tarjeta-torneo" (click)="verTorneo(torneo.id)" mode="ios">
+      <div class="tarjeta-main">
+        <div class="tarjeta-info">
+          <h3>{{ torneo.nombre }}</h3>
+          <p>{{ torneo.modalidadTorneo }}</p>
+          <span class="estado" [ngClass]="torneo.estadoTorneo?.toLowerCase() || 'sin-estado'">{{ torneo.estadoTorneo || 'Sin estado' }}</span>
+          <small>{{ torneo.ciudad!.nombre }} - {{ torneo.ciudad?.departamento!.nombre }}</small>
+        </div>
+        <ion-img src="https://ionicframework.com/docs/img/demos/thumbnail.svg" alt="Torneo"></ion-img>
+      </div>
     </ion-card>
   </ng-container>
+
+  <ion-item *ngIf="listaTorneosFiltrados.length === 0" lines="none" class="empty-state">
+    <ion-label>No se encontraron torneos.</ion-label>
+  </ion-item>
 </ion-list>

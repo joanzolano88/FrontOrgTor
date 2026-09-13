@@ -9,11 +9,12 @@
     </ion-item>
     <ion-item>
       <ion-segment value="default" color="primary" [(ngModel)]="torneo.estadoTorneo"
-        [disabled]="!validarOrganizador">
+        [disabled]="!esPropietario || torneo.estadoTorneo == 'FINALIZADO'"
+        (ionChange)="cambiarEstadoTorneo($event)">
         <ion-segment-button value="INSCRIPCIONES">
           <ion-label>Inscripciones</ion-label>
         </ion-segment-button>
-        <ion-segment-button value="INSCRIPCIONES_ACRIVO">
+        <ion-segment-button value="INSCRIPCIONES_ACTIVO">
           <ion-label>Insc. Activo</ion-label>
         </ion-segment-button>
         <ion-segment-button value="ACTIVO">
@@ -30,7 +31,7 @@
       <ion-col>
         <ion-button expand="block"  (click)="tablaEquipos()">Ver Tabla</ion-button>
       </ion-col>
-      @if (validarOrganizador) {
+      @if (esPropietario) {
         <ion-col>
           <ion-button expand="block" (click)="listaPartidos()">Ver Partidos</ion-button>
         </ion-col>
@@ -40,13 +41,23 @@
         <ion-col>
           <ion-button expand="block" (click)="agregarEquipo()">Agregar Equipo</ion-button>
         </ion-col>
+        <ion-col *ngIf="torneo.estadoTorneo == 'INSCRIPCIONES' || torneo.estadoTorneo == 'INSCRIPCIONES_ACTIVO'">
+          <ion-button expand="block" (click)="verSolicitudes()">Solicitudes</ion-button>
+        </ion-col>
+        <ion-col *ngIf="torneo.estadoTorneo == 'INSCRIPCIONES' || torneo.estadoTorneo == 'INSCRIPCIONES_ACTIVO'">
+          <ion-button expand="block" (click)="organizarEquipos()">Organizar grupos/llaves</ion-button>
+        </ion-col>
+      } @else if (torneo.estadoTorneo == 'INSCRIPCIONES' || torneo.estadoTorneo == 'INSCRIPCIONES_ACTIVO') {
+        <ion-col>
+          <ion-button expand="block" (click)="solicitarEquipo()">Solicitar participación</ion-button>
+        </ion-col>
       }
     </ion-row>
   </ion-grid>
   <ion-list>
     <ion-list-header>
       <ion-label>Canchas</ion-label>
-      @if (validarOrganizador) {
+      @if (esPropietario) {
         <ion-button (click)="agregarCancha()">Agregar <ion-icon name="add-circle-sharp"></ion-icon></ion-button>
       }
     </ion-list-header>
@@ -57,7 +68,7 @@
         </ion-thumbnail>
         <ion-label>Nombre: {{cancha.nombre}}</ion-label>
         <ion-icon name="map-sharp" size="large" class="ion-margin-end" (click)="verUbicacion(cancha)"></ion-icon>
-        @if (validarOrganizador) {
+        @if (esPropietario) {
           <ion-icon name="construct-sharp" size="large" (click)="configurarCancha(cancha.id)"></ion-icon>
         }
       </ion-item>

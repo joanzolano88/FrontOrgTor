@@ -5,6 +5,20 @@
     display: inline-block;
     vertical-align: top;
   }
+
+  .builder-intro {
+    margin: 16px;
+    border-left: 4px solid #3880ff;
+  }
+
+  .builder-intro ion-card-content {
+    color: var(--ion-color-medium-shade);
+  }
+
+  .example-list {
+    min-height: 88px;
+    padding: 8px;
+  }
   
   .example-list {
     border: solid 1px #3880ff;

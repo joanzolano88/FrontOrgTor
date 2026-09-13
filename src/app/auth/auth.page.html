@@ -1,17 +1,17 @@
 <ion-tabs>
 
   <ion-tab-bar slot="bottom">
-    <ion-tab-button tab="partidos">
+    <ion-tab-button tab="partidos" href="/auth/partidos">
       <ion-icon aria-hidden="true" name="football-sharp"></ion-icon>
       <ion-label>Partidos</ion-label>
     </ion-tab-button>
-    <ion-tab-button tab="torneos">
+    <ion-tab-button tab="torneos" href="/auth/torneos">
       <ion-icon aria-hidden="true" name="trophy-sharp"></ion-icon>
       <ion-label>Torneos</ion-label>
     </ion-tab-button>
-    <ion-tab-button tab="login">
+    <ion-tab-button tab="usuario" [href]="sesionActiva() ? '/auth/usuario' : '/auth/login'">
       <ion-icon aria-hidden="true" name="person-circle-sharp"></ion-icon>
-      <ion-label>Login</ion-label>
+      <ion-label>{{ sesionActiva() ? 'Mi perfil' : 'Login' }}</ion-label>
     </ion-tab-button>
   </ion-tab-bar>
 

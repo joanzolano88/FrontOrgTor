@@ -33,7 +33,10 @@ export class Tab1Page implements OnInit {
     });
   }
   verPartido(id: number) {
-    this.router.navigateByUrl('/tabs/tab1/partido/' + id);
+    this.router.navigateByUrl('/auth/partidos/partido/' + id);
+  }
+  escudoEquipo(equipo?: Equipo): string {
+    return equipo?.escudo ? 'data:image/png;base64,' + equipo.escudo : 'assets/icon/favicon.png';
   }
   mostrarFecha(fechaPartido: Date) {
     let fecha = new Date(fechaPartido);

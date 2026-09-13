@@ -1,0 +1,25 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start"><ion-back-button defaultHref="/auth/torneos"></ion-back-button></ion-buttons>
+    <ion-title>Deportes y reglas</ion-title>
+  </ion-toolbar>
+</ion-header>
+<ion-content class="ion-padding">
+  <form #formulario="ngForm" (ngSubmit)="guardar()">
+    <ion-list>
+      <ion-item><ion-input label="Deporte" labelPlacement="stacked" required name="nombre" [(ngModel)]="deporte.nombre"></ion-input></ion-item>
+      <ion-item><ion-input type="number" label="Mínimo de titulares" labelPlacement="stacked" name="minimo" [(ngModel)]="deporte.minimoTitulares"></ion-input></ion-item>
+      <ion-item><ion-input type="number" label="Máximo de titulares" labelPlacement="stacked" name="maximo" [(ngModel)]="deporte.maximoTitulares"></ion-input></ion-item>
+      <ion-item><ion-input type="number" label="Máximo de convocados" labelPlacement="stacked" name="convocados" [(ngModel)]="deporte.maximoConvocados"></ion-input></ion-item>
+      <ion-item><ion-textarea label="Reglas" labelPlacement="stacked" name="reglas" [(ngModel)]="deporte.reglas"></ion-textarea></ion-item>
+    </ion-list>
+    <ion-button type="submit" expand="block">Guardar deporte</ion-button>
+  </form>
+  <ion-note color="danger">{{ mensaje }}</ion-note>
+  <ion-list>
+    <ion-item *ngFor="let item of deportes">
+      <ion-label><strong>{{ item.nombre }}</strong><small>{{ item.minimoTitulares }}-{{ item.maximoTitulares }} titulares, {{ item.maximoConvocados }} convocados</small></ion-label>
+      <ion-button fill="clear" (click)="editar(item)">Editar</ion-button>
+    </ion-item>
+  </ion-list>
+</ion-content>

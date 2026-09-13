@@ -6,6 +6,7 @@ import { SesionService } from 'src/app/services/restriccion/sesion.service';
 import { FaseActual } from 'src/enums/FaseActual';
 import { ModalidadTorneo } from 'src/enums/ModalidadTorneo';
 import { Equipo } from 'src/models/Equipo';
+import { GrupoLlave } from 'src/models/GrupoLlave';
 import { Partido } from 'src/models/Partido';
 import { Torneo } from 'src/models/Torneo';
 
@@ -17,7 +18,7 @@ import { Torneo } from 'src/models/Torneo';
 })
 export class TablaEquiposPage implements OnInit {
 
-  listaEuiposGrupos: Equipo[][] = [];
+  listaEuiposGrupos: GrupoLlave[][] = [];
   listaPartidosEliminatorias: Partido[][] = [];
   torneo: Torneo = new Torneo();
   equipoS: Equipo = new Equipo();
@@ -28,17 +29,8 @@ export class TablaEquiposPage implements OnInit {
   validarOrganizador: boolean = false;
   public actionSheetButtons = [
     {
-      text: 'Eliminar',
-      role: 'destructive',
-      data: {
-        accion: 'eliminar',
-      },
-    },
-    {
-      text: 'Editar',
-      data: {
-        accion: 'editar',
-      },
+      text: 'Ver equipo',
+      data: { accion: 'ver' },
     },
     {
       text: 'Cancel',
@@ -70,23 +62,18 @@ export class TablaEquiposPage implements OnInit {
   }
   ngOnInit() {
   }
-  calcularDG(equipo: Equipo){
-    if (this.tipoTabla == ModalidadTorneo.ELIMINATORIAS_GRUPOS) {
-      return equipo.anotacionesAFavorEliminatoria! - equipo.anotacionesEnContraEliminatoria!;
-    }
-    return equipo.anotacionesAFavor! - equipo.anotacionesEnContra!;
+  calcularDG(equipo: GrupoLlave){
+    return (equipo.golesFavor || 0) - (equipo.golesContra || 0);
   }
-  setOpen(isOpen: boolean, equipo?: Equipo) {
-    if (equipo != undefined) this.equipoS = equipo;
+  setOpen(isOpen: boolean, grupoLlave?: GrupoLlave) {
+    if (grupoLlave?.equipo != undefined) this.equipoS = grupoLlave.equipo;
     this.isActionSheetOpen = isOpen;
   }
   accionesEquipo(ev: any) {
     let data = ev.detail.data;
     if (data != undefined && data.accion) {
-      if (data.accion ==  'eliminar') {
-        
-      } else if (data.accion ==  'editar') {
-        this.router.navigateByUrl('tabs/tab2/torneo/' + this.torneo.id + '/tabla-equipos/crear-equipo/' + this.equipoS.id);
+      if (data.accion == 'ver') {
+        this.router.navigateByUrl('/auth/torneos/torneo/' + this.torneo.id + '/equipo/' + this.equipoS.id);
       }
     }
   }
@@ -114,50 +101,40 @@ export class TablaEquiposPage implements OnInit {
   }
   listarEquiposFase() {
     if (this.tipoTabla != ModalidadTorneo.ELIMINATORIAS) {
-      this.crud.obtener('equipo/torneo/modalidad/' + this.torneo.id + '/' + this.tipoTabla).subscribe((resp: Equipo[]) => {
+      const fase = this.tipoTabla == ModalidadTorneo.ELIMINATORIAS_GRUPOS
+        ? FaseActual.ELIMINATORIAS_GRUPOS
+        : FaseActual.FASE_GRUPOS;
+      this.crud.obtener('torneo/' + this.torneo.id + '/grupo-llave/' + fase).subscribe((resp: GrupoLlave[]) => {
         this.mensajeError = undefined;
+        this.listaEuiposGrupos = [];
         if (this.tipoTabla == ModalidadTorneo.ELIMINATORIAS_GRUPOS && this.torneo.cantidadGrupos) {
           for (let index = 0; index < this.torneo.cantidadGrupos; index++) {
-            this.listaEuiposGrupos[index] = resp.filter(e => e.grupo == (index+1));
+            this.listaEuiposGrupos[index] = resp.filter(e => e.grupoLlave == (index+1));
             for (let j = 0; j < this.listaEuiposGrupos[index].length - 1; j++) {
               for (let i = j+1; i < this.listaEuiposGrupos[index].length; i++) {
-                if (this.listaEuiposGrupos[index][j].puntosEliminatoria! < this.listaEuiposGrupos[index][i].puntosEliminatoria!) {
+                if (this.compararGrupoLlave(this.listaEuiposGrupos[index][j], this.listaEuiposGrupos[index][i]) > 0) {
                   let equipo = this.listaEuiposGrupos[index][j];
                   this.listaEuiposGrupos[index][j] = this.listaEuiposGrupos[index][i];
                   this.listaEuiposGrupos[index][i] = equipo;
-                } else if (this.listaEuiposGrupos[index][j].puntosEliminatoria! == this.listaEuiposGrupos[index][i].puntosEliminatoria!) {
-                  if (this.calcularDG(this.listaEuiposGrupos[index][j]) < this.calcularDG(this.listaEuiposGrupos[index][i]) ||
-                    this.listaEuiposGrupos[index][j].anotacionesAFavor! < this.listaEuiposGrupos[index][i].anotacionesAFavor!) {
-                    let equipo = this.listaEuiposGrupos[index][j];
-                    this.listaEuiposGrupos[index][j] = this.listaEuiposGrupos[index][i];
-                    this.listaEuiposGrupos[index][i] = equipo;
-                  }
                 }
               }
             }
           }
         } else if (this.tipoTabla == ModalidadTorneo.GRUPOS && this.torneo.cantidadGrupos) {
           for (let index = 0; index < this.torneo.cantidadGrupos; index++) {
-            this.listaEuiposGrupos[index] = resp.filter(e => e.grupo == (index+1));
+            this.listaEuiposGrupos[index] = resp.filter(e => e.grupoLlave == (index+1));
             for (let j = 0; j < this.listaEuiposGrupos[index].length - 1; j++) {
               for (let i = j+1; i < this.listaEuiposGrupos[index].length; i++) {
-                if (this.listaEuiposGrupos[index][j].puntos! < this.listaEuiposGrupos[index][i].puntos!) {
+                if (this.compararGrupoLlave(this.listaEuiposGrupos[index][j], this.listaEuiposGrupos[index][i]) > 0) {
                   let equipo = this.listaEuiposGrupos[index][j];
                   this.listaEuiposGrupos[index][j] = this.listaEuiposGrupos[index][i];
                   this.listaEuiposGrupos[index][i] = equipo;
-                } else if (this.listaEuiposGrupos[index][j].puntos! == this.listaEuiposGrupos[index][i].puntos!) {
-                  if (this.calcularDG(this.listaEuiposGrupos[index][j]) < this.calcularDG(this.listaEuiposGrupos[index][i]) ||
-                    this.listaEuiposGrupos[index][j].anotacionesAFavor! < this.listaEuiposGrupos[index][i].anotacionesAFavor!) {
-                    let equipo = this.listaEuiposGrupos[index][j];
-                    this.listaEuiposGrupos[index][j] = this.listaEuiposGrupos[index][i];
-                    this.listaEuiposGrupos[index][i] = equipo;
-                  }
                 }
               }
             }
           }
         } else {
-          this.listaEuiposGrupos[0] = resp;
+          this.listaEuiposGrupos[0] = resp.sort((a, b) => this.compararGrupoLlave(a, b));
         }
       }, (error: HttpErrorResponse) => {
         this.mensajeError = error.error.message;
@@ -200,46 +177,30 @@ export class TablaEquiposPage implements OnInit {
     this.listaPartidosEliminatorias = [];
     this.listarEquiposFase();
   }
-  puntos(equipo: Equipo) {
-    if (this.tipoTabla == ModalidadTorneo.ELIMINATORIAS_GRUPOS) {
-      return equipo.puntosEliminatoria;
-    }
-    return equipo.puntos;
+  puntos(equipo: GrupoLlave) {
+    return equipo.puntos || 0;
   }
-  anotacionesAFavor(equipo: Equipo) {
-    if (this.tipoTabla == ModalidadTorneo.ELIMINATORIAS_GRUPOS) {
-      return equipo.anotacionesAFavorEliminatoria;
-    }
-    return equipo.anotacionesAFavor;
+  anotacionesAFavor(equipo: GrupoLlave) {
+    return equipo.golesFavor || 0;
   }
-  anotacionesEnContra(equipo: Equipo) {
-    if (this.tipoTabla == ModalidadTorneo.ELIMINATORIAS_GRUPOS) {
-      return equipo.anotacionesEnContraEliminatoria;
-    }
-    return equipo.anotacionesEnContra;
+  anotacionesEnContra(equipo: GrupoLlave) {
+    return equipo.golesContra || 0;
   }
-  partidosJugados(equipo: Equipo) {
-    if (this.tipoTabla == ModalidadTorneo.ELIMINATORIAS_GRUPOS) {
-      return equipo.partidosJugadosEliminatoria;
-    }
-    return equipo.partidosJugados;
+  partidosJugados(equipo: GrupoLlave) {
+    return equipo.partidosJugados || 0;
   }
-  partidosGanados(equipo: Equipo) {
-    if (this.tipoTabla == ModalidadTorneo.ELIMINATORIAS_GRUPOS) {
-      return equipo.partidosGanadosEliminatoria;
-    }
-    return equipo.partidosGanados;
+  partidosGanados(equipo: GrupoLlave) {
+    return equipo.partidosGanados || 0;
   }
-  partidosEmpatados(equipo: Equipo) {
-    if (this.tipoTabla == ModalidadTorneo.ELIMINATORIAS_GRUPOS) {
-      return equipo.partidosEmpatadosEliminatoria;
-    }
-    return equipo.partidosEmpatados;
+  partidosEmpatados(equipo: GrupoLlave) {
+    return equipo.partidosEmpatados || 0;
   }
-  partidosPerdidos(equipo: Equipo) {
-    if (this.tipoTabla == ModalidadTorneo.ELIMINATORIAS_GRUPOS) {
-      return equipo.partidosPerdidosEliminatoria;
-    }
-    return equipo.partidosPerdidos;
+  partidosPerdidos(equipo: GrupoLlave) {
+    return equipo.partidosPerdidos || 0;
+  }
+  compararGrupoLlave(primero: GrupoLlave, segundo: GrupoLlave) {
+    return (segundo.puntos || 0) - (primero.puntos || 0) ||
+      this.calcularDG(segundo) - this.calcularDG(primero) ||
+      (segundo.golesFavor || 0) - (primero.golesFavor || 0);
   }
 }

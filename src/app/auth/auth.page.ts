@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { CrudService } from '../services/crud.service';
 
 @Component({
   selector: 'app-auth',
@@ -8,7 +9,11 @@ import { Component, OnInit } from '@angular/core';
 })
 export class AuthPage implements OnInit {
 
-  constructor() { }
+  constructor(private crud: CrudService) { }
+
+  sesionActiva(): boolean {
+    return this.crud.verSesion();
+  }
 
   ngOnInit() {
   }

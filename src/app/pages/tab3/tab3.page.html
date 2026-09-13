@@ -3,9 +3,7 @@
     <ion-buttons slot="start" *ngIf="validarBackBtn()">
       <ion-back-button text="" defaultHref="/auth/login"></ion-back-button>
     </ion-buttons>
-    <ion-title>
-      Registrar
-    </ion-title>
+    <ion-title>{{ url == '/auth/usuario' ? 'Mi perfil' : 'Registrar' }}</ion-title>
   </ion-toolbar>
 </ion-header>
 <ion-content [fullscreen]="true">
@@ -32,8 +30,26 @@
       <ion-item class="ion-padding-horizontal" [ngClass]="{'error-input': f.submitted && f.controls['celular'].errors}" title="{{extraer.erroresForm(f.controls['celular'])}}">
         <ion-input label="Celular" labelPlacement="floating" required name="celular" type="tel" [(ngModel)]="usuario.numeroCelular" minlength="6"></ion-input>
       </ion-item>
+      <ion-item class="ion-padding-horizontal" [ngClass]="{'error-input': f.submitted && f.controls['identificacion'].errors}" title="{{extraer.erroresForm(f.controls['identificacion'])}}">
+        <ion-input label="Cédula" labelPlacement="floating" required name="identificacion" [(ngModel)]="usuario.identificacion" minlength="5"></ion-input>
+      </ion-item>
       <ion-item class="ion-padding-horizontal" [ngClass]="{'error-input': f.submitted && f.controls['correo'].errors}" title="{{extraer.erroresForm(f.controls['correo'])}}">
         <ion-input label="Correo electronico" labelPlacement="floating" required name="correo" type="email" [(ngModel)]="usuario.correoElectronico" minlength="6"></ion-input>
+      </ion-item>
+      <ion-item class="ion-padding-horizontal">
+        <ion-select interface="popover" [value]="paisSeleccionado" (ionChange)="seleccionarPais($event.detail.value)" label="País" labelPlacement="floating" name="pais">
+          <ion-select-option *ngFor="let pais of paises" [value]="pais.id">{{ pais.nombre }}</ion-select-option>
+        </ion-select>
+      </ion-item>
+      <ion-item class="ion-padding-horizontal">
+        <ion-select interface="popover" [value]="departamentoSeleccionado" (ionChange)="seleccionarDepartamento($event.detail.value)" label="Departamento" labelPlacement="floating" name="departamento">
+          <ion-select-option *ngFor="let departamento of departamentos" [value]="departamento.id">{{ departamento.nombre }}</ion-select-option>
+        </ion-select>
+      </ion-item>
+      <ion-item class="ion-padding-horizontal" [ngClass]="{'error-input': f.submitted && f.controls['ubicacion'].errors}" title="{{extraer.erroresForm(f.controls['ubicacion'])}}">
+        <ion-select interface="popover" [value]="ciudadSeleccionada" (ionChange)="seleccionarCiudad($event.detail.value)" label="Ciudad" labelPlacement="floating" name="ubicacion" required>
+          <ion-select-option *ngFor="let ciudad of ciudades" [value]="ciudad.id">{{ ciudad.nombre }}</ion-select-option>
+        </ion-select>
       </ion-item>
       <ion-item class="ion-padding-horizontal" [ngClass]="{'error-input': f.submitted && f.controls['contrasena'].errors}" title="{{extraer.erroresForm(f.controls['contrasena'])}}">
         <ion-input label="Contraseña" labelPlacement="floating" required name="contrasena" type="password" [(ngModel)]="usuario.contrasena" minlength="6"></ion-input>
@@ -41,11 +57,22 @@
       <ion-item class="ion-padding-horizontal" [ngClass]="{'error-input': f.submitted && f.controls['conf-contrasena'].errors}" title="{{extraer.erroresForm(f.controls['conf-contrasena'])}}">
         <ion-input label="Confirmar Contraseña" labelPlacement="floating" required name="conf-contrasena" type="password" [(ngModel)]="confirmarContrasena" minlength="6"></ion-input>
       </ion-item>
+      <ion-item class="ion-padding-horizontal" [disabled]="usuario" [ngClass]="{'error-input': f.submitted && f.controls['tipo-usuario'].errors}" title="{{extraer.erroresForm(f.controls['tipo-usuario'])}}">
+        <ion-select label="Selecionar tipo de usuario" labelPlacement="floating" required name="tipo-usuario" [(ngModel)]="usuario.tipoUsuario" >
+          @if(usuario.tipoUsuario == 'ORGANIZADOR') {
+            <ion-select-option value="ORGANIZADOR">ORGANIZADOR</ion-select-option>
+          }
+          <ion-select-option value="DELEGADO">DELEGADO</ion-select-option>
+          @if (url == '/auth/login/registrar') {
+            <ion-select-option value="JUGADOR">JUGADOR</ion-select-option>
+          }
+        </ion-select>
+      </ion-item>
     </ion-list>
     <ion-button type="submit" class="w-100 ion-margin-top ion-padding-horizontal">
       {{textoBtnSubmit()}}
     </ion-button>
-    @if (url == '/tabs/tab3') {
+    @if (url == '/auth/usuario') {
     <ion-button (click)="cerrarSesion()" class="w-100 ion-margin-top ion-padding-horizontal">
       Cerrar sesion
     </ion-button>

@@ -8,13 +8,17 @@
   <!--<ion-icon name="document-text-sharp"  size="large" class="ion-margin-end" (click)="reglamentoD.click()"></ion-icon>
   <a download='Reglamento {{torneo.nombre}}' href="data:application/pdf;base64,{{documento}}" title='Descargar' #reglamentoD>
   </a>-->
-  @if (validarOrganizador) {
+  @if (esPropietario) {
     <ion-icon name="construct-sharp" size="large" (click)="configurarTorneo()"></ion-icon>
   }
 </ion-item>
 <ion-item>
   <ion-label>Encargado: </ion-label>
-  <ion-note color="dark">{{ torneo.encargadoTorneo?.nombre }}</ion-note>
+  <ion-label>{{ torneo.encargadoTorneo?.nombre }}</ion-label>
+</ion-item>
+<ion-item>
+  <ion-label>Ciudad: </ion-label>
+  <ion-label>{{ torneo.ciudad?.nombre }} - {{torneo.ciudad?.departamento?.nombre}}</ion-label>
 </ion-item>
 <ion-item>
   <ion-label>Modalidad: </ion-label>
@@ -41,6 +45,13 @@
   <ion-badge color="primary">{{ torneo.valorInscripcion | currency:'COP':'symbol-narrow':'3.0'}}</ion-badge>
 </ion-item>
 <ion-item>
-  <ion-label>Fase del Torneo:</ion-label>
-  <ion-badge color="primary" (click)="cambiarFase()">{{ torneo.faseTorneo }}</ion-badge>
+  <ion-label>Duración de cada partido:</ion-label>
+  <ion-badge color="primary">{{ torneo.duracionMinutos || 90 }} min</ion-badge>
 </ion-item>
+<ion-item>
+  <ion-label>Fase del Torneo:</ion-label>
+  <ion-badge color="primary">{{ torneo.faseTorneo }}</ion-badge>
+</ion-item>
+  <ion-button *ngIf="!esPropietario" color="success" expand="block" size="default" (click)="contactarOrganizador()" aria-label="Contactar organizador por WhatsApp">
+    WhatsApp
+  </ion-button>

@@ -4,6 +4,7 @@ import { Cancha } from "./Cancha";
 import { Torneo } from "./Torneo";
 import { FaseActual } from "src/enums/FaseActual";
 import { EstadoPartido } from "src/enums/EstadoPartido";
+import { ConvocatoriaPartido } from "./ConvocatoriaPartido";
 
 export class Partido {
     id?: number;
@@ -28,4 +29,5 @@ export class Partido {
     penaltisEquipoVisitante?: number;
     penaltisEquipoLocal?: number;
     listaArbitros?: Arbitro[];
+    convocatorias?: ConvocatoriaPartido[];
 }

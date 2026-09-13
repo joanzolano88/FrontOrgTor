@@ -12,12 +12,12 @@ export class TorneoService {
   constructor(private crud: CrudService, private router: Router) { }
 
   listaTorneos(): Observable<Torneo[]> {
-    return this.crud.obtener("torneo/usuario/" + this.crud.obtenerUsuario().id);
-  }
-  listaTorneosOrganizador(): Observable<Torneo[]> {
     return this.crud.obtener("torneo");
   }
+  listaTorneosOrganizador(): Observable<Torneo[]> {
+    return this.crud.obtener("torneo/usuario/" + this.crud.obtenerUsuario().id);
+  }
   pageCrearTorneo() {
-    this.router.navigateByUrl('/tabs/torneos/crear-torneo');
+    this.router.navigateByUrl('/auth/torneos/crear-torneo');
   }
 }

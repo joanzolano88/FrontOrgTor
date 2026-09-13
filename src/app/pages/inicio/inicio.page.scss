@@ -1,0 +1,36 @@
+:host {
+	--muted: #71808d;
+}
+
+.filters-panel { --border-color: #e5eaec; }
+.partidos-list { background: transparent; }
+.partido-card { margin: 12px 14px; border-radius: 12px; box-shadow: 0 5px 16px rgba(23,33,43,.08); cursor: pointer; }
+.partido-card-top, .partido-card-bottom { display: flex; align-items: center; justify-content: space-between; gap: 10px; color: var(--muted); font-size: 12px; }
+.partido-card-top { 
+    padding-bottom: 4px; 
+    span {
+        font-size: 15px;
+    } 
+}
+.partido-card-top ion-badge { font-size: 15px; }
+ion-button { width: stretch}
+.teams-line { display: grid; grid-template-columns: minmax(0,1fr) auto minmax(0,1fr); align-items: center; gap: 8px; }
+.team { display: flex; align-items: center; gap: 8px; font-weight: 700; min-width: 0; }
+.team span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 15px;  text-wrap: auto;}
+.team-home { justify-content: flex-end; text-align: right; }
+.team.winner { color: #2f80ed; }
+.team.winner img { outline: 3px solid #2f80ed; }
+.team img { width: 32px; height: 32px; object-fit: contain; border-radius: 50%; background: #eef1f2; padding: 4px; }
+.score-preview { display: flex; align-items: center; gap: 7px; }
+.score-preview strong { font-size: 21px; min-width: 15px; text-align: center; }
+.score-preview small { color: var(--muted); font-size: 9px; font-weight: 700; }
+.penalty-score { margin-top: 8px; color: var(--accent); font-size: 12px; font-weight: 700; text-align: center; }
+.partido-card-bottom { margin-top: 14px; padding-top: 10px; border-top: 1px solid #edf0f1; }
+.text-center {
+    align-items: center;
+    display: flex;
+    font-size: 15px;
+    ion-icon {
+        margin-right: 5px;
+    }
+}

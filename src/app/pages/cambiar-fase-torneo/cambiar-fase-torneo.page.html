@@ -1,41 +1,67 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-back-button text="" defaultHref="/tabs/torneos"></ion-back-button>
+      <ion-back-button text="" defaultHref="/auth/torneos"></ion-back-button>
     </ion-buttons>
-    <ion-title>cambiarFaseTorneo</ion-title>
+    <ion-title>Organizar torneo</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true">
+  <ion-item color="warning" *ngIf="mensajeError">
+    <ion-label>{{ mensajeError }}</ion-label>
+  </ion-item>
+  <ion-card class="builder-intro">
+    <ion-card-header>
+      <ion-card-title>{{ torneo.modalidadTorneo == 'ELIMINATORIAS_GRUPOS' ? 'Distribuir grupos y llaves' : (torneo.modalidadTorneo == 'GRUPOS' ? 'Distribuir equipos en grupos' : 'Armar llaves') }}</ion-card-title>
+      <ion-card-subtitle>Fase actual: {{ torneo.faseTorneo }} · Equipos: {{ totalEquiposOrganizados() }}</ion-card-subtitle>
+    </ion-card-header>
+    <ion-card-content>Arrastra los equipos y guarda cuando quieras. Puedes completar la distribución por partes; el torneo iniciará cuando todos estén asignados.</ion-card-content>
+  </ion-card>
   <ion-grid>
     <ion-row>
       <ion-col>
-        <ion-button (click)="cambiarFase()" expand="block">Cambiar Fase</ion-button>
+        <ion-button (click)="cambiarFase()" expand="block" color="success">Guardar distribución</ion-button>
       </ion-col>
     </ion-row>
   </ion-grid>
   <ion-grid>
     <ion-row cdkDropListGroup>
+      <ion-col size="12" *ngIf="organizacionInicial">
+        <ion-accordion-group>
+          <ion-accordion value="sin-asignar">
+            <ion-item slot="header" color="warning">
+              <ion-label>Equipos sin asignar · {{ equiposSinAsignar.length }}</ion-label>
+            </ion-item>
+            <div slot="content" id="equiposSinAsignar" cdkDropList [cdkDropListData]="equiposSinAsignar"
+              [cdkDropListEnterPredicate]="noReturnPredicate" class="example-list" (cdkDropListDropped)="drop($event)">
+              <ion-row *ngFor="let equipo of equiposSinAsignar" [cdkDragData]="equipo" class="example-box" cdkDrag>
+                <ion-col size="12">{{ equipo.nombreEquipo }}</ion-col>
+              </ion-row>
+              <ion-note class="ion-padding">Arrastra cada equipo a un grupo o una llave.</ion-note>
+            </div>
+          </ion-accordion>
+        </ion-accordion-group>
+      </ion-col>
       <ion-col>
-        <div *ngFor="let grupo of listaEuiposGrupos; let j = index">
+        <div *ngFor="let grupo of listaEuiposGrupos; let j = index" [hidden]="organizacionInicial && torneo.modalidadTorneo == 'ELIMINATORIAS'">
           <ion-accordion-group>
             <ion-accordion value="first">
               <ion-item slot="header" color="light">
-                <ion-label *ngIf="torneo.faseTorneo == 'FASE_GRUPOS' || torneo.faseTorneo == 'ELIMINATORIAS_GRUPOS'">Grupo <ng-container *ngIf="torneo.faseTorneo == 'ELIMINATORIAS_GRUPOS'">Elimi. </ng-container>{{ grupo[0].grupo }}</ion-label>
-                <ion-label *ngIf="torneo.faseTorneo != 'FASE_GRUPOS' && torneo.faseTorneo != 'ELIMINATORIAS_GRUPOS'">Llave</ion-label>
+                <ion-label *ngIf="(torneo.faseTorneo == 'FASE_GRUPOS' && !organizacionInicial) || (organizacionInicial && torneo.modalidadTorneo != 'ELIMINATORIAS') || torneo.faseTorneo == 'ELIMINATORIAS_GRUPOS'">Grupo <ng-container *ngIf="torneo.faseTorneo == 'ELIMINATORIAS_GRUPOS'">Elimi. </ng-container>{{ j + 1 }} · {{ grupo.length }} equipos</ion-label>
+                <ion-label *ngIf="(torneo.faseTorneo != 'FASE_GRUPOS' && torneo.faseTorneo != 'ELIMINATORIAS_GRUPOS') || (organizacionInicial && torneo.modalidadTorneo == 'ELIMINATORIAS')">Llave {{ j + 1 }} · {{ grupo.length }} equipos</ion-label>
               </ion-item>
-              <div slot="content" id="grupoE{{grupo[0].grupo}}" 
+                <div slot="content" id="grupoE{{j}}" 
                 cdkDropList [cdkDropListData]="grupo" [cdkDropListEnterPredicate]="evenPredicateGrupo"
                 class="example-list" cdkDropListSortingDisabled (cdkDropListDropped)="drop($event)">
                 <ion-row *ngFor="let equipo of grupo; let i = index" [cdkDragData]="equipo" class="example-box" cdkDrag>
-                  <ion-col size="2" *ngIf="torneo.faseTorneo == 'FASE_GRUPOS' || torneo.faseTorneo == 'ELIMINATORIAS_GRUPOS'">
+                  <ion-col size="2" *ngIf="(torneo.faseTorneo == 'FASE_GRUPOS' && !organizacionInicial) || (organizacionInicial && torneo.modalidadTorneo != 'ELIMINATORIAS') || torneo.faseTorneo == 'ELIMINATORIAS_GRUPOS'">
                     {{ puntosEquipo(equipo) }}
                   </ion-col>
-                  <ion-col size="3" *ngIf="torneo.faseTorneo != 'FASE_GRUPOS' && torneo.faseTorneo != 'ELIMINATORIAS_GRUPOS'">
+                  <ion-col size="3" *ngIf="(torneo.faseTorneo != 'FASE_GRUPOS' && torneo.faseTorneo != 'ELIMINATORIAS_GRUPOS') || (organizacionInicial && torneo.modalidadTorneo == 'ELIMINATORIAS')">
                     {{ resulatdoLlaves(equipo) }}
                   </ion-col>
-                  <ion-col size="9">{{ equipo.nombre }}</ion-col>
+                  <ion-col size="9">{{ equipo.nombreEquipo }}</ion-col>
                 </ion-row>
               </div>
             </ion-accordion>
@@ -47,30 +73,30 @@
           <ion-accordion-group>
             <ion-accordion value="first">
               <ion-item slot="header" color="light">
-                <ion-label>Grupo {{ j + 1 }}</ion-label>
+                <ion-label>Llave {{ j + 1 }} · {{ grupo.length }} equipos</ion-label>
               </ion-item>
               <div slot="content" id="grupoG{{j}}" cdkDropList [cdkDropListData]="grupo" [cdkDropListEnterPredicate]="evenPredicate"
                 class="example-list" cdkDropListSortingDisabled (cdkDropListDropped)="drop($event)">
                 <ion-row *ngFor="let equipo of grupo; let i = index" [cdkDragData]="equipo" class="example-box" cdkDrag>
-                  <ion-col size="10">{{ equipo.nombre }}</ion-col>
+                  <ion-col size="10">{{ equipo.nombreEquipo }}</ion-col>
                 </ion-row>
               </div>
             </ion-accordion>
           </ion-accordion-group>
         </div>
       </ion-col>
-      <ion-col *ngIf="torneo.faseTorneo != 'ELIMINATORIAS_GRUPOS'">
+      <ion-col *ngIf="torneo.faseTorneo != 'ELIMINATORIAS_GRUPOS' && (torneo.faseTorneo != 'FASE_GRUPOS' || organizacionInicial && torneo.modalidadTorneo == 'ELIMINATORIAS')">
         <ion-content style="height: 80vh;">
         <ion-list *ngFor="let llave of listaLlaves; let i = index">
           <ion-item>
-            <label for="">Llave</label>
+            <ion-label>Llave {{ i + 1 }} · {{ llave.length }}/2 equipos</ion-label>
           </ion-item>
           <ion-item>
             <ion-grid id="grupoG{{i}}" cdkDropList [cdkDropListData]="llave"
               class="example-list" (cdkDropListDropped)="drop($event)"
               [cdkDropListEnterPredicate]="evenPredicate">
               <ion-row *ngFor="let equipo of llave" [cdkDragData]="equipo" class="example-box" cdkDrag>
-              <ion-col size="10">{{ equipo.nombre }}</ion-col>
+              <ion-col size="10">{{ equipo.nombreEquipo }}</ion-col>
             </ion-row>
             </ion-grid>
           </ion-item>
@@ -81,7 +107,7 @@
   </ion-grid>
   <ion-alert
   [isOpen]="isAlertOpen"
-  header="Cambio de Fase completa"
+  header="Distribución"
   [buttons]="alertButtons"
   (didDismiss)="setOpen(false)"
   ></ion-alert>

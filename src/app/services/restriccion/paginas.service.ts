@@ -11,7 +11,7 @@ export class PaginasService implements CanActivate {
 
   canActivate ( next: ActivatedRouteSnapshot,
           state: RouterStateSnapshot): Observable<boolean> | Promise<boolean> | boolean{
-    const tipo = sessionStorage.getItem('tipo');
+    const tipo = localStorage.getItem('tipo');
     let userAuthenticated = false;
     if (userAuthenticated) {
       return true;

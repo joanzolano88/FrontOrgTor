@@ -9,8 +9,11 @@ import { SesionService } from 'src/app/services/restriccion/sesion.service';
   standalone: false
 })
 export class TorneoFabButtonComponent  implements OnInit {
+  esOrganizador = false;
 
-  constructor(private torneoService: TorneoService) { }
+  constructor(private torneoService: TorneoService, private sesionService: SesionService) {
+    this.esOrganizador = this.sesionService.validacionOrganizador();
+  }
 
   ngOnInit() {
   }

@@ -1,0 +1,42 @@
+:host {
+  --ink: #a6cef5;
+  --muted: #71808d;
+  --surface: #f4f7f8;
+  --accent: #e86f2d;
+}
+
+.partidos-toolbar { padding: 14px 14px 8px; ; border-bottom: 1px solid #e5eaec; }
+.filter-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+.filter-row ion-select { --border-radius: 9px; color: var(--ink); }
+ion-list { background: transparent; margin: 10px 12px; }
+.group-header { --background: #17212b; --color: #fff; margin-bottom: 2px; }
+.group-kicker { display: block; color: #ffb58f; font-size: 10px; letter-spacing: 1.4px; font-weight: 700; }
+.group-header strong { display: block; font-size: 17px; margin-top: 2px; }
+.partido-card { display: block; padding: 14px 12px; ; border-bottom: 1px solid #edf0f1; cursor: pointer; 
+	span{
+		display: flex;
+		align-items: center;
+		font-size: 15px;
+	}}
+.partido-card-top, .partido-card-bottom { display: flex; align-items: center; justify-content: space-between; gap: 10px; color: var(--muted); font-size: 12px; }
+.partido-card-top ion-badge { font-size: 15px; }
+.teams-line { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 8px; margin: 14px 0; color: var(--ink); }
+.team { display: flex; align-items: center; gap: 8px; font-weight: 700; min-width: 0;}
+.team span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap;  text-wrap: auto; }
+.team-home { justify-content: flex-end; text-align: right; }
+.team.winner { color: #2f80ed; }
+.team.winner img { outline: 3px solid #2f80ed; }
+.team img { width: 32px; height: 32px; object-fit: contain; border-radius: 50%; background: #eef1f2; padding: 4px; }
+.score-preview { display: flex; align-items: center; gap: 7px; color: var(--ink); }
+.score-preview strong { font-size: 21px; min-width: 15px; text-align: center; }
+.score-preview small { color: var(--muted); font-size: 9px; font-weight: 700; }
+.penalty-score { margin-top: 8px; color: #c45b24; font-size: 12px; font-weight: 700; text-align: center; }
+.partido-card-bottom { border-top: 1px solid #edf0f1; padding-top: 9px; 
+	span{
+		display: flex;
+		align-items: center;
+		font-size: 15px;
+	}}
+.partido-card-bottom span:last-child { font-weight: 700; }
+.modal-matchup { display: flex; justify-content: center; align-items: center; gap: 10px; padding: 10px 0 18px; color: var(--ink); }
+.modal-matchup span { font-weight: 800; }

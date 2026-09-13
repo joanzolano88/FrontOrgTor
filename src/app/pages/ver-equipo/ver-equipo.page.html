@@ -1,0 +1,47 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start"><ion-back-button [defaultHref]="'/auth/torneos/torneo/' + idTorneo + '/tabla-equipos'"></ion-back-button></ion-buttons>
+    <ion-title>Información del equipo</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-card>
+    <ion-card-header>
+      <ion-thumbnail><img alt="Escudo del equipo" [src]="equipo.escudo ? 'data:image/png;base64,' + equipo.escudo : 'https://ionicframework.com/docs/img/demos/thumbnail.svg'"></ion-thumbnail>
+      <ion-card-title>{{ equipo.nombre }}</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <p><strong>Delegado:</strong> {{ equipo.delegado?.nombre }}</p>
+      <p><strong>Celular:</strong> {{ equipo.delegado?.numeroCelular }}</p>
+      <p><strong>Torneo:</strong> {{ equipo.torneo?.nombre }}</p>
+      <ion-button *ngIf="esOrganizador" expand="block" color="success" (click)="abrirWhatsapp(equipo.delegado?.numeroCelular, 'Hola, soy el organizador de ' + equipo.torneo?.nombre + '.')">
+        WhatsApp
+      </ion-button>
+      <ion-button *ngIf="esDelegado && (equipo.torneo?.estadoTorneo === 'INSCRIPCIONES' || equipo.torneo?.estadoTorneo === 'INSCRIPCIONES_ACTIVO')" expand="block" (click)="editar()">
+        Editar información
+      </ion-button>
+      <ion-card *ngIf="esOrganizador">
+        <ion-card-header><ion-card-title>Pagos de inscripción</ion-card-title></ion-card-header>
+        <ion-card-content>
+          <ion-item>
+            <ion-input type="number" label="Monto" labelPlacement="floating" [(ngModel)]="nuevoPago.monto"></ion-input>
+          </ion-item>
+          <ion-item>
+            <ion-label>Estado</ion-label>
+            <ion-note color="medium">Automático según el total aportado</ion-note>
+          </ion-item>
+          <ion-item>
+            <ion-input label="Observación" labelPlacement="floating" [(ngModel)]="nuevoPago.observacion"></ion-input>
+          </ion-item>
+          <ion-button expand="block" (click)="registrarPago()">Revisar y registrar pago</ion-button>
+          <ion-note color="danger" *ngIf="mensajePago">{{ mensajePago }}</ion-note>
+          <ion-item *ngFor="let pago of pagos">
+            <ion-label>{{ pago.estado }}: {{ pago.monto | currency:'COP':'symbol-narrow':'3.0' }}</ion-label>
+            <ion-note>{{ pago.fechaPago || 'Pendiente' }}</ion-note>
+          </ion-item>
+        </ion-card-content>
+      </ion-card>
+    </ion-card-content>
+  </ion-card>
+</ion-content>

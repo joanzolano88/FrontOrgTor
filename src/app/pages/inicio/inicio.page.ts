@@ -33,6 +33,20 @@ export class InicioPage implements OnInit {
   verPartido(id: number) {
     this.router.navigateByUrl('/auth/partidos/partido/' + id);
   }
+  escudoEquipo(equipo?: Equipo): string {
+    return equipo?.escudo ? 'data:image/png;base64,' + equipo.escudo : 'assets/icon/favicon.png';
+  }
+  ganadorPartido(partido: Partido): 'LOCAL' | 'VISITANTE' | '' {
+    const golesLocal = partido.anotacionesEquipoLocal || 0;
+    const golesVisitante = partido.anotacionesEquipoVisitante || 0;
+    if (golesLocal > golesVisitante) return 'LOCAL';
+    if (golesVisitante > golesLocal) return 'VISITANTE';
+    const penaltisLocal = partido.penaltisEquipoLocal || 0;
+    const penaltisVisitante = partido.penaltisEquipoVisitante || 0;
+    if (penaltisLocal > 0 && penaltisLocal > penaltisVisitante) return 'LOCAL';
+    if (penaltisVisitante > 0 && penaltisVisitante > penaltisLocal) return 'VISITANTE';
+    return '';
+  }
   mostrarFecha(fechaPartido: Date) {
     let fecha = new Date(fechaPartido);
     return fecha.getDay() + '/' + (fecha.getMonth() + 1)+ '/' + fecha.getFullYear() + ' - ' + fecha.getHours() + ':' + fecha.getMinutes();

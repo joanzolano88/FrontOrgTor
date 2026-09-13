@@ -28,9 +28,9 @@ export class Tab2Page {
     return equipo.anotacionesAFavor! - equipo.anotacionesEnContra!;
   }
   verTorneo(id?: number) {
-    this.router.navigateByUrl('/tabs/tab2/torneo/' + id);
+    this.router.navigateByUrl('/auth/torneos/torneo/' + id);
   }
   pageCrearTorneo() {
-    this.router.navigateByUrl('/tabs/tab2/crear-torneo');
+    this.router.navigateByUrl('/auth/torneos/crear-torneo');
   }
 }

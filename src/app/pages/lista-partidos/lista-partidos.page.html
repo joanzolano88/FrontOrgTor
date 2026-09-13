@@ -1,46 +1,60 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-back-button text="" defaultHref="/tabs/torneos"></ion-back-button>
+      <ion-back-button text="" defaultHref="/auth/torneos"></ion-back-button>
     </ion-buttons>
     <ion-title>Lista Partidos</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true">
-  <ion-item>
-    <ion-searchbar show-clear-button="always" (ionInput)="buscador($event)" placeholder="Buscar Equipo"></ion-searchbar>
-  </ion-item>
-  <ion-item>
-    <ion-select label="Selecionar estado" placeholder="estado" [(ngModel)]="estadoPartido" name="estadoPartido">
-      <ion-select-option [value]="estado" *ngFor="let estado of estadosPartido">{{estado}}</ion-select-option>
-    </ion-select>
-  </ion-item>
-  <ion-item>
-    <ion-select label="Selecionar fase" placeholder="estado" [(ngModel)]="fasePartido" name="fasePartido">
-      <ion-select-option [value]="fase" *ngFor="let fase of faseActual">{{fase}}</ion-select-option>
-    </ion-select>
-  </ion-item>
-  <ion-grid>
-    <ion-row>
-      <ion-col>
-        <ion-button (click)="listaPartidos()" expand="block">Buscar partidos</ion-button>
-      </ion-col>
-    </ion-row>
-  </ion-grid>
+  <section class="partidos-toolbar">
+    <ion-searchbar show-clear-button="always" (ionInput)="buscador($event)" placeholder="Buscar equipo"></ion-searchbar>
+    <div class="filter-row">
+      <ion-select label="Consulta" labelPlacement="stacked" [(ngModel)]="filtroPartidos" name="filtroPartidos">
+        <ion-select-option value="PENDIENTES">Pendientes</ion-select-option>
+        <ion-select-option value="TODOS">Todos los partidos</ion-select-option>
+        <ion-select-option value="SIN_PROGRAMAR">Partidos sin programación</ion-select-option>
+      </ion-select>
+      <ion-select label="Fase" labelPlacement="stacked" [(ngModel)]="fasePartido" name="fasePartido">
+        <ion-select-option [value]="fase" *ngFor="let fase of faseActual">{{fase}}</ion-select-option>
+      </ion-select>
+    </div>
+    <ion-button class="filter-button" (click)="listaPartidos()" expand="block" fill="solid">Actualizar partidos</ion-button>
+  </section>
   <ion-list  *ngFor="let listaPartidos of listaGruposPartidos; let i = index">
     <ion-accordion-group *ngIf="listaPartidos.length > 0 && validacionEstadoPartido(listaPartidos)">
       <ion-accordion value="first">
-        <ion-item slot="header" color="primary">
-          <ion-label *ngIf="torneo.faseTorneo == 'ELIMINATORIAS_GRUPOS' || torneo.faseTorneo == 'FASE_GRUPOS'">Grupo {{listaPartidos[0].grupo}}</ion-label>
-          <ion-label *ngIf="torneo.faseTorneo != 'ELIMINATORIAS_GRUPOS' && torneo.faseTorneo != 'FASE_GRUPOS'">Llave</ion-label>
+        <ion-item slot="header" class="group-header">
+          <ion-label>
+            <span class="group-kicker">{{ torneo.faseTorneo == 'ELIMINATORIAS_GRUPOS' || torneo.faseTorneo == 'FASE_GRUPOS' ? 'FASE DE GRUPOS' : 'ELIMINATORIA' }}</span>
+            <strong *ngIf="torneo.faseTorneo == 'ELIMINATORIAS_GRUPOS' || torneo.faseTorneo == 'FASE_GRUPOS'">Grupo {{listaPartidos[0].grupo}}</strong>
+            <strong *ngIf="torneo.faseTorneo != 'ELIMINATORIAS_GRUPOS' && torneo.faseTorneo != 'FASE_GRUPOS'">Llaves</strong>
+          </ion-label>
         </ion-item>
         <ng-container *ngFor="let partido of listaPartidos">
-          <div class="ion-padding d-flex ion-justify-content-between" slot="content" 
-              *ngIf="partido.estadoPartido == estadoPartido && compararBuscador(partido)" (click)="selecionarFecha(btnModalFecha, partido)">
-            <label for="">{{partido.equipoLocal?.nombre}} vs {{partido.equipoVisitante?.nombre}}</label>
-            <ion-badge slot="end" color="{{colorEstadoPartido(partido)}}">{{ partido.estadoPartido }}</ion-badge>
-          </div>
+          <ion-card class="partido-card" slot="content"
+              *ngIf="compararBuscador(partido)" (click)="selecionarFecha(btnModalFecha, partido)">
+            <div class="partido-card-top">
+              <span><ion-icon name="calendar" size="large"></ion-icon>{{ mostrarFechaPartido(partido.fechaPartido) }}</span>
+              <ion-badge color="{{colorEstadoPartido(partido)}}">{{ partido.estadoPartido }}</ion-badge>
+            </div>
+            <div class="teams-line">
+              <div class="team team-home" [class.winner]="ganadorPartido(partido) === 'LOCAL'"><span>{{partido.equipoLocal?.nombre}}</span><img [src]="escudoEquipo(partido.equipoLocal)" alt=""></div>
+              <div class="score-preview"><strong>{{ partido.anotacionesEquipoLocal ?? '-' }}</strong><small>VS</small><strong>{{ partido.anotacionesEquipoVisitante ?? '-' }}</strong></div>
+              <div class="team team-away" [class.winner]="ganadorPartido(partido) === 'VISITANTE'"><img [src]="escudoEquipo(partido.equipoVisitante)" alt=""><span>{{partido.equipoVisitante?.nombre}}</span></div>
+            </div>
+            <div class="penalty-score" *ngIf="(partido.penaltisEquipoLocal ?? 0) > 0 || (partido.penaltisEquipoVisitante ?? 0) > 0">
+              Penaltis: {{ partido.penaltisEquipoLocal ?? 0 }} - {{ partido.penaltisEquipoVisitante ?? 0 }}
+            </div>
+            <div class="partido-card-bottom">
+              <span>
+                <ion-icon name="map" size="large"></ion-icon>
+                {{ partido.cancha?.nombre || 'Cancha pendiente' }}
+              </span>
+              <span>Ver partido</span>
+            </div>
+          </ion-card>
         </ng-container>
       </ion-accordion>
     </ion-accordion-group>
@@ -59,19 +73,21 @@
           </ion-buttons>
         </ion-toolbar>
       </ion-header>
-      <ion-content class="ion-padding">
+      <ion-content class="ion-padding schedule-modal">
+        <div class="modal-matchup"><strong>{{ partidoSeleccionado.equipoLocal?.nombre }}</strong><span>vs</span><strong>{{ partidoSeleccionado.equipoVisitante?.nombre }}</strong></div>
         <ion-item>
           <ion-datetime minuteValues="0,15,30,45" [(ngModel)]="partidoSeleccionado.fechaPartido" name="fecha"></ion-datetime>
         </ion-item>
+        <ion-note class="ion-padding-horizontal">Duración: {{ torneo.duracionMinutos || 90 }} minutos. Se reserva automáticamente una hora antes del siguiente partido.</ion-note>
         <ion-item>
           <ion-select label="Selecionar Cancha" placeholder="Cancha" [(ngModel)]="partidoSeleccionado.cancha!.id" name="canhca">
             <ion-select-option [value]="cancha.id" *ngFor="let cancha of listaCanchas">{{cancha.nombre}}</ion-select-option>
           </ion-select>
         </ion-item>
-        <ion-button (click)="cancelarPartido()" expand="block" shape="round" *ngIf="estadoPartido == 'PROGRAMADO'">
+        <ion-button (click)="cancelarPartido()" expand="block" shape="round" *ngIf="esOrganizadorDelTorneo() && partidoSeleccionado.estadoPartido == 'PROGRAMADO'">
           Cancelar partido
         </ion-button>
-        <ion-button (click)="iniciarPartido()" expand="block" shape="round" *ngIf="estadoPartido == 'PROGRAMADO'">
+        <ion-button (click)="iniciarPartido()" expand="block" shape="round" *ngIf="esOrganizadorDelTorneo() && partidoSeleccionado.estadoPartido == 'PROGRAMADO'">
           Jugar partido
         </ion-button>
       </ion-content>

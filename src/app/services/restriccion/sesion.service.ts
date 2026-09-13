@@ -16,21 +16,21 @@ export class SesionService implements CanActivate {
     if (sesion) {
       return true;
     }
-    this.router.navigate(['login']);
+    this.router.navigateByUrl('/auth/login');
     return false;
   }
 
   login() {
-    this.router.navigate(['login']);
+    this.router.navigateByUrl('/auth/login');
   }
 
   cerrarSesion() {
-    sessionStorage.clear();
-    this.router.navigate(['login']);
+    this.crud.cerrarSesion();
+    this.router.navigateByUrl('/auth/login');
   }
   validacionOrganizador() {
-    const usuario: Usuario = JSON.parse(sessionStorage.getItem("usuario")!);
-    if (usuario == null) {
+    const usuario = this.crud.obtenerUsuario();
+    if (!usuario.id) {
       return false;
     }
     return usuario.tipoUsuario == TipoUsuario.ORGANIZADOR;

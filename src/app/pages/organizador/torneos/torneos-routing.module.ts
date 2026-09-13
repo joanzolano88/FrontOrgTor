@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 
 import { TorneosPage } from './torneos.page';
+import { OrganizadorGuard } from 'src/app/services/restriccion/organizador.guard';
 
 const routes: Routes = [
   {
@@ -10,6 +11,7 @@ const routes: Routes = [
   },
   {
     path: 'crear-torneo',
+    canActivate: [OrganizadorGuard],
     loadChildren: () => import('../../crear-torneo/crear-torneo.module').then(m => m.CrearTorneoPageModule) 
   },
   {

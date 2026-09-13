@@ -15,6 +15,10 @@ import { Torneo } from 'src/models/Torneo';
 export class InformacionTorneoComponent  implements OnInit {
   @Input() torneo: Torneo = new Torneo();
   @Input() validarOrganizador: Boolean = false;
+  get esPropietario(): boolean {
+    const usuario = this.crud.obtenerUsuario();
+    return this.validarOrganizador && this.torneo.encargadoTorneo?.id === usuario?.id;
+  }
   mensajeError: string = "";
   isAlertOpen = false;
 
@@ -24,18 +28,18 @@ export class InformacionTorneoComponent  implements OnInit {
   }
 
   configurarTorneo() {
-    this.router.navigateByUrl('tabs/torneos/torneo/' + this.torneo.id + '/configuracion-torneo');
+    this.router.navigateByUrl('/auth/torneos/torneo/' + this.torneo.id + '/configuracion-torneo');
   }
 
   cantidadEquipos() {
     return (this.torneo.modalidadTorneo == ModalidadTorneo.GRUPOS || this.torneo.modalidadTorneo == ModalidadTorneo.ELIMINATORIAS_GRUPOS)? this.torneo.cantidadEquipos!*this.torneo.cantidadGrupos!: this.torneo.cantidadEquipos;
   }
   cambiarFase() {
-    if (this.torneo.faseTorneo == FaseActual.FINAL || !this.validarOrganizador) {
+    if (this.torneo.faseTorneo == FaseActual.FINAL || !this.esPropietario) {
       return;
     }
     this.crud.actualizar(null,'torneo/cambiar_fase/' + this.torneo.id).subscribe((resp: Torneo) =>{
-      this.router.navigateByUrl('tabs/torneos/torneo/' + this.torneo.id + '/cambio-fase');
+      this.router.navigateByUrl('/auth/torneos/torneo/' + this.torneo.id + '/cambio-fase');
     }, (err: HttpErrorResponse) =>{
       this.mensajeError = err.error.message;
       this.setOpen(true);
@@ -43,5 +47,16 @@ export class InformacionTorneoComponent  implements OnInit {
   }
   setOpen(isOpen: boolean) {
     this.isAlertOpen = isOpen;
+  }
+
+  contactarOrganizador() {
+    const numero = this.torneo.encargadoTorneo?.numeroCelular;
+    if (!numero) {
+      this.mensajeError = 'El organizador no tiene un número de WhatsApp registrado.';
+      this.setOpen(true);
+      return;
+    }
+    const telefono = numero.replace(/\D/g, '');
+    window.open(`https://wa.me/57${telefono}?text=${encodeURIComponent('Hola, quisiera información sobre el torneo ' + this.torneo.nombre + '.')}`, '_blank');
   }
 }

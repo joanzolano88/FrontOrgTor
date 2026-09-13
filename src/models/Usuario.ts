@@ -6,6 +6,7 @@ import { Torneo } from "./Torneo";
 export class Usuario extends InformacionPersona {
     nombreUsuario?: string;
     contrasena?: string;
+    ubicacion?: string;
     torneo?: Torneo;
     tipoUsuario?: TipoUsuario;
 }

@@ -4,4 +4,5 @@ export class InformacionContacto {
     numeroTelefono?: string;
     whatsappActivo?: boolean;
     correoElectronico?: string;
+    cedula?: string;
 }
