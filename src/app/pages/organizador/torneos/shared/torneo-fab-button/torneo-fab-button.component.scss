@@ -1,0 +1,3 @@
+:host { position: fixed; right: 16px; bottom: calc(58px + env(safe-area-inset-bottom)); z-index: 1000; }
+ion-fab { position: static; margin: 0 !important; }
+ion-fab-button { --box-shadow: 0 8px 20px rgba(0,0,0,.28); }

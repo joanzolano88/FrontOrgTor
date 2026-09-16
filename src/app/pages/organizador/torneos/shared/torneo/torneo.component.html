@@ -3,81 +3,79 @@
     <ion-refresher-content>
     </ion-refresher-content>
   </ion-refresher>
-  <ion-list>
-    <ion-item  lines="none">
-      <ion-label>Estado:</ion-label>
-    </ion-item>
-    <ion-item>
-      <ion-segment value="default" color="primary" [(ngModel)]="torneo.estadoTorneo"
-        [disabled]="!esPropietario || torneo.estadoTorneo == 'FINALIZADO'"
-        (ionChange)="cambiarEstadoTorneo($event)">
-        <ion-segment-button value="INSCRIPCIONES">
-          <ion-label>Inscripciones</ion-label>
-        </ion-segment-button>
-        <ion-segment-button value="INSCRIPCIONES_ACTIVO">
-          <ion-label>Insc. Activo</ion-label>
-        </ion-segment-button>
-        <ion-segment-button value="ACTIVO">
-          <ion-label>Activo</ion-label>
-        </ion-segment-button>
-        <ion-segment-button value="FINALIZADO">
-          <ion-label>Terminado</ion-label>
-        </ion-segment-button>
-      </ion-segment>
-    </ion-item>
-  </ion-list>
-  <ion-grid>
-    <ion-row>
-      <ion-col>
-        <ion-button expand="block"  (click)="tablaEquipos()">Ver Tabla</ion-button>
-      </ion-col>
+  <ion-card class="status-panel">
+    <div class="section-heading"><div><strong>Estado actual</strong></div><ion-badge [color]="colorEstadoTorneo()">{{ etiquetaEstadoTorneo() }}</ion-badge></div>
+    <ion-segment [(ngModel)]="torneo.estadoTorneo" [disabled]="!esPropietario || torneo.estadoTorneo == 'FINALIZADO'" (ionChange)="cambiarEstadoTorneo($event)">
+      <ion-segment-button value="INSCRIPCIONES"><ion-label>Inscripciones</ion-label></ion-segment-button>
+      <ion-segment-button value="INSCRIPCIONES_ACTIVO"><ion-label>Activo/inscripciones</ion-label></ion-segment-button>
+      <ion-segment-button value="ACTIVO"><ion-label>Activo</ion-label></ion-segment-button>
+      <ion-segment-button value="FINALIZADO"><ion-label>Finalizado</ion-label></ion-segment-button>
+    </ion-segment>
+  </ion-card>
+  <ion-card class="tournament-actions">
+    <div class="section-heading"><div><strong>Gestiona este torneo</strong></div></div>
+    <div class="action-grid">
+      <ion-button (click)="tablaEquipos()"><ion-icon size="large" slot="start" name="podium-outline"></ion-icon>Tabla</ion-button>
+      <ion-button (click)="listaPartidos()"><ion-icon size="large" slot="start" name="football-outline"></ion-icon>Partidos</ion-button>
       @if (esPropietario) {
-        <ion-col>
-          <ion-button expand="block" (click)="listaPartidos()">Ver Partidos</ion-button>
-        </ion-col>
-        <ion-col>
-          <ion-button expand="block" (click)="agregarPartido()">Agregar Partidos</ion-button>
-        </ion-col>
-        <ion-col>
-          <ion-button expand="block" (click)="agregarEquipo()">Agregar Equipo</ion-button>
-        </ion-col>
-        <ion-col *ngIf="torneo.estadoTorneo == 'INSCRIPCIONES' || torneo.estadoTorneo == 'INSCRIPCIONES_ACTIVO'">
-          <ion-button expand="block" (click)="verSolicitudes()">Solicitudes</ion-button>
-        </ion-col>
-        <ion-col *ngIf="torneo.estadoTorneo == 'INSCRIPCIONES' || torneo.estadoTorneo == 'INSCRIPCIONES_ACTIVO'">
-          <ion-button expand="block" (click)="organizarEquipos()">Organizar grupos/llaves</ion-button>
-        </ion-col>
+        <ion-button (click)="agregarEquipo()"><ion-icon size="large" slot="start" name="people-outline"></ion-icon>Agregar equipo</ion-button>
+        <ion-button (click)="agregarPartido()"><ion-icon size="large" slot="start" name="calendar-number-outline"></ion-icon>Agregar partido</ion-button>
+        <ion-button *ngIf="torneo.estadoTorneo == 'INSCRIPCIONES' || torneo.estadoTorneo == 'INSCRIPCIONES_ACTIVO'" (click)="verSolicitudes()">
+          <ion-icon size="large" slot="start" name="mail-unread-outline"></ion-icon>Solicitudes
+        </ion-button>
+        <ion-button *ngIf="torneo.estadoTorneo == 'INSCRIPCIONES' || torneo.estadoTorneo == 'INSCRIPCIONES_ACTIVO'" (click)="organizarEquipos()">
+          <ion-icon size="large" slot="start" class="icon-rotado" name="git-network-outline"></ion-icon>Organizar fase</ion-button>
       } @else if (torneo.estadoTorneo == 'INSCRIPCIONES' || torneo.estadoTorneo == 'INSCRIPCIONES_ACTIVO') {
-        <ion-col>
-          <ion-button expand="block" (click)="solicitarEquipo()">Solicitar participación</ion-button>
-        </ion-col>
+        <ion-button (click)="solicitarEquipo()">Solicitar participación</ion-button>
       }
-    </ion-row>
-  </ion-grid>
-  <ion-list>
-    <ion-list-header>
-      <ion-label>Canchas</ion-label>
-      @if (esPropietario) {
-        <ion-button (click)="agregarCancha()">Agregar <ion-icon name="add-circle-sharp"></ion-icon></ion-button>
-      }
-    </ion-list-header>
-    <ng-container *ngFor="let cancha of listCancha">
-      <ion-item lines="none">
-        <ion-thumbnail slot="start">
-          <img alt="Silhouette of mountains" src="https://ionicframework.com/docs/img/demos/thumbnail.svg" />
-        </ion-thumbnail>
-        <ion-label>Nombre: {{cancha.nombre}}</ion-label>
-        <ion-icon name="map-sharp" size="large" class="ion-margin-end" (click)="verUbicacion(cancha)"></ion-icon>
-        @if (esPropietario) {
-          <ion-icon name="construct-sharp" size="large" (click)="configurarCancha(cancha.id)"></ion-icon>
-        }
-      </ion-item>
-      <ion-item>
-        <ion-label>Direccion:</ion-label>
-        <ion-note color="primary">{{cancha.direccion}}</ion-note>
-      </ion-item>
-    </ng-container>
-  </ion-list>
+      <ion-button fill="solid" color="success" *ngIf="esJugador && (torneo.estadoTorneo == 'ACTIVO' || torneo.estadoTorneo == 'INSCRIPCIONES_ACTIVO')" (click)="abrirRegistroJugador()"><ion-icon size="large" slot="start" name="person-add-outline"></ion-icon>Unirme como jugador</ion-button>
+    </div>
+  </ion-card>
+  <ion-card class="venues-panel">
+    <div class="section-heading">
+      <div>
+        <strong>Canchas del torneo</strong>
+      </div>
+      <ion-button *ngIf="esPropietario" fill="clear" size="small" (click)="agregarCancha()">
+        <ion-icon slot="start" size="large" name="add-circle-outline"></ion-icon>Agregar
+      </ion-button>
+    </div>
+    <div class="venue-card" *ngFor="let cancha of listCancha">
+      <div class="venue-icon">
+        <ion-icon size="large" src="assets/icon/campo.svg"></ion-icon>
+      </div>
+      <div class="venue-copy">
+        <strong>{{ cancha.nombre }}</strong>
+        <span>{{ cancha.direccion }}</span>
+      </div>
+      <ion-button fill="clear" (click)="verUbicacion(cancha)">
+        <ion-icon size="large" name="location-outline"></ion-icon></ion-button>
+        <ion-button *ngIf="esPropietario" fill="clear" (click)="configurarCancha(cancha.id)">
+          <ion-icon size="large" name="settings-outline"></ion-icon>
+      </ion-button>
+    </div>
+    <div class="empty-state" *ngIf="!listCancha.length">No hay canchas registradas para este torneo.</div>
+  </ion-card>
+  <ion-modal [isOpen]="registroJugadorOpen" (didDismiss)="cerrarRegistroJugador()">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>Registrarme en un equipo</ion-title>
+          <ion-buttons slot="end"><ion-button (click)="cerrarRegistroJugador()">Cerrar</ion-button></ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="ion-padding">
+        <p class="join-copy">Selecciona el equipo del torneo al que perteneces.</p>
+        <ion-radio-group [(ngModel)]="equipoSeleccionado">
+          <ion-item *ngFor="let equipo of equipos">
+            <ion-radio slot="start" [value]="equipo"></ion-radio>
+            <ion-label><strong>{{ equipo.nombre }}</strong><small>{{ torneo.nombre }}</small></ion-label>
+          </ion-item>
+        </ion-radio-group>
+        <ion-button expand="block" color="success" (click)="registrarJugador()">Confirmar registro</ion-button>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
   <ion-alert
   [isOpen]="isAlertOpen"
   header="{{mensajeError}}"

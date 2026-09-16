@@ -30,8 +30,8 @@
       <ion-item class="ion-padding-horizontal" [ngClass]="{'error-input': f.submitted && f.controls['celular'].errors}" title="{{extraer.erroresForm(f.controls['celular'])}}">
         <ion-input label="Celular" labelPlacement="floating" required name="celular" type="tel" [(ngModel)]="usuario.numeroCelular" minlength="6"></ion-input>
       </ion-item>
-      <ion-item class="ion-padding-horizontal" [ngClass]="{'error-input': f.submitted && f.controls['identificacion'].errors}" title="{{extraer.erroresForm(f.controls['identificacion'])}}">
-        <ion-input label="Cédula" labelPlacement="floating" required name="identificacion" [(ngModel)]="usuario.identificacion" minlength="5"></ion-input>
+      <ion-item class="ion-padding-horizontal" [ngClass]="{'error-input': f.submitted && f.controls['cedula'].errors}" title="{{extraer.erroresForm(f.controls['cedula'])}}">
+        <ion-input label="Cédula" labelPlacement="floating" required name="cedula" [(ngModel)]="usuario.cedula" minlength="5"></ion-input>
       </ion-item>
       <ion-item class="ion-padding-horizontal" [ngClass]="{'error-input': f.submitted && f.controls['correo'].errors}" title="{{extraer.erroresForm(f.controls['correo'])}}">
         <ion-input label="Correo electronico" labelPlacement="floating" required name="correo" type="email" [(ngModel)]="usuario.correoElectronico" minlength="6"></ion-input>
@@ -57,15 +57,11 @@
       <ion-item class="ion-padding-horizontal" [ngClass]="{'error-input': f.submitted && f.controls['conf-contrasena'].errors}" title="{{extraer.erroresForm(f.controls['conf-contrasena'])}}">
         <ion-input label="Confirmar Contraseña" labelPlacement="floating" required name="conf-contrasena" type="password" [(ngModel)]="confirmarContrasena" minlength="6"></ion-input>
       </ion-item>
-      <ion-item class="ion-padding-horizontal" [disabled]="usuario" [ngClass]="{'error-input': f.submitted && f.controls['tipo-usuario'].errors}" title="{{extraer.erroresForm(f.controls['tipo-usuario'])}}">
+      <ion-item class="ion-padding-horizontal" [ngClass]="{'error-input': f.submitted && f.controls['tipo-usuario'].errors}" title="{{extraer.erroresForm(f.controls['tipo-usuario'])}}">
         <ion-select label="Selecionar tipo de usuario" labelPlacement="floating" required name="tipo-usuario" [(ngModel)]="usuario.tipoUsuario" >
-          @if(usuario.tipoUsuario == 'ORGANIZADOR') {
-            <ion-select-option value="ORGANIZADOR">ORGANIZADOR</ion-select-option>
-          }
+          <ion-select-option value="ORGANIZADOR">ORGANIZADOR</ion-select-option>
           <ion-select-option value="DELEGADO">DELEGADO</ion-select-option>
-          @if (url == '/auth/login/registrar') {
-            <ion-select-option value="JUGADOR">JUGADOR</ion-select-option>
-          }
+          <ion-select-option value="JUGADOR">JUGADOR</ion-select-option>
         </ion-select>
       </ion-item>
     </ion-list>

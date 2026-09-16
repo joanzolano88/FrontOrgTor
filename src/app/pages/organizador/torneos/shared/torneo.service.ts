@@ -11,8 +11,15 @@ export class TorneoService {
 
   constructor(private crud: CrudService, private router: Router) { }
 
-  listaTorneos(): Observable<Torneo[]> {
-    return this.crud.obtener("torneo");
+  listaTorneos(departamento?: string, soloMios = false): Observable<Torneo[]> {
+    const params: string[] = [];
+    if (departamento && departamento !== 'Todos' && departamento !== 'Seleccione un departamento') {
+      params.push(`departamento=${encodeURIComponent(departamento)}`);
+    }
+    if (soloMios && this.crud.obtenerUsuario().id) {
+      params.push(`usuarioId=${this.crud.obtenerUsuario().id}`);
+    }
+    return this.crud.obtener(`torneo${params.length ? '?' + params.join('&') : ''}`);
   }
   listaTorneosOrganizador(): Observable<Torneo[]> {
     return this.crud.obtener("torneo/usuario/" + this.crud.obtenerUsuario().id);

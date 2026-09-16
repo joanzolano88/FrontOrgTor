@@ -1,57 +1,37 @@
-<ion-item>
-  <ion-thumbnail slot="start">
-    <img alt="Silhouette of mountains" src="https://ionicframework.com/docs/img/demos/thumbnail.svg" />
-  </ion-thumbnail>
-  <ion-label>
-    <h3>{{ torneo.nombre }}</h3>
-  </ion-label>
+<section class="tournament-hero">
+  <div class="hero-topline"><span>{{ torneo.estadoTorneo }}</span><ion-badge color="success">{{ torneo.faseTorneo }}</ion-badge></div>
+  <div class="hero-content">
+    <div class="tournament-mark"><ion-icon name="trophy-outline"></ion-icon></div>
+    <div><h1>{{ torneo.nombre }}</h1><p>{{ torneo.ciudad && torneo.ciudad.nombre }}<span *ngIf="torneo.ciudad && torneo.ciudad.departamento"> · {{ torneo.ciudad.departamento.nombre }}</span></p></div>
+  </div>
+  <div class="hero-actions">
+    @if (esPropietario) { <ion-button fill="clear" size="small" (click)="configurarTorneo()"><ion-icon size="large" slot="start" name="settings-outline"></ion-icon>Configurar</ion-button> }
+    @if (!esPropietario) { <ion-button fill="clear" size="small" (click)="contactarOrganizador()"><ion-icon size="large" slot="start" name="logo-whatsapp"></ion-icon>Contactar</ion-button> }
+  </div>
+</section>
+<ion-card class="tournament-facts">
+  <div><span>Organizador</span><strong>{{ torneo.encargadoTorneo?.nombre || 'Pendiente' }}</strong></div>
+  <div><span>Deporte</span><strong>{{ torneo.deporte?.nombre || 'No definido' }}</strong></div>
+  <div><span>Modalidad</span><strong>{{ torneo.modalidadTorneo }}</strong></div>
+  <div><span>Partido</span><strong>{{ torneo.duracionMinutos || 90 }} min</strong></div>
+</ion-card>
+<ion-card class="tournament-details">
+  <ion-card-content>
+    <div class="detail-heading"><strong>Información del torneo</strong></div>
+    <div class="detail-row"><ion-icon name="location-outline"></ion-icon><span>{{ torneo.ubicacion || 'Ubicación pendiente' }}</span></div>
+    <div class="detail-row"><ion-icon name="people-outline"></ion-icon><span>{{ cantidadEquipos() }} equipos participantes</span></div>
+    <div class="detail-row"><ion-icon name="cash-outline"></ion-icon><span>{{ torneo.valorInscripcion | currency:'COP':'symbol-narrow':'3.0' }} de inscripción</span></div>
+    <ng-container *ngIf="torneo.deporte?.reglas as reglasDeporte">
+      <div class="detail-row"><ion-icon name="document-text-outline"></ion-icon><span>{{ reglasDeporte }}</span></div>
+    </ng-container>
+  </ion-card-content>
+</ion-card>
+<!-- Datos legacy conservados para no cambiar los contratos de la pantalla. -->
+<div class="legacy-tournament-data" aria-hidden="true">
   <!--<ion-icon name="document-text-sharp"  size="large" class="ion-margin-end" (click)="reglamentoD.click()"></ion-icon>
   <a download='Reglamento {{torneo.nombre}}' href="data:application/pdf;base64,{{documento}}" title='Descargar' #reglamentoD>
   </a>-->
   @if (esPropietario) {
     <ion-icon name="construct-sharp" size="large" (click)="configurarTorneo()"></ion-icon>
   }
-</ion-item>
-<ion-item>
-  <ion-label>Encargado: </ion-label>
-  <ion-label>{{ torneo.encargadoTorneo?.nombre }}</ion-label>
-</ion-item>
-<ion-item>
-  <ion-label>Ciudad: </ion-label>
-  <ion-label>{{ torneo.ciudad?.nombre }} - {{torneo.ciudad?.departamento?.nombre}}</ion-label>
-</ion-item>
-<ion-item>
-  <ion-label>Modalidad: </ion-label>
-  <ion-badge color="primary">{{ torneo.modalidadTorneo }}</ion-badge>
-</ion-item>
-<ion-item *ngIf="torneo.modalidadTorneo == 'ELIMINATORIAS_GRUPOS'">
-  <ion-label>Cant Grupos Eliminatorias:</ion-label>
-  <ion-badge color="primary">{{ torneo.cantidadGruposEliminatoriaGrupos }}</ion-badge>
-</ion-item>
-<ion-item  *ngIf="torneo.modalidadTorneo == 'ELIMINATORIAS_GRUPOS'">
-  <ion-label>Cant Equipos Eliminatorias:</ion-label>
-  <ion-badge color="primary">{{ (torneo.cantidadEquiposEliminatoriaGrupos! * torneo.cantidadGruposEliminatoriaGrupos!) }}</ion-badge>
-</ion-item>
-<ion-item  *ngIf="torneo.modalidadTorneo == 'ELIMINATORIAS_GRUPOS' || torneo.modalidadTorneo == 'GRUPOS'">
-  <ion-label>Cant Grupos:</ion-label>
-  <ion-badge color="primary">{{ torneo.cantidadGrupos }}</ion-badge>
-</ion-item>
-<ion-item>
-  <ion-label>Cant Equipos:</ion-label>
-  <ion-badge color="primary">{{ cantidadEquipos() }}</ion-badge>
-</ion-item>
-<ion-item>
-  <ion-label>Valor Incripcion:</ion-label>
-  <ion-badge color="primary">{{ torneo.valorInscripcion | currency:'COP':'symbol-narrow':'3.0'}}</ion-badge>
-</ion-item>
-<ion-item>
-  <ion-label>Duración de cada partido:</ion-label>
-  <ion-badge color="primary">{{ torneo.duracionMinutos || 90 }} min</ion-badge>
-</ion-item>
-<ion-item>
-  <ion-label>Fase del Torneo:</ion-label>
-  <ion-badge color="primary">{{ torneo.faseTorneo }}</ion-badge>
-</ion-item>
-  <ion-button *ngIf="!esPropietario" color="success" expand="block" size="default" (click)="contactarOrganizador()" aria-label="Contactar organizador por WhatsApp">
-    WhatsApp
-  </ion-button>
+</div>

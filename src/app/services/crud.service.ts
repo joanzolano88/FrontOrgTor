@@ -172,5 +172,8 @@ export class CrudService {
     localStorage.removeItem('usuario');
     localStorage.removeItem('token');
     localStorage.removeItem('tipo');
+    sessionStorage.removeItem('usuario');
+    sessionStorage.removeItem('token');
+    sessionStorage.removeItem('tipo');
   }
 }

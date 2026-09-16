@@ -49,19 +49,20 @@
 }
 
 .tarjeta-torneo {
-  --background: linear-gradient(135deg, #3d8bfd, #3ea1ff);
-  border-radius: 18px;
+  --background: #1d2730;
+  border: 1px solid #8eb8da;
+  border-radius: 14px;
   margin: 8px 0;
-  box-shadow: none;
+  box-shadow: 0 7px 16px rgba(0,0,0,.12);
 }
 
 .tarjeta-main {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 12px;
   padding: 14px 14px 14px 16px;
 }
+.escudo-torneo { display: grid; place-items: center; flex: 0 0 74px; width: 74px; height: 74px; border-radius: 12px; background: linear-gradient(145deg, #456b8a, #18232c); color: #d9efff; font-size: 37px; box-shadow: inset 0 0 0 1px rgba(255,255,255,.2); }
 
 .tarjeta-info {
   flex: 1;
@@ -69,12 +70,14 @@
 }
 
 .tarjeta-info h3 {
-  margin: 0 0 6px;
+  margin: 0;
   color: #ffffff;
-  font-size: 1.1rem;
+  font-size: 1.2rem;
   font-weight: 700;
   line-height: 1.2;
 }
+.tarjeta-heading { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.tarjeta-heading ion-badge { flex: 0 0 auto; font-size: .9rem; text-transform: uppercase; }
 
 .tarjeta-info p,
 .tarjeta-info small {
@@ -85,9 +88,13 @@
 .tarjeta-info p {
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  font-size: 0.72rem;
+  font-size: 1rem;
   margin-bottom: 8px;
 }
+.tarjeta-meta { display: flex; flex-wrap: wrap; gap: 8px 14px; margin-top: 8px; }
+.tarjeta-meta span { display: inline-flex; align-items: center; gap: 4px; color: #c7d1df; font-size: 1rem; }
+.tarjeta-meta ion-icon { color: #8fc8f1; }
+.tarjeta-arrow { color: #8fc8f1; font-size: 22px; }
 
 .tarjeta-info small {
   display: block;
@@ -120,15 +127,6 @@
   background: rgba(239, 68, 68, 0.25);
 }
 
-.tarjeta-main ion-img {
-  width: 92px;
-  height: 92px;
-  border-radius: 18px;
-  object-fit: cover;
-  background: rgba(12, 20, 32, 0.25);
-  border: 1px solid rgba(255, 255, 255, 0.25);
-}
-
 .empty-state {
   --background: transparent;
   color: #dfe7f3;
@@ -144,8 +142,6 @@
     gap: 10px;
   }
 
-  .tarjeta-main ion-img {
-    width: 74px;
-    height: 74px;
-  }
+  .escudo-torneo { flex-basis: 58px; width: 58px; height: 58px; font-size: 28px; }
+  .tarjeta-heading { align-items: flex-start; flex-direction: column; gap: 4px; }
 }

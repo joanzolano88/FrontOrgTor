@@ -24,6 +24,9 @@ export class LoginPage {
       return;
     }
     this.crud.logear(this.login, 'usuario/login').subscribe((resp: any)=>{
+      sessionStorage.removeItem('usuario');
+      sessionStorage.removeItem('token');
+      sessionStorage.removeItem('tipo');
       localStorage.setItem('usuario', JSON.stringify(resp));
       localStorage.setItem('tipo', resp.tipoUsuario || '');
       this.router.navigateByUrl('/auth/partidos');

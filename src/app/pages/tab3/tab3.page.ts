@@ -31,9 +31,19 @@ export class Tab3Page implements OnInit {
     this.url =  router.url
   }
   ngOnInit() {
+    this.cargarPerfil();
+  }
+
+  ionViewWillEnter() {
+    this.cargarPerfil();
+  }
+
+  private cargarPerfil() {
     if (this.url == '/auth/usuario') {
       const usuarioSesion = this.crud.obtenerUsuario();
       if (usuarioSesion.id) {
+        this.usuario = new Usuario();
+        this.confirmarContrasena = '';
         this.crud.obtenerParametro(usuarioSesion.id, 'usuario').subscribe({
           next: (usuarioActual: Usuario) => {
             this.usuario = usuarioActual;
@@ -45,6 +55,8 @@ export class Tab3Page implements OnInit {
         return;
       }
     }
+    this.usuario = new Usuario();
+    this.confirmarContrasena = '';
     this.cargarPaises();
   }
 

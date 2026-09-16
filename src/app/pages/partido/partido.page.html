@@ -24,7 +24,7 @@
       <strong>{{ partido.penaltisEquipoLocal ?? 0 }} - {{ partido.penaltisEquipoVisitante ?? 0 }}</strong>
     </div>
     <div class="venue" (click)="verUbicacion(btnModalUbicacion)">
-      <ion-icon name="map" size="large"></ion-icon>
+      <ion-icon name="location-outline" size="large"></ion-icon>
       <div>
         <strong>{{ partido.cancha?.nombre || 'Cancha pendiente' }}</strong>
         <span>{{ partido.cancha?.direccion || 'Ubicación pendiente' }}</span>

@@ -32,8 +32,16 @@ export class ListaTorneoComponent {
   estadosTorneo = ['Todos', ...Object.values(EstadoTorneo)];
 
   constructor(private router: Router, private torneoService: TorneoService, private crud: CrudService) {
+    this.cargarTorneos();
+  }
+
+  ionViewWillEnter() {
     this.esOrganizador = this.crud.obtenerUsuario()?.tipoUsuario === TipoUsuario.ORGANIZADOR;
-    torneoService.listaTorneos().subscribe((resp: Torneo[]) => {
+    this.cargarTorneos();
+  }
+
+  private cargarTorneos() {
+    this.torneoService.listaTorneos(this.filtroDepartamento, this.mostrarSoloMios).subscribe((resp: Torneo[]) => {
       this.listaTorneos = resp || [];
       this.paises = ['Seleccione un país', ...this.obtenerValoresUnicos(this.listaTorneos.map(t => this.getPaisNombre(t)).filter(Boolean))];
       this.departamentos = ['Seleccione un departamento', ...this.obtenerValoresUnicos(this.listaTorneos.map(t => this.getDepartamentoNombre(t)).filter(Boolean))];
@@ -45,6 +53,26 @@ export class ListaTorneoComponent {
       
       this.filtrar();
     });
+  }
+
+  etiquetaEstado(torneo: Torneo): string {
+    const etiquetas: Record<string, string> = {
+      INSCRIPCIONES: 'Inscripciones abiertas',
+      INSCRIPCIONES_ACTIVO: 'Inscripciones activas',
+      ACTIVO: 'Torneo activo',
+      FINALIZADO: 'Finalizado'
+    };
+    return etiquetas[torneo.estadoTorneo as string] || 'Estado pendiente';
+  }
+
+  colorEstado(torneo: Torneo): string {
+    const colores: Record<string, string> = {
+      INSCRIPCIONES: 'warning',
+      INSCRIPCIONES_ACTIVO: 'primary',
+      ACTIVO: 'success',
+      FINALIZADO: 'medium'
+    };
+    return colores[torneo.estadoTorneo as string] || 'dark';
   }
 
   private obtenerValoresUnicos(valores: string[]): string[] {
@@ -61,7 +89,7 @@ export class ListaTorneoComponent {
     return ciudad?.departamento?.nombre || this.mapearDepartamento(this.getCiudadNombre(torneo));
   }
 
-  private getCiudadNombre(torneo: Torneo): string {
+  getCiudadNombre(torneo: Torneo): string {
     const ciudad = torneo.ciudad as any;
     if (typeof ciudad === 'string') {
       return ciudad;
@@ -119,7 +147,11 @@ export class ListaTorneoComponent {
   }
   cambiarDepartamento() {
     this.filtroCiudad = 'Todos';
-    this.filtrar();
+    this.cargarTorneos();
+  }
+
+  cambiarSoloMios() {
+    this.cargarTorneos();
   }
 
   informacionPartido(){

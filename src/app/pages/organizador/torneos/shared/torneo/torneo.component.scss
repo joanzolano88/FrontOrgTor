@@ -1,0 +1,28 @@
+.join-copy { line-height: 1.5; }
+ion-label { display: grid; gap: 4px; }
+ion-label small { }
+.status-panel, .tournament-actions, .venues-panel { margin: 14px; padding: 16px;  border-radius: 14px; box-shadow: 0 6px 18px rgba(23,33,43,.07); }
+.section-heading { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 12px; 
+    ion-button {font-size: 15px; }
+    ion-badge { font-size: 15px; padding: 4px 8px; border-radius: 8px; }
+}
+.section-heading div { display: grid; gap: 4px; }
+.section-heading span { font-size: 11px; text-transform: uppercase; letter-spacing: .8px; }
+.section-heading strong { font-size: 19px; }
+.status-panel ion-segment { border-radius: 10px; }
+.status-panel ion-segment-button { min-height: 46px; font-size: 12px; }
+.action-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(145px, 1fr)); gap: 9px; }
+.action-grid ion-button { margin: 0; min-height: 42px; text-transform: none; font-size: 16px; }
+.venue-card { display: flex; align-items: center; gap: 10px; margin-top: 9px; padding: 10px;  border-radius: 10px; }
+.venue-icon { display: grid; place-items: center; width: 40px; height: 40px; 
+    .icon-large { width: 40px; height: 40px; }
+}
+.venue-copy { display: grid; gap: 3px; min-width: 0; flex: 1; }
+.venue-copy strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 17px; }
+.venue-copy span { font-size: 15px; }
+.venue-card ion-button { margin: 0; }
+.empty-state { padding: 18px 4px 4px; font-size: 13px; }
+@media (max-width: 600px) { .status-panel, .tournament-actions, .venues-panel { margin: 10px 0; border-radius: 0; } .status-panel ion-segment { overflow-x: auto; } .status-panel ion-segment-button { min-width: 112px; } }
+.icon-rotado {
+  transform: rotate(180deg);
+}
