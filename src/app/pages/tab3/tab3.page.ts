@@ -36,6 +36,7 @@ export class Tab3Page implements OnInit {
   errorInvitacionesEquipo = '';
   notificacionesPendientes = 0;
   editarPerfilOpen = false;
+  fechaMaximaNacimiento = this.fechaActualISO();
 
   constructor(private router: Router, private crud: CrudService, public extraer: ExtraerInfService,
           private alertController: AlertController) {
@@ -158,6 +159,13 @@ export class Tab3Page implements OnInit {
 
   private normalizar(texto: string): string {
     return (texto || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toLowerCase();
+  }
+
+  private fechaActualISO(): string {
+    const hoy = new Date();
+    const mes = String(hoy.getMonth() + 1).padStart(2, '0');
+    const dia = String(hoy.getDate()).padStart(2, '0');
+    return `${hoy.getFullYear()}-${mes}-${dia}`;
   }
 
   cargarPaises() {

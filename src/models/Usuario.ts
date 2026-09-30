@@ -7,6 +7,7 @@ export class Usuario extends InformacionPersona {
     nombreUsuario?: string;
     contrasena?: string;
     ubicacion?: string;
+    fechaNacimiento?: string;
     torneo?: Torneo;
     tipoUsuario?: TipoUsuario;
 }

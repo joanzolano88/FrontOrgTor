@@ -57,6 +57,10 @@
       <ion-item [ngClass]="{'error-input': f.submitted && f.controls['cedula'].errors}" title="{{extraer.erroresForm(f.controls['cedula'])}}">
         <ion-input label="Cédula" labelPlacement="floating" required name="cedula" [(ngModel)]="usuario.cedula" minlength="5"></ion-input>
       </ion-item>
+      <ion-item *ngIf="url == '/auth/login/registrar'" [ngClass]="{'error-input': f.submitted && f.controls['fecha-nacimiento'].errors}" title="{{extraer.erroresForm(f.controls['fecha-nacimiento'])}}">
+        <ion-input label="Fecha de nacimiento" labelPlacement="floating" type="date" required name="fecha-nacimiento"
+          [max]="fechaMaximaNacimiento" [(ngModel)]="usuario.fechaNacimiento"></ion-input>
+      </ion-item>
       <ion-item [ngClass]="{'error-input': f.submitted && f.controls['correo'].errors}" title="{{extraer.erroresForm(f.controls['correo'])}}">
         <ion-input label="Correo electronico" labelPlacement="floating" required name="correo" type="email" [(ngModel)]="usuario.correoElectronico" minlength="6"></ion-input>
       </ion-item>
