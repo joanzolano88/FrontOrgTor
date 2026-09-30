@@ -4,17 +4,18 @@
 }
 
 .filtro-busqueda {
-  --background: rgba(255, 255, 255, 0.04);
-  border-radius: 14px;
+  --background: var(--app-surface);
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius);
   margin-bottom: 10px;
 }
 
 .filtro-busqueda ion-searchbar {
   --background: transparent;
   --box-shadow: none;
-  --color: #ffffff;
-  --placeholder-color: #c7d1df;
-  --icon-color: #c7d1df;
+  --color: var(--app-ink);
+  --placeholder-color: var(--app-muted);
+  --icon-color: var(--app-muted);
   padding: 0;
 }
 
@@ -25,21 +26,20 @@
 }
 
 .filtro-grid ion-item {
-  --background: rgba(255, 255, 255, 0.04);
-  border-radius: 12px;
-  min-height: 52px;
+  margin-bottom: 0;
 }
 
 .filtro-grid ion-select,
 .toggle-item ion-label,
 .toggle-item ion-toggle {
-  --placeholder-color: #dfe7f3;
-  color: #f5f7fb;
+  --placeholder-color: var(--app-muted);
+  color: var(--app-ink);
 }
 
 .toggle-item {
-  --background: rgba(255, 255, 255, 0.04);
-  border-radius: 12px;
+  --background: var(--app-surface);
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius);
   margin-top: 10px;
 }
 
@@ -49,11 +49,11 @@
 }
 
 .tarjeta-torneo {
-  --background: #1d2730;
-  border: 1px solid #8eb8da;
-  border-radius: 14px;
+  --background: var(--app-surface);
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius);
   margin: 8px 0;
-  box-shadow: 0 7px 16px rgba(0,0,0,.12);
+  box-shadow: 0 6px 18px rgba(32,45,50,.06);
 }
 
 .tarjeta-main {
@@ -62,7 +62,7 @@
   gap: 12px;
   padding: 14px 14px 14px 16px;
 }
-.escudo-torneo { display: grid; place-items: center; flex: 0 0 74px; width: 74px; height: 74px; border-radius: 12px; background: linear-gradient(145deg, #456b8a, #18232c); color: #d9efff; font-size: 37px; box-shadow: inset 0 0 0 1px rgba(255,255,255,.2); }
+.escudo-torneo { display: grid; place-items: center; flex: 0 0 74px; width: 74px; height: 74px; border-radius: var(--app-radius); background: var(--app-surface-muted); color: var(--app-teal); font-size: 37px; box-shadow: inset 0 0 0 1px var(--app-border); }
 
 .tarjeta-info {
   flex: 1;
@@ -71,7 +71,7 @@
 
 .tarjeta-info h3 {
   margin: 0;
-  color: #ffffff;
+  color: var(--app-ink);
   font-size: 1.2rem;
   font-weight: 700;
   line-height: 1.2;
@@ -82,7 +82,7 @@
 .tarjeta-info p,
 .tarjeta-info small {
   margin: 0;
-  color: rgba(255, 255, 255, 0.85);
+  color: var(--app-muted);
 }
 
 .tarjeta-info p {
@@ -92,9 +92,9 @@
   margin-bottom: 8px;
 }
 .tarjeta-meta { display: flex; flex-wrap: wrap; gap: 8px 14px; margin-top: 8px; }
-.tarjeta-meta span { display: inline-flex; align-items: center; gap: 4px; color: #c7d1df; font-size: 1rem; }
-.tarjeta-meta ion-icon { color: #8fc8f1; }
-.tarjeta-arrow { color: #8fc8f1; font-size: 22px; }
+.tarjeta-meta span { display: inline-flex; align-items: center; gap: 4px; color: var(--app-muted); font-size: 1rem; }
+.tarjeta-meta ion-icon { color: var(--app-teal); }
+.tarjeta-arrow { color: var(--app-coral); font-size: 22px; }
 
 .tarjeta-info small {
   display: block;
@@ -110,26 +110,26 @@
   letter-spacing: 0.04em;
   text-transform: uppercase;
   background: rgba(0, 0, 0, 0.12);
-  color: #fff;
+  color: var(--app-ink);
 }
 
 .estado.inscripciones,
 .estado.inscripciones_activo,
 .estado.inscripciones_acrivo {
-  background: rgba(44, 211, 132, 0.25);
+  background: var(--app-mint);
 }
 
 .estado.activo {
-  background: rgba(59, 130, 246, 0.25);
+  background: #e6efec;
 }
 
 .estado.finalizado {
-  background: rgba(239, 68, 68, 0.25);
+  background: #f8e5e1;
 }
 
 .empty-state {
   --background: transparent;
-  color: #dfe7f3;
+  color: var(--app-muted);
   text-align: center;
 }
 

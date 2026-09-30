@@ -6,6 +6,7 @@ import { IonInput } from '@ionic/angular';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CrudService } from 'src/app/services/crud.service';
 import { Torneo } from 'src/models/Torneo';
+import { Ciudad } from 'src/models/Ciudad';
 import { Location } from '@angular/common';
 
 @Component({
@@ -20,6 +21,14 @@ export class EquipoConfigurarPage{
   equipo: Equipo = new Equipo();
   delegado: Persona = new Persona();
   idEquipo?: string;
+  idTorneo?: string;
+  delegadLista: Persona[] = [];
+  paises: any[] = [];
+  departamentos: any[] = [];
+  ciudades: any[] = [];
+  paisSeleccionado?: number;
+  departamentoSeleccionado?: number;
+  ciudadSeleccionada?: number;
   delegadoLista: Persona[] = [];
   escudoEquipo: any;
   identificacionDelegado: any;
@@ -30,15 +39,24 @@ export class EquipoConfigurarPage{
   
   constructor(private router: Router, private crud: CrudService, private route: ActivatedRoute,
                 private location: Location, private cd: ChangeDetectorRef) {
-    this.equipo.delegado = new Persona();
+    const usuarioSesion = this.crud.obtenerUsuario();
+    if (usuarioSesion) {
+      this.equipo.delegado = usuarioSesion as any;
+      this.delegado = usuarioSesion as any;
+    } else {
+      this.equipo.delegado = new Persona();
+    }
     this.idEquipo = route.snapshot.paramMap.get('idEquipo')!;
-    crud.obtenerParametro(route.snapshot.paramMap.get('idTorneo'), "torneo").subscribe((respT: Torneo) =>{
-      this.torneo = respT;
-    }, err=>{
-      this.mensajeError = err.error.message;
-      this.setOpen(true);
-      
-    });
+    this.idTorneo = route.snapshot.paramMap.get('idTorneo') || undefined;
+    this.cargarPaises();
+    if (this.idTorneo) {
+      crud.obtenerParametro(this.idTorneo, "torneo").subscribe((respT: Torneo) =>{
+        this.torneo = respT;
+      }, err=>{
+        this.mensajeError = err.error.message;
+        this.setOpen(true);
+      });
+    }
     if (this.idEquipo != undefined) {
       crud.obtenerParametro(this.idEquipo, "equipo").subscribe(async (respE: Equipo) =>{
         this.equipo = respE;
@@ -48,7 +66,9 @@ export class EquipoConfigurarPage{
         this.escudoEquipo = this.equipo.escudo;
         this.identificacionDelegado = this.delegado?.identificacion;
         
-        (document.getElementById('img-escudo') as HTMLImageElement).src =  'data:image/png;base64,' + this.escudoEquipo;
+        (document.getElementById('img-escudo') as HTMLImageElement).src = this.escudoEquipo
+          ? 'data:image/png;base64,' + this.escudoEquipo
+          : 'assets/images/shield-placeholder.svg';
         (document.getElementById('img-identificacion') as HTMLImageElement).src =  'data:image/png;base64,' + this.identificacionDelegado;
       }, err=>{
         this.mensajeError = err.error.message;
@@ -71,6 +91,62 @@ export class EquipoConfigurarPage{
       }
     }
   }
+  cargarPaises() {
+    this.crud.obtenerPaises().subscribe((resp: any[]) => {
+      this.paises = resp || [];
+      const colombia = this.paises.find(p => p.nombre?.toLowerCase() === 'colombia');
+      if (colombia) {
+        this.paisSeleccionado = colombia.id;
+        this.cargarDepartamentos(colombia.id);
+      }
+    });
+  }
+
+  cargarDepartamentos(paisId: number) {
+    this.crud.obtenerDepartamentosPorPais(paisId).subscribe((resp: any[]) => {
+      this.departamentos = resp || [];
+      if (this.departamentos.length > 0) {
+        this.departamentoSeleccionado = this.departamentos[0].id;
+        this.cargarCiudades(this.departamentos[0].id);
+      } else {
+        this.departamentos = [];
+        this.ciudades = [];
+        this.departamentoSeleccionado = undefined;
+        this.ciudadSeleccionada = undefined;
+      }
+    });
+  }
+
+  cargarCiudades(departamentoId: number) {
+    this.crud.obtenerCiudadesPorDepartamento(departamentoId).subscribe((resp: any[]) => {
+      this.ciudades = resp || [];
+      if (this.ciudades.length > 0) {
+        this.ciudadSeleccionada = this.ciudades[0].id;
+        const ciudad = this.ciudades.find(c => c.id === this.ciudadSeleccionada);
+        this.equipo.ciudad = ciudad || undefined;
+      } else {
+        this.ciudadSeleccionada = undefined;
+        this.equipo.ciudad = undefined;
+      }
+    });
+  }
+
+  seleccionarPais(paisId: number) {
+    this.paisSeleccionado = paisId;
+    this.cargarDepartamentos(paisId);
+  }
+
+  seleccionarDepartamento(departamentoId: number) {
+    this.departamentoSeleccionado = departamentoId;
+    this.cargarCiudades(departamentoId);
+  }
+
+  seleccionarCiudad(ciudadId: number) {
+    this.ciudadSeleccionada = ciudadId;
+    const ciudad = this.ciudades.find(c => c.id === ciudadId);
+    this.equipo.ciudad = ciudad || undefined;
+  }
+
   activarSubirArchivo(elemtIon: IonInput){
     let btnFile: any = elemtIon["el"].children[0];
     btnFile.click();
@@ -100,7 +176,7 @@ export class EquipoConfigurarPage{
     } else if (this.escudoEquipo != null && this.equipo.escudo != undefined) {
       return 'data:image/png;base64,' + this.escudoEquipo;
     } 
-    return 'https://ionicframework.com/docs/img/demos/thumbnail.svg';
+    return 'assets/images/shield-placeholder.svg';
   }
   imgIdentificacion() {
     if (this.identificacionDelegado != null && this.delegado!.identificacion == undefined) {
@@ -108,7 +184,7 @@ export class EquipoConfigurarPage{
     }else if (this.delegado!.identificacion != undefined) {
       return 'data:image/png;base64,' + this.identificacionDelegado;
     }
-    return 'https://ionicframework.com/docs/img/demos/thumbnail.svg';
+    return 'assets/images/avatar-placeholder.svg';
   }
   seleccionarDelegado(delegadoS: Persona,) {
     this.crearDelegado = 'ver';
@@ -117,22 +193,32 @@ export class EquipoConfigurarPage{
     //this.identificacionDelegado = this.dataURLtoFile('data:image/png;base64,' + this.delegado?.identificacion, 'identificacion');
     this.cargarImagen((document.getElementById('img-identificacion') as HTMLImageElement), this.identificacionDelegado);
   }
-  onSubmit(form: NgForm) {
-    if (form.invalid || this.delegado!.id == undefined) {
-      if (this.delegado!.id == undefined) {
-        
-        this.mensajeError = "Falta un delegado";
-        this.setOpen(true);
-      }
+  volverAtras() {
+    if (this.idTorneo) {
+      this.router.navigateByUrl(`/auth/torneos/torneo/${this.idTorneo}/solicitar-equipo`);
       return;
     }
-    this.equipo.torneo = this.torneo;
+    this.location.back();
+  }
+
+  onSubmit(form: NgForm) {
+    if (form.invalid || !this.equipo.delegado?.id) {
+      this.mensajeError = 'No se pudo identificar al delegado autenticado.';
+      this.setOpen(true);
+      return;
+    }
+    this.equipo.torneo = undefined;
+    this.equipo.delegado = this.delegado;
     if (this.equipo.grupo == undefined) {
       this.equipo.grupo = 0;
     }
     if (this.equipo.id == undefined) {
       this.crud.crearUsuario(this.equipo,'equipo', this.escudoEquipo, null).subscribe((resp: Equipo) =>{
         this.equipo = resp;
+        if (this.idTorneo) {
+          this.router.navigateByUrl(`/auth/torneos/torneo/${this.idTorneo}/solicitar-equipo?equipo=${resp.id}`);
+          return;
+        }
         this.location.back();
       }, err=>{
         this.mensajeError = err.error.message;
@@ -141,6 +227,10 @@ export class EquipoConfigurarPage{
     } else {
       this.crud.actualizarUsuario(this.equipo,'equipo', this.escudoEquipo, null).subscribe((resp: Equipo) =>{
         this.equipo = resp;
+        if (this.idTorneo) {
+          this.router.navigateByUrl(`/auth/torneos/torneo/${this.idTorneo}/solicitar-equipo`);
+          return;
+        }
         this.location.back();
       }, err=>{
         this.mensajeError = err.error.message;

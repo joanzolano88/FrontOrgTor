@@ -1,11 +1,9 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { IonModal } from '@ionic/angular';
 import { CrudService } from 'src/app/services/crud.service';
 import { EstadoPartido } from 'src/enums/EstadoPartido';
 import { Equipo } from 'src/models/Equipo';
 import { Partido } from 'src/models/Partido';
-import { Torneo } from 'src/models/Torneo';
 
 @Component({
   selector: 'app-inicio',
@@ -15,26 +13,117 @@ import { Torneo } from 'src/models/Torneo';
 })
 export class InicioPage implements OnInit {
   listaPartidos: Partido[] = [];
-  listaTorneo: Torneo[] = [];
+  listaTorneo: { label: string; value: number }[] = [];
+  paises: any[] = [];
+  departamentos: any[] = [];
+  ciudades: any[] = [];
+  paisId?: number;
+  departamentoId?: number;
+  ciudadId?: number;
   torneoId?: number;
-  fecha?: Date;
-  @ViewChild(IonModal) modal!: IonModal;
+  fecha: Date = new Date();
+  fechasVisibles: Date[] = [];
+  cargandoTorneos = false;
+  busquedaRealizada = false;
+  buscandoPartidos = false;
   
   constructor(private router: Router,private crud: CrudService) {}
   ngOnInit(): void {
-    this.crud.obtener("torneo").subscribe((resp: Torneo[]) => {
-      this.listaTorneo = resp;
-      if (this.listaTorneo.length > 0) {
-        this.torneoId = this.listaTorneo[0].id;
-        this.listarPartidosFechaTorneo(null, this.listaTorneo[0].id!);
+    this.fecha = this.inicioDia(new Date());
+    this.actualizarFechasVisibles();
+    this.crud.obtenerPaises().subscribe((resp: any[]) => this.paises = resp || []);
+  }
+  inicioDia(fecha: Date): Date {
+    const dia = new Date(fecha);
+    dia.setHours(0, 0, 0, 0);
+    return dia;
+  }
+  actualizarFechasVisibles() {
+    this.fechasVisibles = [-2, -1, 0, 1, 2].map(offset => {
+      const dia = new Date(this.fecha);
+      dia.setDate(dia.getDate() + offset);
+      return dia;
+    });
+  }
+  etiquetaFecha(fecha: Date): string {
+    const dia = fecha.getDate();
+    const semana = new Intl.DateTimeFormat('es-CO', { weekday: 'short' })
+      .format(fecha).replace('.', '');
+    return `${dia} ${semana}`;
+  }
+  moverFecha(dias: number) {
+    const siguiente = new Date(this.fecha);
+    siguiente.setDate(siguiente.getDate() + dias);
+    this.fecha = this.inicioDia(siguiente);
+    this.actualizarFechasVisibles();
+    this.listaPartidos = [];
+    this.busquedaRealizada = false;
+  }
+  seleccionarFecha(fecha: Date) {
+    this.fecha = this.inicioDia(fecha);
+    this.actualizarFechasVisibles();
+    this.listaPartidos = [];
+    this.busquedaRealizada = false;
+  }
+  seleccionarPais(paisId: number | string) {
+    this.paisId = Number(paisId) || undefined;
+    this.departamentos = [];
+    this.ciudades = [];
+    this.listaTorneo = [];
+    this.departamentoId = undefined;
+    this.ciudadId = undefined;
+    this.torneoId = undefined;
+    this.listaPartidos = [];
+    this.busquedaRealizada = false;
+    if (this.paisId) {
+      this.crud.obtenerDepartamentosPorPais(this.paisId).subscribe(resp => this.departamentos = resp || []);
+    }
+  }
+  seleccionarDepartamento(departamentoId: number | string) {
+    this.departamentoId = Number(departamentoId) || undefined;
+    this.ciudades = [];
+    this.listaTorneo = [];
+    this.ciudadId = undefined;
+    this.torneoId = undefined;
+    this.listaPartidos = [];
+    this.busquedaRealizada = false;
+    if (this.departamentoId) {
+      this.crud.obtenerCiudadesPorDepartamento(this.departamentoId).subscribe(resp => this.ciudades = resp || []);
+    }
+  }
+  seleccionarCiudad(ciudadId: number | string) {
+    this.ciudadId = Number(ciudadId) || undefined;
+    this.listaTorneo = [];
+    this.torneoId = undefined;
+    this.listaPartidos = [];
+    this.busquedaRealizada = false;
+    if (!this.ciudadId) return;
+    this.cargandoTorneos = true;
+    this.crud.obtenerTorneosPorCiudad(this.ciudadId).subscribe({
+      next: torneos => {
+        this.listaTorneo = torneos || [];
+        this.torneoId = this.listaTorneo[0]?.value;
+        this.cargandoTorneos = false;
+      },
+      error: () => {
+        this.listaTorneo = [];
+        this.cargandoTorneos = false;
       }
     });
+  }
+  seleccionarTorneo(torneoId: number | string) {
+    this.torneoId = Number(torneoId) || undefined;
+    this.listaPartidos = [];
+    this.busquedaRealizada = false;
+  }
+  nombreCiudadSeleccionada(): string {
+    return this.ciudades.find(ciudad => ciudad.id === this.ciudadId)?.nombre || 'esta ciudad';
   }
   verPartido(id: number) {
     this.router.navigateByUrl('/auth/partidos/partido/' + id);
   }
   escudoEquipo(equipo?: Equipo): string {
-    return equipo?.escudo ? 'data:image/png;base64,' + equipo.escudo : 'assets/icon/favicon.png';
+    return equipo?.escudo ? 'data:image/png;base64,' + equipo.escudo : '';
   }
   ganadorPartido(partido: Partido): 'LOCAL' | 'VISITANTE' | '' {
     const golesLocal = partido.anotacionesEquipoLocal || 0;
@@ -51,17 +140,20 @@ export class InicioPage implements OnInit {
     let fecha = new Date(fechaPartido);
     return fecha.getDay() + '/' + (fecha.getMonth() + 1)+ '/' + fecha.getFullYear() + ' - ' + fecha.getHours() + ':' + fecha.getMinutes();
   }
-  cerraModal() {
-    this.modal.dismiss(null, 'cancel');
-  }
-  listarPartidosFechaTorneo(fecha: Date | null, idTorneo: number) {
-    if (fecha == null) {
-      fecha = new Date();
-    } else {
-      fecha = new Date(fecha);
-    }
-    this.crud.obtener('partido/programado_proceso/' + fecha.getTime() + '/' + idTorneo).subscribe((resp: Partido[]) =>{
-      this.listaPartidos = resp;
+  listarPartidosFechaTorneo() {
+    if (!this.torneoId) return;
+    this.buscandoPartidos = true;
+    this.crud.obtener('partido/programado_proceso/' + this.fecha.getTime() + '/' + this.torneoId).subscribe({
+      next: (resp: Partido[]) => {
+        this.listaPartidos = resp || [];
+        this.busquedaRealizada = true;
+        this.buscandoPartidos = false;
+      },
+      error: () => {
+        this.listaPartidos = [];
+        this.busquedaRealizada = true;
+        this.buscandoPartidos = false;
+      }
     });
   }
   colorEstadoPartido(partido: Partido){
@@ -102,9 +194,7 @@ export class InicioPage implements OnInit {
     return '';
   }
   handleRefresh(event: CustomEvent | any) {
-    setTimeout(() => {
-      this.listarPartidosFechaTorneo(this.fecha!,this.torneoId!);
-      (event.target as HTMLIonRefresherElement).complete();
-    }, 2000);
+    this.listarPartidosFechaTorneo();
+    (event.target as HTMLIonRefresherElement).complete();
   }
 }

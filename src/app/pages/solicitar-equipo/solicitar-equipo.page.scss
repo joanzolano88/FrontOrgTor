@@ -1,0 +1,124 @@
+.request-shell {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.header-card,
+.option-card,
+.summary-card {
+  background: var(--app-surface);
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius);
+  padding: 18px 16px;
+  box-shadow: 0 6px 18px rgba(32, 45, 50, 0.06);
+}
+
+.header-card {
+  border-left: 4px solid var(--app-coral);
+}
+
+.eyebrow {
+  display: inline-block;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--app-coral);
+  margin-bottom: 8px;
+}
+
+.header-card h2,
+.option-head h3 {
+  margin: 0;
+}
+
+.header-card p,
+.option-head small {
+  margin: 8px 0 0;
+  color: var(--app-muted);
+}
+
+.request-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.option-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.option-head ion-icon {
+  font-size: 28px;
+  color: var(--app-teal);
+}
+
+.select-wrap,
+.field-wrap,
+.summary-card ion-item {
+  --background: rgba(255, 255, 255, 0.02);
+  border-radius: 14px;
+  margin-top: 8px;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--app-muted);
+  font-weight: 700;
+  position: relative;
+}
+
+.divider::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: rgba(148, 163, 184, 0.24);
+  z-index: 0;
+}
+
+.divider span {
+  position: relative;
+  z-index: 1;
+  background: var(--ion-background-color);
+  padding: 0 12px;
+}
+
+.create-team-box {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.upload-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  border: 1.5px dashed var(--app-teal);
+  border-radius: var(--app-radius);
+  padding: 18px 12px;
+  background: var(--app-surface-muted);
+}
+
+.upload-box img {
+  width: 72px;
+  height: 72px;
+  border-radius: 18px;
+  object-fit: cover;
+}
+
+.submit-btn {
+  margin-top: 8px;
+  --border-radius: 9px;
+  height: 48px;
+  font-weight: 700;
+}

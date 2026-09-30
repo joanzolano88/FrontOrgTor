@@ -51,7 +51,7 @@
   <ng-template #elseTemplate>
     @if (listaPartidosEliminatorias.length == 0) {
       <ion-item>
-        <ion-badge color="danger" class="mat-headline-6 w-100" style="margin-top: 16px">{{mensajeError}}</ion-badge>
+        <ion-badge color="danger" class="w-100" style="margin-top: 16px">{{mensajeError}}</ion-badge>
       </ion-item>
     }
     <ion-item *ngIf="torneo.faseTorneo != 'ELIMINATORIAS_GRUPOS'">

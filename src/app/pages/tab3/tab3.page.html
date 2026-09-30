@@ -1,21 +1,45 @@
-<ion-header [translucent]="true">
+<ion-header class="profile-header" [translucent]="true">
   <ion-toolbar>
     <ion-buttons slot="start" *ngIf="validarBackBtn()">
       <ion-back-button text="" defaultHref="/auth/login"></ion-back-button>
     </ion-buttons>
     <ion-title>{{ url == '/auth/usuario' ? 'Mi perfil' : 'Registrar' }}</ion-title>
+    <ion-buttons slot="end" *ngIf="url == '/auth/usuario'">
+      <ion-button aria-label="Abrir notificaciones" (click)="abrirNotificaciones()">
+        <ion-icon slot="icon-only" name="notifications-outline"></ion-icon>
+        <ion-badge *ngIf="notificacionesPendientes" color="danger">{{ notificacionesPendientes }}</ion-badge>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
-<ion-content [fullscreen]="true">
-  <form (ngSubmit)="onSubmit(f)" #f="ngForm">
-    <ion-list>
+<ion-content [fullscreen]="true" class="profile-page">
+  <section class="profile-hero" *ngIf="url == '/auth/usuario'; else registerHero">
+    <div class="hero-glow"></div>
+    <div class="profile-identity">
+      <button class="avatar-button" type="button" (click)="abrirEdicionPerfil()">
+        <ion-avatar><img appImageFallback="assets/images/avatar-placeholder.svg" [src]="imagenDef" alt="Foto de perfil"></ion-avatar>
+        <span class="avatar-edit"><ion-icon name="camera-outline"></ion-icon></span>
+      </button>
+      <div class="identity-copy"><span class="eyebrow">Perfil {{ usuario.tipoUsuario | titlecase }}</span><h1>{{ usuario.nombre || 'Tu perfil' }}</h1><p>{{ usuario.ubicacion || 'Agrega tu ubicación' }}</p></div>
+      <div class="profile-actions-inline">
+        <ion-button class="edit-profile-button" fill="clear" (click)="abrirEdicionPerfil()"><ion-icon slot="start" name="create-outline"></ion-icon>Editar perfil</ion-button>
+        <ion-button *ngIf="url == '/auth/usuario'" fill="outline" color="medium" (click)="cerrarSesion()">Cerrar sesión</ion-button>
+      </div>
+    </div>
+    <div class="profile-counts"><div><strong>{{ torneosCreados.length }}</strong><span>Torneos</span></div><div><strong>{{ usuario.tipoUsuario == 'JUGADOR' ? equiposJugador.length : equiposDelegado.length }}</strong><span>Equipos</span></div><div><strong>{{ participacionesJugador.length }}</strong><span>Participaciones</span></div></div>
+  </section>
+  <ng-template #registerHero><section class="register-hero"><span class="eyebrow">Nuevo registro</span><h1>Crea tu perfil</h1><p>Completa tus datos para participar en la organización deportiva.</p></section></ng-template>
+  <form (ngSubmit)="onSubmit(f)" #f="ngForm" class="profile-form" *ngIf="url != '/auth/usuario' || editarPerfilOpen">
+    <section class="section-block personal-section">
+      <div class="section-heading"><div><span class="eyebrow">{{ url == '/auth/usuario' ? 'Editar perfil' : 'Información personal' }}</span><h2>Datos de la cuenta</h2></div><ion-button *ngIf="url == '/auth/usuario'" fill="clear" color="medium" type="button" (click)="cerrarEdicionPerfil()">Cancelar</ion-button></div>
+      <div class="form-grid">
       <ion-item lines="none" class="ion-text-center">
         <ion-grid>
           <ion-row class="ion-justify-content-center">
             <ion-col size="4">
               <ion-input type="file" class="ion-hide" #file accept="image/png, image/jpeg" (change)="cargarImg($event)" required></ion-input>
               <ion-avatar style="width: 100px; height: 100px; margin: auto;" (click)="activarSubirArchivo(file)">
-                <img alt="Imagen" [src]="imagenDef"/>
+                <img appImageFallback="assets/images/avatar-placeholder.svg" alt="Imagen de perfil" [src]="imagenDef"/>
               </ion-avatar>
             </ion-col>
           </ion-row>
@@ -24,54 +48,80 @@
       <!--<ion-item class="ion-padding-horizontal" [ngClass]="{'error-input': f.submitted && f.controls['nombre-usuario'].errors}" title="{{extraer.erroresForm(f.controls['nombre-usuario'])}}">
         <ion-input label="Nombre Usuario" labelPlacement="floating" required name="nombre-usuario" [(ngModel)]="usuario.nombreUsuario" minlength="6"></ion-input>
       </ion-item>-->
-      <ion-item class="ion-padding-horizontal" [ngClass]="{'error-input': f.submitted && f.controls['nombre'].errors}" title="{{extraer.erroresForm(f.controls['nombre'])}}">
+      <ion-item [ngClass]="{'error-input': f.submitted && f.controls['nombre'].errors}" title="{{extraer.erroresForm(f.controls['nombre'])}}">
         <ion-input label="Nombre" labelPlacement="floating" required name="nombre" [(ngModel)]="usuario.nombre" minlength="6"></ion-input>
       </ion-item>
-      <ion-item class="ion-padding-horizontal" [ngClass]="{'error-input': f.submitted && f.controls['celular'].errors}" title="{{extraer.erroresForm(f.controls['celular'])}}">
+      <ion-item [ngClass]="{'error-input': f.submitted && f.controls['celular'].errors}" title="{{extraer.erroresForm(f.controls['celular'])}}">
         <ion-input label="Celular" labelPlacement="floating" required name="celular" type="tel" [(ngModel)]="usuario.numeroCelular" minlength="6"></ion-input>
       </ion-item>
-      <ion-item class="ion-padding-horizontal" [ngClass]="{'error-input': f.submitted && f.controls['cedula'].errors}" title="{{extraer.erroresForm(f.controls['cedula'])}}">
+      <ion-item [ngClass]="{'error-input': f.submitted && f.controls['cedula'].errors}" title="{{extraer.erroresForm(f.controls['cedula'])}}">
         <ion-input label="Cédula" labelPlacement="floating" required name="cedula" [(ngModel)]="usuario.cedula" minlength="5"></ion-input>
       </ion-item>
-      <ion-item class="ion-padding-horizontal" [ngClass]="{'error-input': f.submitted && f.controls['correo'].errors}" title="{{extraer.erroresForm(f.controls['correo'])}}">
+      <ion-item [ngClass]="{'error-input': f.submitted && f.controls['correo'].errors}" title="{{extraer.erroresForm(f.controls['correo'])}}">
         <ion-input label="Correo electronico" labelPlacement="floating" required name="correo" type="email" [(ngModel)]="usuario.correoElectronico" minlength="6"></ion-input>
       </ion-item>
-      <ion-item class="ion-padding-horizontal">
-        <ion-select interface="popover" [value]="paisSeleccionado" (ionChange)="seleccionarPais($event.detail.value)" label="País" labelPlacement="floating" name="pais">
+      <ion-item>
+        <ion-select [value]="paisSeleccionado" (ionChange)="seleccionarPais($event.detail.value)" label="País" labelPlacement="floating" name="pais">
           <ion-select-option *ngFor="let pais of paises" [value]="pais.id">{{ pais.nombre }}</ion-select-option>
         </ion-select>
       </ion-item>
-      <ion-item class="ion-padding-horizontal">
-        <ion-select interface="popover" [value]="departamentoSeleccionado" (ionChange)="seleccionarDepartamento($event.detail.value)" label="Departamento" labelPlacement="floating" name="departamento">
+      <ion-item>
+        <ion-select [value]="departamentoSeleccionado" (ionChange)="seleccionarDepartamento($event.detail.value)" label="Departamento" labelPlacement="floating" name="departamento">
           <ion-select-option *ngFor="let departamento of departamentos" [value]="departamento.id">{{ departamento.nombre }}</ion-select-option>
         </ion-select>
       </ion-item>
-      <ion-item class="ion-padding-horizontal" [ngClass]="{'error-input': f.submitted && f.controls['ubicacion'].errors}" title="{{extraer.erroresForm(f.controls['ubicacion'])}}">
-        <ion-select interface="popover" [value]="ciudadSeleccionada" (ionChange)="seleccionarCiudad($event.detail.value)" label="Ciudad" labelPlacement="floating" name="ubicacion" required>
+      <ion-item [ngClass]="{'error-input': f.submitted && f.controls['ubicacion'].errors}" title="{{extraer.erroresForm(f.controls['ubicacion'])}}">
+        <ion-select [value]="ciudadSeleccionada" (ionChange)="seleccionarCiudad($event.detail.value)" label="Ciudad" labelPlacement="floating" name="ubicacion" required>
           <ion-select-option *ngFor="let ciudad of ciudades" [value]="ciudad.id">{{ ciudad.nombre }}</ion-select-option>
         </ion-select>
       </ion-item>
-      <ion-item class="ion-padding-horizontal" [ngClass]="{'error-input': f.submitted && f.controls['contrasena'].errors}" title="{{extraer.erroresForm(f.controls['contrasena'])}}">
+      <ion-item [ngClass]="{'error-input': f.submitted && f.controls['contrasena'].errors}" title="{{extraer.erroresForm(f.controls['contrasena'])}}">
         <ion-input label="Contraseña" labelPlacement="floating" required name="contrasena" type="password" [(ngModel)]="usuario.contrasena" minlength="6"></ion-input>
       </ion-item>
-      <ion-item class="ion-padding-horizontal" [ngClass]="{'error-input': f.submitted && f.controls['conf-contrasena'].errors}" title="{{extraer.erroresForm(f.controls['conf-contrasena'])}}">
+      <ion-item [ngClass]="{'error-input': f.submitted && f.controls['conf-contrasena'].errors}" title="{{extraer.erroresForm(f.controls['conf-contrasena'])}}">
         <ion-input label="Confirmar Contraseña" labelPlacement="floating" required name="conf-contrasena" type="password" [(ngModel)]="confirmarContrasena" minlength="6"></ion-input>
       </ion-item>
-      <ion-item class="ion-padding-horizontal" [ngClass]="{'error-input': f.submitted && f.controls['tipo-usuario'].errors}" title="{{extraer.erroresForm(f.controls['tipo-usuario'])}}">
+      <ion-item class="role-item" [ngClass]="{'error-input': f.submitted && f.controls['tipo-usuario'].errors}" title="{{extraer.erroresForm(f.controls['tipo-usuario'])}}">
         <ion-select label="Selecionar tipo de usuario" labelPlacement="floating" required name="tipo-usuario" [(ngModel)]="usuario.tipoUsuario" >
           <ion-select-option value="ORGANIZADOR">ORGANIZADOR</ion-select-option>
           <ion-select-option value="DELEGADO">DELEGADO</ion-select-option>
           <ion-select-option value="JUGADOR">JUGADOR</ion-select-option>
         </ion-select>
       </ion-item>
-    </ion-list>
-    <ion-button type="submit" class="w-100 ion-margin-top ion-padding-horizontal">
+      </div>
+      <div class="form-actions"><ion-button type="submit"> 
       {{textoBtnSubmit()}}
-    </ion-button>
-    @if (url == '/auth/usuario') {
-    <ion-button (click)="cerrarSesion()" class="w-100 ion-margin-top ion-padding-horizontal">
-      Cerrar sesion
-    </ion-button>
-    }
+      </ion-button>
+      </div>
+    </section>
   </form>
+  <section class="profile-context" *ngIf="url == '/auth/usuario'">
+    <div class="section-heading context-heading" *ngIf="usuario.tipoUsuario != 'DELEGADO'">
+      <div><span class="eyebrow">Tu actividad</span><h2>{{ usuario.tipoUsuario == 'ORGANIZADOR' ? 'Torneos creados' : 'Mis equipos' }}</h2></div>
+      <ion-icon name="arrow-forward-outline"></ion-icon>
+    </div>
+
+    <div *ngIf="usuario.tipoUsuario == 'DELEGADO'" class="delegado-actions">
+      <ion-button expand="block" color="primary" (click)="crearEquipoDelegado()">Crear equipo</ion-button>
+    </div>
+
+    <div class="section-heading context-heading" *ngIf="usuario.tipoUsuario == 'DELEGADO'">
+      <div><span class="eyebrow">Mis equipos</span><h2>Equipos creados</h2></div>
+    </div>
+
+    <div class="content-grid" *ngIf="usuario.tipoUsuario == 'ORGANIZADOR'"><ion-card class="info-card tournament-card" button *ngFor="let torneo of torneosCreados" (click)="abrirTorneo(torneo)"><div class="card-mark tournament-mark"><ion-icon name="trophy-outline"></ion-icon></div><div class="card-content"><ion-badge [color]="torneo.estadoTorneo == 'FINALIZADO' ? 'medium' : 'success'">{{ torneo.estadoTorneo }}</ion-badge><h3>{{ torneo.nombre }}</h3><p>{{ torneo.ubicacion || 'Ubicación pendiente' }}</p><small>{{ torneo.modalidadTorneo }} · {{ torneo.cantidadEquipos || 0 }} equipos</small></div><ion-icon class="card-arrow" name="chevron-forward-outline"></ion-icon></ion-card></div>
+    <div class="content-grid" *ngIf="usuario.tipoUsuario == 'DELEGADO'"><ion-card class="info-card team-card" button *ngFor="let equipo of equiposDelegado" (click)="abrirEquipo(equipo)"><div class="team-shield"><img appImageFallback="assets/images/shield-placeholder.svg" [src]="equipo.escudo ? 'data:image/png;base64,' + equipo.escudo : ''" alt="Escudo del equipo"></div><div class="card-content"><ion-badge color="primary">Equipo</ion-badge><h3>{{ equipo.nombre }}</h3><p>{{ equipo.torneo?.nombre || 'Sin torneo asignado aún' }}</p><small>{{ equipo.ciudad ? equipo.ciudad.nombre : 'Ciudad no registrada' }}</small></div><ion-icon class="card-arrow" name="chevron-forward-outline"></ion-icon></ion-card></div>
+    <div class="content-grid" *ngIf="usuario.tipoUsuario == 'JUGADOR'"><ion-card class="info-card team-card" button *ngFor="let equipo of equiposJugador" (click)="abrirEquipo(equipo)"><div class="team-shield"><img appImageFallback="assets/images/shield-placeholder.svg" [src]="equipo.escudo ? 'data:image/png;base64,' + equipo.escudo : ''" alt="Escudo del equipo"></div><div class="card-content"><ion-badge [color]="participacionDeEquipo(equipo)?.participando ? 'success' : 'primary'">{{ participacionDeEquipo(equipo)?.participando ? 'Participando' : 'Mi equipo' }}</ion-badge><h3>{{ equipo.nombre }}</h3><p>{{ equipo.torneo?.nombre }}</p><small>{{ equipo.torneo?.ubicacion || 'Ubicación pendiente' }} <span *ngIf="participacionDeEquipo(equipo)?.cambioEquipo">· Cambio registrado</span></small></div><ion-icon class="card-arrow" name="chevron-forward-outline"></ion-icon></ion-card></div>
+    <section class="section-block team-invitations" *ngIf="usuario.tipoUsuario == 'JUGADOR'">
+      <div class="section-heading"><div><span class="eyebrow">Plantel</span><h2>Invitaciones a equipos</h2></div></div>
+      <ion-item *ngIf="cargandoInvitacionesEquipo" lines="none"><ion-spinner slot="start"></ion-spinner><ion-label>Cargando invitaciones...</ion-label></ion-item>
+      <ion-note color="danger" *ngIf="errorInvitacionesEquipo">{{ errorInvitacionesEquipo }}</ion-note>
+      <ion-item *ngFor="let invitacion of invitacionesEquipoJugador">
+        <ion-label>{{ invitacion.equipoNombre }}<small>Invitación recibida {{ invitacion.creadaEn | date:'medium' }}</small></ion-label>
+        <ion-button slot="end" color="success" (click)="responderInvitacionEquipo(invitacion, true)">Aceptar</ion-button>
+        <ion-button slot="end" fill="clear" color="medium" (click)="responderInvitacionEquipo(invitacion, false)">Rechazar</ion-button>
+      </ion-item>
+      <p class="empty-invitations" *ngIf="!cargandoInvitacionesEquipo && !errorInvitacionesEquipo && !invitacionesEquipoJugador.length">No tienes invitaciones pendientes.</p>
+    </section>
+  </section>
 </ion-content>

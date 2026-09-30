@@ -1,0 +1,38 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start"><ion-back-button defaultHref="/auth/usuario"></ion-back-button></ion-buttons>
+    <ion-title>Notificaciones</ion-title>
+    <ion-buttons slot="end"><ion-button aria-label="Actualizar" (click)="cargar()"><ion-icon slot="icon-only" name="refresh-outline"></ion-icon></ion-button></ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <main class="notification-page">
+    <header class="page-heading">
+      <div><span class="eyebrow">Actividad de tu cuenta</span><h1>Notificaciones</h1></div>
+      <span class="notification-count">{{ notificaciones.length }}</span>
+    </header>
+
+    <ion-spinner *ngIf="cargando" class="loading-spinner"></ion-spinner>
+    <ion-note color="danger" *ngIf="error" class="error-note">{{ error }}</ion-note>
+    <section class="notification-list" *ngIf="!cargando && !error && notificaciones.length">
+      <article class="notification-item" *ngFor="let notificacion of notificaciones" [class.unread]="!notificacion.leida" [class.action-item]="esAccion(notificacion)">
+        <div class="notification-icon"><ion-icon [name]="esAccion(notificacion) ? 'hand-left-outline' : 'information-circle-outline'"></ion-icon></div>
+        <div class="notification-copy">
+          <div class="notification-title-row"><h2>{{ notificacion.titulo }}</h2><ion-badge *ngIf="esAccion(notificacion)" color="warning">Pendiente</ion-badge></div>
+          <p>{{ notificacion.mensaje }}</p>
+          <time>{{ notificacion.creadaEn | date:'medium' }}</time>
+        </div>
+        <ion-button fill="clear" [disabled]="procesandoId === notificacion.id" (click)="abrir(notificacion)">
+          {{ esAccion(notificacion) ? 'Resolver' : 'Ver y quitar' }}
+          <ion-icon slot="end" name="chevron-forward-outline"></ion-icon>
+        </ion-button>
+      </article>
+    </section>
+    <div class="empty-state" *ngIf="!cargando && !error && !notificaciones.length">
+      <ion-icon name="notifications-off-outline"></ion-icon>
+      <h2>No tienes notificaciones</h2>
+      <p>Los avisos nuevos aparecerán aquí.</p>
+    </div>
+  </main>
+</ion-content>

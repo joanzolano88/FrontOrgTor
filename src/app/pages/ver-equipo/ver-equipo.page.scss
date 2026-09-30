@@ -1,0 +1,328 @@
+:host {
+    --line: #dfe9ed;
+}
+
+
+
+.team-shell {
+    width: min(980px, calc(100% - 20px));
+    margin: 0 auto;
+    padding: 16px 0 24px
+}
+
+.team-hero {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    padding: 22px 20px;
+    border-radius: 24px;
+    background: var(--ion-card-background);
+    overflow: hidden;
+    box-shadow: 0 16px 35px rgba(17, 36, 46, .18)
+}
+
+.hero-glow {
+    position: absolute;
+    right: -26px;
+    top: -26px;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: rgba(215, 238, 229, .14)
+}
+
+.team-identity {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 16px
+}
+
+.team-badge {
+    width: 92px;
+    height: 92px;
+    border-radius: 24px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, .12);
+    border: 2px solid rgba(255, 255, 255, .25)
+}
+
+.team-badge img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover
+}
+
+.eyebrow {
+    display: inline-block;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 1.3px;
+    text-transform: uppercase
+}
+
+.team-copy h1 {
+    margin: 7px 0 5px;
+    font-size: clamp(28px, 4vw, 38px);
+    line-height: 1
+}
+
+.team-copy p {
+    margin: 0;
+}
+
+.team-actions {
+    position: relative;
+    z-index: 1;
+    width: min(280px, 100%)
+}
+
+.team-actions ion-button {
+    --border-radius: 12px;
+    --padding-top: 16px;
+    --padding-bottom: 16px;
+    text-transform: none;
+    font-weight: 700
+}
+
+.team-stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+    margin-top: 16px
+}
+
+.stat-box {
+    display: grid;
+    gap: 4px;
+    padding: 16px;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    box-shadow: 0 10px 24px rgba(17, 36, 46, .04)
+}
+
+.stat-box strong {
+    font-size: 22px;
+}
+
+.stat-box span {
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: .08em
+}
+
+.team-panels {
+    display: grid;
+    gap: 14px;
+    margin-top: 16px
+}
+
+.panel {
+    padding: 18px;
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    box-shadow: 0 10px 22px rgba(17, 36, 46, .04)
+}
+
+.panel-header {
+    margin-bottom: 14px
+}
+
+.panel-header h2 {
+    margin: 8px 0 0;
+    font-size: 22px;
+}
+
+.detail-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px
+}
+
+.detail-item {
+    display: grid;
+    gap: 6px;
+    padding: 12px;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+}
+
+.detail-item .label {
+    font-size: 13px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    font-weight: 700
+}
+
+.detail-item strong {
+    font-size: 15px;
+}
+
+.player-list,
+.request-list,
+.tournament-list,
+.detail-list {
+    display: grid;
+    gap: 10px
+}
+
+.player-item,
+.request-item,
+.detail-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+}
+
+.player-avatar {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--app-mint);
+    font-size: 24px
+}
+
+.player-info {
+    display: grid;
+    gap: 3px;
+    flex: 1
+}
+
+.player-info strong,
+.request-item strong {
+    font-size: 15px;
+}
+
+.player-info small,
+.request-item small {
+    font-size: 14px;
+}
+
+.inline-add {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 8px;
+    margin-top: 12px
+}
+
+.inline-add ion-item {
+    border: 1px solid var(--line);
+    border-radius: 14px
+}
+
+.inline-add ion-button {
+    --border-radius: 14px;
+    width: 52px;
+    min-width: 52px;
+    height: 52px
+}
+
+.message-note {
+    display: block;
+    margin-top: 12px
+}
+
+.request-list h3 {
+    margin: 14px 0 0;
+    font-size: 15px;
+}
+
+.request-actions {
+    display: flex;
+    gap: 4px
+}
+
+.tournament-list {
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr))
+}
+
+.tournament-pill {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px 14px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    font-weight: 700
+}
+
+.tournament-detail {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--line)
+}
+
+.tournament-detail h3 {
+    margin: 0 0 10px;
+    font-size: 18px;
+}
+
+.detail-row {
+    padding: 9px 12px
+}
+
+.detail-row span {
+    font-weight: 600
+}
+
+.empty-state {
+    display: grid;
+    place-items: center;
+    gap: 8px;
+    padding: 22px 12px;
+    border: 1px dashed var(--line);
+    border-radius: 14px;
+}
+
+.empty-state ion-icon {
+    font-size: 24px
+}
+
+.empty-state p,
+.empty-tournament {
+    margin: 0;
+}
+
+.payment-form {
+    display: grid;
+    gap: 10px
+}
+
+.payment-form ion-item {
+    border: 1px solid var(--line);
+    border-radius: 14px
+}
+
+.payment-form ion-button {
+    --border-radius: 14px;
+    margin-top: 4px
+}
+
+@media (max-width:700px) {
+    .team-hero {
+        flex-direction: column;
+        align-items: flex-start
+    }
+
+    .team-actions {
+        width: 100%
+    }
+
+    .detail-grid {
+        grid-template-columns: 1fr
+    }
+
+    .team-shell {
+        width: min(100%, calc(100% - 20px))
+    }
+}

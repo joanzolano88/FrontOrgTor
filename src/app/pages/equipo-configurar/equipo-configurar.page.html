@@ -1,84 +1,70 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-back-button text="" defaultHref="/auth/torneos"></ion-back-button>
+      <ion-back-button text="" (click)="volverAtras()"></ion-back-button>
     </ion-buttons>
-    <ion-title>Equipo</ion-title>
+    <ion-title>Crear equipo</ion-title>
   </ion-toolbar>
 </ion-header>
+
 <ion-content [fullscreen]="true">
-  <form  #f="ngForm" (ngSubmit)="onSubmit(f)">
-    <ion-list>
-      <ion-item class="ion-padding-horizontal" [ngClass]="{'error-input': f.submitted && f.controls['nombre'].errors}"
-        [ngStyle]="{'--border-color': f.submitted && f.controls['nombre'].errors ? '#f44336' : '#404040'}">
-        <ion-input label="Nombre Equipo" labelPlacement="floating" name="nombre" [(ngModel)]="equipo.nombre"
-            required minlength="3" [counter]="true"></ion-input>
-      </ion-item>
-      <ion-item class="ion-padding-horizontal" [ngClass]="{'error-input': f.submitted && escudoEquipo == null}"
-        [ngStyle]="{'--border-color': f.submitted && escudoEquipo == null ? '#f44336' : '#404040'}">
-        <ion-label>Escudo</ion-label>
-        <ion-input type="file" class="ion-hide" #fileEsc (change)="cargarImagen(imgEsc,'escudo',$event)" accept="image/png, image/jpeg" required></ion-input>
-        <ion-thumbnail slot="end">
-            <img alt="Escudo imagen" #imgEsc id="img-escudo" src="https://ionicframework.com/docs/img/demos/thumbnail.svg" (click)="activarSubirArchivo(fileEsc)" />
-        </ion-thumbnail>
-      </ion-item>
-      <ion-item class="ion-padding-horizontal" [ngClass]="{'error-input': f.submitted && f.controls['grupo'].errors}"
-      [ngStyle]="{'--border-color': f.submitted && f.controls['grupo'].errors ? '#f44336' : '#404040'}" *ngIf="torneo.modalidadTorneo == 'GRUPOS'">
-        <ion-select label="Grupo del equipo" placeholder="" [(ngModel)]="equipo.grupo" name="grupo" required>
-          <ion-select-option value="{{ i + 1 }}" *ngFor="let item of [].constructor(torneo.cantidadGrupos); let i = index">{{i + 1}}</ion-select-option>
-        </ion-select>
-      </ion-item>
-      <ion-item lines="none" class="ion-margin-top">
-        <ion-label class="mat-headline-6" style="margin: 0;">Delegado</ion-label>
-        <ion-icon name="eye-sharp" size="large" (click)="crearDelegado = 'ver'"></ion-icon>
-        <ion-icon name="person-add-sharp" size="large" class="ion-margin-horizontal" (click)="crearDelegado = 'crear'"></ion-icon>
-        <ion-icon name="search-sharp" size="large" (click)="crearDelegado = 'buscar'"></ion-icon>
-      </ion-item>
-      <ion-item *ngIf="crearDelegado == 'buscar'">
-        <ion-searchbar show-clear-button="always"></ion-searchbar>
-      </ion-item>
-      <ion-list *ngIf="crearDelegado == 'buscar'">
-        {{ tarerPersonas() }}
-        <ion-item *ngFor="let item of delegadoLista">
-          <ion-label (click)="seleccionarDelegado(item)">{{item.nombre}} <br> Celular: {{item.numeroCelular}}</ion-label>
+  <div class="team-shell">
+    <div class="header-card">
+      <span class="eyebrow">Nuevo equipo</span>
+      <h2>{{ torneo.nombre || 'Registro de equipo' }}</h2>
+      <p>Completa la información del equipo para registrarlo en el sistema.</p>
+    </div>
+
+    <form #f="ngForm" (ngSubmit)="onSubmit(f)" class="team-form">
+      <div class="card-block">
+        <div class="field-row">
+          <ion-item lines="none" class="field-wrap">
+            <ion-input label="Nombre del equipo" labelPlacement="floating" name="nombre" [(ngModel)]="equipo.nombre" required minlength="3" [counter]="true"></ion-input>
+          </ion-item>
+        </div>
+
+        <div class="upload-block">
+          <div class="upload-label">Escudo del equipo</div>
+          <ion-input type="file" class="ion-hide" #fileEsc (change)="cargarImagen(imgEsc,'escudo',$event)" accept="image/png, image/jpeg" required></ion-input>
+          <div class="upload-box" (click)="activarSubirArchivo(fileEsc)">
+            <img appImageFallback="assets/images/shield-placeholder.svg" alt="Previsualización del escudo" #imgEsc id="img-escudo" [src]="imgEscudo()" />
+            <span>Seleccionar imagen</span>
+          </div>
+        </div>
+
+        <ion-item lines="none" class="field-wrap">
+          <ion-select interface="popover" [value]="paisSeleccionado" (ionChange)="seleccionarPais($event.detail.value)" label="País" labelPlacement="floating" name="pais-equipo">
+            <ion-select-option *ngFor="let pais of paises" [value]="pais.id">{{ pais.nombre }}</ion-select-option>
+          </ion-select>
         </ion-item>
-      </ion-list>
-      <ion-item lines="none" [ngClass]="{'ion-hide': crearDelegado != 'ver'}">
-        <ion-thumbnail slot="start">
-          <img alt="identificacion imagen"  id="img-identificacion" src="https://ionicframework.com/docs/img/demos/thumbnail.svg"/>
-        </ion-thumbnail>
-        <ion-label>Nombre: {{equipo.delegado!.nombre}}</ion-label>
-      </ion-item>
-      <ion-item *ngIf="crearDelegado == 'ver'">
-        <ion-label>Celular: {{equipo.delegado!.numeroCelular}}</ion-label>
-      </ion-item>
-      <ion-item *ngIf="crearDelegado == 'crear'" class="ion-padding-horizontal" [ngClass]="{'error-input': f.submitted && f.controls['nombre-delegado'].errors}"
-        [ngStyle]="{'--border-color': f.submitted && f.controls['nombre-delegado'].errors ? '#f44336' : '#404040'}">
-        <ion-input label="Nombre Delegado" labelPlacement="floating" name="nombre-delegado" [(ngModel)]="delegado!.nombre"
-            required minlength="6" [counter]="true"></ion-input>
-      </ion-item>
-      <ion-item *ngIf="crearDelegado == 'crear'" class="ion-padding-horizontal" [ngClass]="{'error-input': f.submitted && f.controls['numero-celular'].errors}"
-        [ngStyle]="{'--border-color': f.submitted && f.controls['numero-celular'].errors ? '#f44336' : '#404040'}">
-        <ion-input label="Numero Celular" labelPlacement="floating" name="numero-celular" type="tel" [(ngModel)]="delegado!.numeroCelular"
-            required minlength="6" [counter]="true"></ion-input>
-      </ion-item>
-      <ion-item *ngIf="crearDelegado == 'crear'" class="ion-padding-horizontal" [ngClass]="{'error-input': f.submitted && identificacionDelegado == null}"
-        [ngStyle]="{'--border-color': f.submitted && identificacionDelegado == null ? '#f44336' : '#404040'}">
-        <ion-label>Identificacion</ion-label>
-        <ion-input type="file" class="ion-hide" #fileIden (change)="cargarImagen(imgIde, 'identificacion', $event)" accept="image/png, image/jpeg" required></ion-input>
-        <ion-thumbnail slot="end">
-          <img alt="Silhouette of mountains" #imgIde (click)="activarSubirArchivo(fileIden)" src="https://ionicframework.com/docs/img/demos/thumbnail.svg"/>
-        </ion-thumbnail>
-      </ion-item>
-    </ion-list>
-    <ion-button *ngIf="crearDelegado == 'crear'" expand="block" class="ion-margin-top ion-margin-horizontal" (click)="guardarDelegado()">Guardar Delegado</ion-button>
-    <ion-button expand="block" class="ion-margin-top ion-margin-horizontal" type="submit">Guardar</ion-button>
-  </form>
+
+        <ion-item lines="none" class="field-wrap">
+          <ion-select interface="popover" [value]="departamentoSeleccionado" (ionChange)="seleccionarDepartamento($event.detail.value)" label="Departamento" labelPlacement="floating" name="departamento-equipo">
+            <ion-select-option *ngFor="let departamento of departamentos" [value]="departamento.id">{{ departamento.nombre }}</ion-select-option>
+          </ion-select>
+        </ion-item>
+
+        <ion-item lines="none" class="field-wrap">
+          <ion-select interface="popover" [value]="ciudadSeleccionada" (ionChange)="seleccionarCiudad($event.detail.value)" label="Ciudad" labelPlacement="floating" name="ciudad-equipo" required>
+            <ion-select-option *ngFor="let ciudad of ciudades" [value]="ciudad.id">{{ ciudad.nombre }}</ion-select-option>
+          </ion-select>
+        </ion-item>
+
+        <ion-item *ngIf="torneo.modalidadTorneo == 'GRUPOS'" lines="none" class="field-wrap">
+          <ion-select label="Grupo del equipo" placeholder="" [(ngModel)]="equipo.grupo" name="grupo" required>
+            <ion-select-option value="{{ i + 1 }}" *ngFor="let item of [].constructor(torneo.cantidadGrupos); let i = index">{{i + 1}}</ion-select-option>
+          </ion-select>
+        </ion-item>
+      </div>
+
+      <ion-button expand="block" type="submit" class="submit-btn">Guardar equipo</ion-button>
+    </form>
+  </div>
 
   <ion-alert
-  [isOpen]="isAlertOpen"
-  header="{{mensajeError}}"
-  [buttons]="alertButtons"
-  (didDismiss)="setOpen(false)"
+    [isOpen]="isAlertOpen"
+    header="{{mensajeError}}"
+    [buttons]="alertButtons"
+    (didDismiss)="setOpen(false)"
   ></ion-alert>
 </ion-content>

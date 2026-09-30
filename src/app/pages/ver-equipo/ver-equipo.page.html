@@ -1,47 +1,180 @@
-<ion-header>
+<ion-header class="team-header">
   <ion-toolbar>
-    <ion-buttons slot="start"><ion-back-button [defaultHref]="'/auth/torneos/torneo/' + idTorneo + '/tabla-equipos'"></ion-back-button></ion-buttons>
-    <ion-title>Información del equipo</ion-title>
+    <ion-buttons slot="start">
+      <ion-back-button [defaultHref]="idTorneo && idTorneo !== '0' ? '/auth/torneos/torneo/' + idTorneo + '/tabla-equipos' : '/auth/usuario'"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Equipo</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content>
-  <ion-card>
-    <ion-card-header>
-      <ion-thumbnail><img alt="Escudo del equipo" [src]="equipo.escudo ? 'data:image/png;base64,' + equipo.escudo : 'https://ionicframework.com/docs/img/demos/thumbnail.svg'"></ion-thumbnail>
-      <ion-card-title>{{ equipo.nombre }}</ion-card-title>
-    </ion-card-header>
-    <ion-card-content>
-      <p><strong>Delegado:</strong> {{ equipo.delegado?.nombre }}</p>
-      <p><strong>Celular:</strong> {{ equipo.delegado?.numeroCelular }}</p>
-      <p><strong>Torneo:</strong> {{ equipo.torneo?.nombre }}</p>
-      <ion-button *ngIf="esOrganizador" expand="block" color="success" (click)="abrirWhatsapp(equipo.delegado?.numeroCelular, 'Hola, soy el organizador de ' + equipo.torneo?.nombre + '.')">
-        WhatsApp
-      </ion-button>
-      <ion-button *ngIf="esDelegado && (equipo.torneo?.estadoTorneo === 'INSCRIPCIONES' || equipo.torneo?.estadoTorneo === 'INSCRIPCIONES_ACTIVO')" expand="block" (click)="editar()">
-        Editar información
-      </ion-button>
-      <ion-card *ngIf="esOrganizador">
-        <ion-card-header><ion-card-title>Pagos de inscripción</ion-card-title></ion-card-header>
-        <ion-card-content>
-          <ion-item>
-            <ion-input type="number" label="Monto" labelPlacement="floating" [(ngModel)]="nuevoPago.monto"></ion-input>
+<ion-content class="team-page">
+  <div class="team-shell">
+    <section class="team-hero">
+      <div class="hero-glow"></div>
+      <div class="team-identity">
+        <div class="team-badge">
+          <img appImageFallback="assets/images/shield-placeholder.svg" alt="Escudo del equipo" [src]="equipo.escudo ? 'data:image/png;base64,' + equipo.escudo : ''">
+        </div>
+        <div class="team-copy">
+          <span class="eyebrow">Club</span>
+          <h1>{{ equipo.nombre || 'Equipo sin nombre' }}</h1>
+          <p>{{ equipo.ciudad?.nombre || 'Ciudad no registrada' }}</p>
+        </div>
+      </div>
+
+      <div class="team-actions" *ngIf="esJugador && !esDelegado || esDelegado">
+        <ion-button *ngIf="esJugador && !esDelegado" expand="block" color="success" [disabled]="solicitandoUnirse" (click)="solicitarUnirse()">
+          <ion-icon slot="start" name="person-add-outline"></ion-icon>
+          Unirme
+        </ion-button>
+
+        <ion-button *ngIf="esDelegado && (torneoSeleccionado()?.estadoTorneo === 'INSCRIPCIONES' || torneoSeleccionado()?.estadoTorneo === 'INSCRIPCIONES_ACTIVO')" expand="block" color="primary" (click)="editar()">
+          <ion-icon slot="start" name="create-outline"></ion-icon>
+          Editar equipo
+        </ion-button>
+      </div>
+    </section>
+
+    <section class="team-stats">
+      <div class="stat-box">
+        <strong>{{ equipo.listaJugadoresActivos?.length || 0 }}</strong>
+        <span>Jugadores</span>
+      </div>
+      <div class="stat-box">
+        <strong>{{ torneosConParticipacion().length || 0 }}</strong>
+        <span>Torneos</span>
+      </div>
+      <div class="stat-box">
+        <strong>{{ participacionSeleccionada() ? '1' : '0' }}</strong>
+        <span>Actual</span>
+      </div>
+    </section>
+
+    <section class="team-panels">
+      <div class="panel info-panel">
+        <div class="panel-header">
+          <span class="eyebrow">Información</span>
+          <h2>Detalles del equipo</h2>
+        </div>
+
+        <div class="detail-grid">
+          <div class="detail-item">
+            <span class="label">Delegado</span>
+            <strong>{{ equipo.delegado?.nombre || 'Sin delegado' }}</strong>
+          </div>
+          <div class="detail-item">
+            <span class="label">Celular</span>
+            <strong>{{ equipo.delegado?.numeroCelular || 'No disponible' }}</strong>
+          </div>
+          <div class="detail-item">
+            <span class="label">Torneo</span>
+            <strong>{{ torneoSeleccionado()?.nombre || 'Sin torneo asignado aún' }}</strong>
+          </div>
+          <div class="detail-item">
+            <span class="label">Ciudad</span>
+            <strong>{{ equipo.ciudad?.nombre || 'Sin ciudad registrada' }}</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel roster-panel">
+        <div class="panel-header row-header">
+          <div>
+            <span class="eyebrow">Plantilla general</span>
+            <h2>Jugadores del equipo</h2>
+          </div>
+        </div>
+
+        <div class="player-list" *ngIf="equipo.listaJugadoresActivos?.length; else emptyPlayers">
+          <div class="player-item" *ngFor="let jugador of equipo.listaJugadoresActivos">
+            <div class="player-avatar">
+              <ion-icon name="person-circle-outline"></ion-icon>
+            </div>
+            <div class="player-info">
+              <strong>{{ jugador.nombre }}</strong>
+              <small *ngIf="jugador.cedula">Cédula: {{ jugador.cedula }}</small>
+            </div>
+            <ion-button *ngIf="esDelegado" fill="clear" color="danger" (click)="eliminarJugador(jugador)">
+              <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+            </ion-button>
+          </div>
+        </div>
+
+        <ng-template #emptyPlayers>
+          <div class="empty-state">
+            <ion-icon name="people-outline"></ion-icon>
+            <p>No hay jugadores registrados.</p>
+          </div>
+        </ng-template>
+
+        <div class="inline-add" *ngIf="esDelegado">
+          <ion-item lines="none">
+            <ion-input label="Cédula del jugador" labelPlacement="floating" [(ngModel)]="cedulaJugador"></ion-input>
           </ion-item>
-          <ion-item>
-            <ion-label>Estado</ion-label>
-            <ion-note color="medium">Automático según el total aportado</ion-note>
-          </ion-item>
-          <ion-item>
-            <ion-input label="Observación" labelPlacement="floating" [(ngModel)]="nuevoPago.observacion"></ion-input>
-          </ion-item>
-          <ion-button expand="block" (click)="registrarPago()">Revisar y registrar pago</ion-button>
-          <ion-note color="danger" *ngIf="mensajePago">{{ mensajePago }}</ion-note>
-          <ion-item *ngFor="let pago of pagos">
-            <ion-label>{{ pago.estado }}: {{ pago.monto | currency:'COP':'symbol-narrow':'3.0' }}</ion-label>
-            <ion-note>{{ pago.fechaPago || 'Pendiente' }}</ion-note>
-          </ion-item>
-        </ion-card-content>
-      </ion-card>
-    </ion-card-content>
-  </ion-card>
+          <ion-button fill="solid" color="primary" (click)="buscarYAgregarJugador()">
+            <ion-icon slot="icon-only" name="person-add-outline"></ion-icon>
+          </ion-button>
+        </div>
+
+        <ion-note color="medium" *ngIf="mensajeJugadores" class="message-note">{{ mensajeJugadores }}</ion-note>
+
+        <div class="request-list" *ngIf="esDelegado && solicitudesJugadores.length">
+          <h3>Solicitudes pendientes</h3>
+          <div class="request-item" *ngFor="let solicitud of solicitudesJugadores">
+            <div>
+              <strong>{{ solicitud.jugador?.nombre }}</strong>
+              <small>{{ solicitud.jugador?.cedula }}</small>
+            </div>
+            <div class="request-actions">
+              <ion-button fill="clear" color="success" (click)="resolverSolicitudJugador(solicitud, true)">
+                <ion-icon slot="icon-only" name="checkmark-outline"></ion-icon>
+              </ion-button>
+              <ion-button fill="clear" color="danger" (click)="resolverSolicitudJugador(solicitud, false)">
+                <ion-icon slot="icon-only" name="close-outline"></ion-icon>
+              </ion-button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel tournament-panel" *ngIf="equipo.id">
+        <div class="panel-header row-header">
+          <div>
+            <span class="eyebrow">Participación</span>
+            <h2>Torneos del equipo</h2>
+          </div>
+        </div>
+
+        <div class="tournament-list">
+          <button class="tournament-pill" *ngFor="let participacion of torneosConParticipacion()" type="button" (click)="abrirDetalleTorneo(participacion)">
+            <span>{{ participacion.torneo?.nombre }}</span>
+            <ion-badge color="success">{{ participacion.estado }}</ion-badge>
+            <ion-icon name="chevron-forward-outline"></ion-icon>
+          </button>
+          <p class="empty-tournament" *ngIf="!torneosConParticipacion().length">Este equipo todavía no participa en torneos.</p>
+        </div>
+      </div>
+    </section>
+  </div>
+  <ion-modal [isOpen]="perfilJugadorModalOpen" (didDismiss)="perfilJugadorModalOpen = false">
+    <ng-template>
+      <ion-header><ion-toolbar><ion-title>Perfil del jugador</ion-title><ion-buttons slot="end"><ion-button (click)="perfilJugadorModalOpen = false">Cerrar</ion-button></ion-buttons></ion-toolbar></ion-header>
+      <ion-content class="ion-padding" *ngIf="perfilJugadorData as perfil">
+        <h2>{{ perfil.jugador?.nombre }}</h2>
+        <p>Cédula: {{ perfil.jugador?.cedula || 'No registrada' }}</p>
+        <p>Celular: {{ perfil.jugador?.numeroCelular || 'No registrado' }}</p>
+        <ng-container *ngIf="perfil.participacionTorneo as participacion">
+          <h3>{{ participacion.torneo?.nombre }}</h3>
+          <p>Equipo: {{ participacion.equipo?.nombre }}</p>
+          <p>Estado: {{ participacion.participando ? 'Participó en el torneo' : (participacion.jugoPartido ? 'Jugó un partido' : 'Inscrito en el plantel') }}</p>
+          <p *ngIf="participacion.cambioEquipo">Cambio de equipo realizado durante el torneo.</p>
+          <ion-list *ngIf="perfil.eventosTorneo?.length">
+            <ion-list-header>Eventos del torneo</ion-list-header>
+            <ion-item *ngFor="let evento of perfil.eventosTorneo"><ion-label>{{ evento.tipo }} · minuto {{ evento.minuto }}</ion-label></ion-item>
+          </ion-list>
+        </ng-container>
+        <p *ngIf="!perfil.participacionTorneo">El jugador no tiene inscripción registrada en este torneo.</p>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
 </ion-content>

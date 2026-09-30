@@ -1,6 +1,8 @@
 .eliminatorias {
-    background-color: #4d8dff;
-    border-radius: 10px;
+    background-color: var(--app-surface-muted);
+    border: 1px solid var(--app-border);
+    color: var(--app-ink);
+    border-radius: var(--app-radius);
     min-width: 120px;
 }
 .tabla-eliminatorias {

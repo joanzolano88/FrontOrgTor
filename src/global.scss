@@ -25,112 +25,195 @@
 @import "@ionic/angular/css/text-transformation.css";
 @import "@ionic/angular/css/flex-utils.css";
 
-/**
- * Ionic Dark Mode
- * -----------------------------------------------------
- * For more info, please see:
- * https://ionicframework.com/docs/theming/dark-mode
- */
-
-/* @import "@ionic/angular/css/palettes/dark.always.css"; */
-/* @import "@ionic/angular/css/palettes/dark.class.css"; */
-@import "@ionic/angular/css/palettes/dark.system.css";
-
+@import "@ionic/angular/css/palettes/dark.always.css";
 
 .w-100 {
     width: 100%;
 }
+
 .w-75 {
     width: 75%;
 }
+
 .w-50 {
     width: 50%;
 }
+
 .w-25 {
     width: 25%;
 }
+
 .d-flex {
     display: flex;
 }
-.scroll-h{
+
+.scroll-h {
     flex-wrap: nowrap;
-    overflow-x: scroll!important;
+    overflow-x: scroll !important;
     overflow-y: hidden;
 }
-.flex-nowrap{
+
+.flex-nowrap {
     flex-wrap: nowrap;
 }
-.flex-reverse{
+
+.flex-reverse {
     flex-direction: row-reverse;
 }
+
 ion-button[shape=circle] {
     --border-radius: 50%;
     width: 56px;
     height: 56px;
 }
+
 ion-item.error-input {
     color: #f44336 !important;
     --border-color: #f44336;
+
     &::after {
         font-size: 13px;
         content: attr(title);
         margin-left: 15px;
     }
 }
-@media (prefers-color-scheme: dark) {
-    :root {
-        --ion-color-primary-contrast: #fff
-    }
-}
+
 ion-card-subtitle {
-  font-size: 0.85rem;
+    font-size: 0.85rem;
 }
+
 ion-segment-button::part(indicator-background) {
-    background: #3880ff;
+    background: var(--ion-color-primary);
 }
+
 .date-time-cong {
     height: 50px;
     overflow: hidden;
     width: 100%;
+
     ion-datetime {
         width: 100%;
         position: absolute;
         top: -75px;
     }
 }
+
 .m-0 {
     margin: 0 !important;
 }
+
 .centrar-text-v {
     display: flex;
     align-items: center;
 }
+
 .text-bold {
     font-weight: bold !important;
 }
+
 .text-font-1-1 {
     font-size: 1.1rem !important;
 }
-ion-segment-view {
-    height: 150px;
-  }
-  
-  ion-segment-content {
+
+ion-content {
+    --background: var(--ion-background-color);
+    color: var(--ion-text-color);
+}
+
+ion-toolbar {
+    --background: var(--ion-toolbar-background);
+    --color: var(--ion-toolbar-color);
+}
+
+ion-card {
+    --background: var(--ion-card-background);
+    color: var(--ion-text-color);
+    border-radius: var(--app-radius);
+}
+
+ion-item {
+    --background: var(--ion-item-background);
+    --border-color: var(--ion-border-color);
+    color: var(--ion-text-color);
+}
+
+ion-button {
+    --border-radius: 9px;
+    font-weight: 600;
+    letter-spacing: 0;
+}
+
+ion-searchbar {
+    --background: var(--app-surface);
+    --color: var(--app-ink);
+    --placeholder-color: var(--app-muted);
+    --icon-color: var(--app-muted);
+}
+
+ion-badge {
+    font-weight: 700;
+}
+
+body, ion-app { background: var(--ion-background-color); color: var(--ion-text-color); }
+ion-modal, ion-popover, ion-alert { --background: var(--app-surface); --ion-background-color: var(--app-surface); --ion-text-color: var(--app-ink); }
+ion-input:not(.ion-hide):not([type="file"]):not(.uniform-input),
+ion-textarea,
+ion-select {
+    min-height: 56px;
+    padding-inline: 12px;
+    border: 1px solid var(--app-border);
+    border-radius: 9px;
+    background: var(--app-surface);
+    color: var(--app-ink);
+    --background: transparent;
+    --color: var(--app-ink);
+    --placeholder-color: var(--app-muted);
+    --highlight-color-focused: var(--ion-color-primary);
+    --placeholder-opacity: .78;
+}
+
+ion-select {
     display: flex;
     align-items: center;
-    justify-content: center;
-  }
-  ion-segment-content:nth-of-type(1) {
-    background: lightpink;
-  }
-  ion-segment-content:nth-of-type(2) {
-    background: lightblue;
-  }
-  ion-segment-content:nth-of-type(3) {
-    background: lightgreen;
-  }
-  
-.s-ion-icon {
-    path {
-    fill:white;}
+    --padding-start: 0;
+    --padding-end: 0;
+}
+
+.filters-panel { --background: var(--app-surface); --border-color: var(--app-border); }
+
+ion-textarea { padding-block: 10px; }
+
+ion-item:has(> ion-input:not(.ion-hide):not([type="file"]):not(.uniform-input), > ion-select, > ion-textarea) {
+    min-height: 58px;
+    margin: 0 0 10px;
+    border: 1px solid var(--border-color, var(--app-border));
+    border-radius: 9px;
+    background: var(--app-surface);
+    --background: transparent;
+    --border-color: transparent;
+    --inner-border-width: 0;
+    --padding-start: 12px;
+    --inner-padding-end: 12px;
+}
+
+ion-item:has(> ion-input:not(.ion-hide):not([type="file"]):not(.uniform-input)) > ion-input,
+ion-item:has(> ion-select) > ion-select,
+ion-item:has(> ion-textarea) > ion-textarea {
+    min-height: 54px;
+    padding-inline: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+}
+
+ion-input:not(.ion-hide):not([type="file"]):not(.uniform-input).has-focus,
+ion-textarea.has-focus,
+ion-select.has-focus,
+ion-item.item-has-focus:has(> ion-input, > ion-select, > ion-textarea) {
+    border-color: var(--ion-color-primary);
+    box-shadow: 0 0 0 2px rgba(var(--ion-color-primary-rgb), .14);
+}
+
+ion-item.error-input:has(> ion-input, > ion-select, > ion-textarea) {
+    border-color: var(--ion-color-danger);
 }

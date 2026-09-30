@@ -76,9 +76,15 @@ export class PartidoPage implements OnInit {
   enlaceInvitacion = '';
   convocatoriaModalOpen = false;
   eventos: EventoPartido[] = [];
+  sancionesTorneo: any[] = [];
   jugadorEvento?: Jugador;
   minutoEvento = 0;
   eventoModalOpen = false;
+  perfilJugadorModalOpen = false;
+  perfilJugador?: Jugador;
+  perfilJugadorData: any;
+  titularCambio?: ConvocatoriaPartido;
+  suplenteCambio?: ConvocatoriaPartido;
 
   constructor(private crud: CrudService, private route: ActivatedRoute,
     private router: Router, private sesionService: SesionService, private alertController: AlertController) {
@@ -98,6 +104,7 @@ export class PartidoPage implements OnInit {
       this.cargarConvocatorias();
       this.cambiarEquipoConvocatoria();
       this.cargarEventos();
+      if (this.partido.torneo?.id) this.cargarSanciones(this.partido.torneo.id);
       console.log(this.partido);
       
       this.alertButtonsPenalties[0].text = this.partido.equipoLocal?.nombre!;
@@ -112,12 +119,44 @@ export class PartidoPage implements OnInit {
     if (!this.partido.id) return;
     this.crud.obtener(`partido/${this.partido.id}/convocados`).subscribe((resp: ConvocatoriaPartido[]) => this.convocatorias = resp || [], error => this.mostrarError(error));
   }
+  cargarSanciones(idTorneo: number) {
+    this.crud.obtenerSancionesTorneo(idTorneo).subscribe(resp => this.sancionesTorneo = resp || [], error => this.mostrarError(error));
+  }
+  sancionActiva(jugador?: Jugador): any {
+    return this.sancionesTorneo.find(sancion => sancion.activa && sancion.jugador?.id === jugador?.id);
+  }
+  modificarSancionJugador(levantar: boolean, jugador = this.jugadorEvento) {
+    const usuarioId = this.crud.obtenerUsuario().id;
+    const jugadorId = jugador?.id;
+    if (!usuarioId || !this.partido.id || !jugadorId) return;
+    this.crud.modificarSancionPartido(this.partido.id, jugadorId, usuarioId, levantar).subscribe({
+      next: () => this.cargarSanciones(this.partido.torneo!.id!),
+      error: error => this.mostrarError(error)
+    });
+  }
   abrirConvocatoria() {
     this.convocatoriaModalOpen = true;
     this.cambiarEquipoConvocatoria();
   }
   cerrarConvocatoria() {
     this.convocatoriaModalOpen = false;
+  }
+  seleccionarTitularCambio(convocatoria: ConvocatoriaPartido) {
+    this.titularCambio = convocatoria;
+  }
+  seleccionarSuplenteCambio(convocatoria: ConvocatoriaPartido) {
+    this.suplenteCambio = convocatoria;
+  }
+  realizarCambio() {
+    const usuarioId = this.crud.obtenerUsuario().id;
+    if (!usuarioId || !this.partido.id || !this.titularCambio?.id || !this.suplenteCambio?.id) {
+      this.mostrarError({ error: { message: 'Selecciona un titular y un suplente del mismo equipo.' } });
+      return;
+    }
+    this.crud.sustituirJugador(this.partido.id, this.titularCambio.id, this.suplenteCambio.id, usuarioId).subscribe({
+      next: () => { this.titularCambio = undefined; this.suplenteCambio = undefined; this.cargarConvocatorias(); this.cargarEventos(); },
+      error: error => this.mostrarError(error)
+    });
   }
   titulares(): ConvocatoriaPartido[] {
     return this.convocatorias.filter(convocatoria => convocatoria.titular);
@@ -145,6 +184,19 @@ export class PartidoPage implements OnInit {
   }
   cerrarEventos() {
     this.eventoModalOpen = false;
+  }
+  abrirPerfilJugador(jugador?: Jugador) {
+    if (!jugador?.id) return;
+    this.perfilJugador = jugador;
+    this.perfilJugadorModalOpen = true;
+    this.crud.obtenerPerfilJugador(jugador.id, this.partido.torneo?.id).subscribe(resp => this.perfilJugadorData = resp, error => this.mostrarError(error));
+  }
+  cerrarPerfilJugador() { this.perfilJugadorModalOpen = false; }
+  estadisticaJugador(tipo: string): number {
+    return this.eventos.filter(evento => evento.jugador?.id === this.perfilJugador?.id && evento.tipo === tipo).length;
+  }
+  abrirEquipo(equipo?: Equipo) {
+    if (equipo?.id && this.partido.torneo?.id) this.router.navigateByUrl(`/auth/torneos/torneo/${this.partido.torneo.id}/equipo/${equipo.id}`);
   }
   cambiarNumeroUniforme(convocatoria: ConvocatoriaPartido) {
     const usuarioId = this.crud.obtenerUsuario().id;
@@ -237,7 +289,7 @@ export class PartidoPage implements OnInit {
     }, error => this.mostrarError(error));
   }
   mostrarEscudo(imagen: any) {
-    return 'data:image/png;base64,' +imagen;
+    return imagen ? 'data:image/png;base64,' + imagen : '';
   }
   eventosPartido(btn: IonButton) {
     if (!this.validarOrganizador) {

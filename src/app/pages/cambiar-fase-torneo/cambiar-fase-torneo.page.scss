@@ -8,7 +8,7 @@
 
   .builder-intro {
     margin: 16px;
-    border-left: 4px solid #3880ff;
+    border-left: 4px solid var(--app-coral);
   }
 
   .builder-intro ion-card-content {
@@ -21,25 +21,25 @@
   }
   
   .example-list {
-    border: solid 1px #3880ff;
+    border: solid 1px var(--app-border);
     min-height: 60px;
-    background:#3880ff;
-    border-radius: 4px;
+    background:var(--app-surface-muted);
+    border-radius: var(--app-radius);
     overflow: hidden;
     display: block;
   }
   
   .example-box {
     padding: 5px 10px;
-    border-bottom: solid 1px #404040;
-    color: white;
+    border-bottom: solid 1px var(--app-border);
+    color: var(--app-ink);
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
     box-sizing: border-box;
     cursor: move;
-    background: #3880ff;
+    background: var(--app-surface);
     font-size: 14px;
   }
   

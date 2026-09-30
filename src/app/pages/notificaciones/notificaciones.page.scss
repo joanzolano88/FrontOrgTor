@@ -1,0 +1,25 @@
+.notification-page { width: min(900px, calc(100% - 28px)); margin: 24px auto 40px; }
+.page-heading { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.eyebrow { color: var(--ion-color-medium); font-size: 12px; font-weight: 700; text-transform: uppercase; }
+.page-heading h1 { margin: 5px 0 0; font-size: 28px; }
+.notification-count { display: grid; place-items: center; min-width: 34px; height: 34px; padding: 0 8px; border-radius: 17px; color: #fff; background: var(--app-coral); font-weight: 700; }
+.notification-list { display: grid; gap: 10px; }
+.notification-item { display: grid; grid-template-columns: 42px minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 14px; border: 1px solid var(--ion-color-light-shade); border-left: 4px solid transparent; border-radius: 10px; background: var(--ion-background-color); }
+.notification-item.unread { border-left-color: var(--app-coral); }
+.notification-item.action-item { background: color-mix(in srgb, var(--ion-color-warning) 8%, var(--ion-background-color)); }
+.notification-icon { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; color: var(--app-teal); background: var(--app-mint); font-size: 20px; }
+.notification-copy { min-width: 0; }
+.notification-title-row { display: flex; align-items: center; gap: 8px; }
+.notification-copy h2 { margin: 0; font-size: 16px; }
+.notification-copy p { margin: 5px 0; overflow-wrap: anywhere; }
+.notification-copy time { color: var(--ion-color-medium); font-size: 12px; }
+.empty-state { display: grid; justify-items: center; gap: 8px; margin: 14vh auto; color: var(--ion-color-medium); text-align: center; }
+.empty-state ion-icon { font-size: 36px; }
+.empty-state h2, .empty-state p { margin: 0; }
+.error-note { display: block; margin: 16px 0; }
+.loading-spinner { display: block; margin: 40px auto; }
+@media (max-width: 620px) {
+  .notification-item { grid-template-columns: 36px minmax(0, 1fr); }
+  .notification-icon { width: 34px; height: 34px; }
+  .notification-item ion-button { grid-column: 2; justify-self: start; margin: 0; }
+}

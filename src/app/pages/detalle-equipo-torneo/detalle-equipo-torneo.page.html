@@ -1,0 +1,68 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start"><ion-back-button [defaultHref]="'/auth/torneos/torneo/' + torneoId + '/equipo/' + equipoId"></ion-back-button></ion-buttons>
+    <ion-title>{{ equipo.nombre || 'Equipo' }} · {{ participacion?.torneo?.nombre || 'Torneo' }}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <main class="participation-page" *ngIf="!cargando && participacion">
+    <header class="page-heading">
+      <div><span class="eyebrow">Participación del equipo</span><h1>{{ participacion.torneo?.nombre }}</h1></div>
+      <ion-badge color="success">{{ participacion.estado }}</ion-badge>
+    </header>
+
+    <section class="stats-grid">
+      <div><span>Fase</span><strong>{{ participacion.faseActual || 'Sin organizar' }}</strong></div>
+      <div><span>Grupo / llave</span><strong>{{ participacion.grupo || 'Sin asignar' }}</strong></div>
+      <div><span>Puntos</span><strong>{{ participacion.puntos || 0 }}</strong></div>
+      <div><span>Jugados</span><strong>{{ participacion.partidosJugados || 0 }}</strong></div>
+      <div><span>G / E / P</span><strong>{{ participacion.partidosGanados || 0 }} / {{ participacion.partidosEmpatados || 0 }} / {{ participacion.partidosPerdidos || 0 }}</strong></div>
+      <div><span>Goles F / C</span><strong>{{ participacion.golesFavor || 0 }} / {{ participacion.golesContra || 0 }}</strong></div>
+    </section>
+
+    <section class="content-section">
+      <div class="section-heading"><div><span class="eyebrow">Lista del torneo</span><h2>Jugadores inscritos</h2></div></div>
+      <ion-list>
+        <ion-item *ngFor="let item of jugadores">
+          <ion-label>{{ item.jugador?.nombre }}<small>{{ item.jugador?.cedula }}</small></ion-label>
+          <ion-badge slot="end" [color]="item.participando ? 'success' : 'medium'">{{ item.participando ? 'Participó' : 'Inscrito' }}</ion-badge>
+          <ion-button *ngIf="esDelegado && !item.jugoPartido" slot="end" fill="clear" color="danger" aria-label="Retirar jugador" (click)="quitarJugador(item)"><ion-icon slot="icon-only" name="close-circle-outline"></ion-icon></ion-button>
+        </ion-item>
+        <ion-item *ngIf="!jugadores.length"><ion-label>No hay jugadores inscritos en este torneo.</ion-label></ion-item>
+      </ion-list>
+      <div class="add-player" *ngIf="esDelegado">
+        <ion-select interface="popover" label="Agregar jugador del plantel" labelPlacement="floating" [(ngModel)]="jugadorInscripcionId">
+          <ion-select-option *ngFor="let jugador of equipo.listaJugadoresActivos" [value]="jugador.id" [disabled]="jugadorInscrito(jugador.id)">{{ jugador.nombre }}{{ jugadorInscrito(jugador.id) ? ' · Inscrito' : '' }}</ion-select-option>
+        </ion-select>
+        <ion-button [disabled]="!jugadorInscripcionId" (click)="agregarJugador({ id: jugadorInscripcionId })">Inscribir</ion-button>
+      </div>
+    </section>
+
+    <section class="content-section payments-section">
+      <div class="section-heading"><div><span class="eyebrow">Registro financiero</span><h2>Pagos del torneo</h2></div></div>
+      <form class="payment-form" *ngIf="esOrganizador" (ngSubmit)="registrarPago()">
+          <ion-select [(ngModel)]="nuevoPago.tipo" name="tipo" label="Tipo" labelPlacement="floating">
+          <ion-select-option value="INSCRIPCION">Inscripción</ion-select-option><ion-select-option value="ARBITRAJE">Arbitraje</ion-select-option><ion-select-option value="MULTA">Multa</ion-select-option><ion-select-option value="OTRO">Otro</ion-select-option>
+        </ion-select>
+          <ion-select [(ngModel)]="jugadorPagoId" name="pagador" label="Pagador" labelPlacement="floating">
+          <ion-select-option [value]="undefined">Equipo {{ equipo.nombre }}</ion-select-option>
+          <ion-select-option *ngFor="let item of jugadores" [value]="item.jugador?.id">{{ item.jugador?.nombre }}</ion-select-option>
+        </ion-select>
+        <ion-input type="number" min="1" [(ngModel)]="nuevoPago.valor" name="valor" label="Monto recibido" labelPlacement="floating"></ion-input>
+        <ion-input [(ngModel)]="nuevoPago.concepto" name="concepto" label="Concepto" labelPlacement="floating"></ion-input>
+        <ion-input [(ngModel)]="nuevoPago.observacion" name="observacion" label="Observación" labelPlacement="floating"></ion-input>
+        <ion-button type="submit">Registrar pago</ion-button>
+      </form>
+      <ion-list>
+        <ion-item *ngFor="let pago of pagos">
+          <ion-label><strong>{{ pago.tipo }} · ${{ pago.valor | number:'1.0-0':'es-CO' }}</strong><small>{{ pago.fecha | date:'mediumDate' }} · {{ pago.jugadorNombre || pago.equipoNombre }} · {{ pago.concepto || 'Sin concepto' }}</small></ion-label>
+          <ion-button *ngIf="esOrganizador" slot="end" fill="clear" aria-label="Enviar por WhatsApp" (click)="whatsappPago(pago)"><ion-icon slot="icon-only" name="logo-whatsapp"></ion-icon></ion-button>
+        </ion-item>
+        <ion-item *ngIf="!pagos.length"><ion-label>No hay pagos registrados para este equipo y torneo.</ion-label></ion-item>
+      </ion-list>
+    </section>
+  </main>
+  <ion-spinner *ngIf="cargando" class="loading-spinner"></ion-spinner>
+  <ion-note color="danger" *ngIf="error" class="page-error">{{ error }}</ion-note>
+</ion-content>

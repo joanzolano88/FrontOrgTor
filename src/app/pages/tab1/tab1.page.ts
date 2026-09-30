@@ -36,7 +36,7 @@ export class Tab1Page implements OnInit {
     this.router.navigateByUrl('/auth/partidos/partido/' + id);
   }
   escudoEquipo(equipo?: Equipo): string {
-    return equipo?.escudo ? 'data:image/png;base64,' + equipo.escudo : 'assets/icon/favicon.png';
+    return equipo?.escudo ? 'data:image/png;base64,' + equipo.escudo : '';
   }
   mostrarFecha(fechaPartido: Date) {
     let fecha = new Date(fechaPartido);

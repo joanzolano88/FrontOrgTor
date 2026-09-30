@@ -6,35 +6,49 @@
 </ion-header>
 
 <ion-content>
-  <form #formulario="ngForm" (ngSubmit)="enviar(formulario)">
-    <ion-list>
-      <ion-item>
-        <ion-input label="Torneo" [value]="torneo.nombre" readonly></ion-input>
-      </ion-item>
-      <ion-item>
-        <ion-select label="Equipo" labelPlacement="floating" name="equipoSeleccionado" [value]="equipoSeleccionadoId" (ionChange)="seleccionarEquipo($event.detail.value)">
-          <ion-select-option [value]="null">Crear equipo nuevo</ion-select-option>
-          <ion-select-option *ngFor="let equipoExistente of equiposDisponibles" [value]="equipoExistente.id">
-            {{ equipoExistente.nombre }}
-          </ion-select-option>
-        </ion-select>
-      </ion-item>
-      <ion-item>
-        <ion-input label="Nombre del equipo" labelPlacement="floating" name="nombre" [(ngModel)]="equipo.nombre" [readonly]="equipoSeleccionadoId !== null" required minlength="3"></ion-input>
-      </ion-item>
-      <ion-item *ngIf="equipoSeleccionadoId === null">
-        <ion-label>Escudo</ion-label>
-        <input #archivo type="file" accept="image/png,image/jpeg" hidden (change)="cargarEscudo($event, imagen)">
-        <ion-thumbnail slot="end"><img #imagen alt="Escudo del equipo" src="https://ionicframework.com/docs/img/demos/thumbnail.svg" (click)="archivo.click()"></ion-thumbnail>
-      </ion-item>
-      <ion-item>
-        <ion-input label="Delegado" [value]="equipo.delegado?.nombre" readonly></ion-input>
-      </ion-item>
-      <ion-item>
-        <ion-input label="Celular" [value]="equipo.delegado?.numeroCelular" readonly></ion-input>
-      </ion-item>
-    </ion-list>
-    <ion-button expand="block" type="submit" class="ion-margin">Enviar solicitud</ion-button>
-  </form>
+  <div class="request-shell">
+    <div class="header-card">
+      <span class="eyebrow">Solicitud de inscripción</span>
+      <h2>{{ torneo.nombre || 'Torneo' }}</h2>
+      <p>Elige el equipo con el que vas a participar o crea uno nuevo.</p>
+    </div>
+
+    <form #formulario="ngForm" (ngSubmit)="enviar(formulario)" class="request-form">
+      <div class="option-card">
+        <div class="option-head">
+          <ion-icon name="people-outline"></ion-icon>
+          <div>
+            <h3>Equipo registrado</h3>
+            <small>Usa un equipo que ya hayas creado</small>
+          </div>
+        </div>
+
+        <ion-item lines="none" class="select-wrap">
+          <ion-select label="Selecciona un equipo" labelPlacement="floating" name="equipoSeleccionado" [value]="equipoSeleccionadoId" (ionChange)="seleccionarEquipo($event.detail.value)">
+            <ion-select-option [value]="null">Selecciona un equipo</ion-select-option>
+            <ion-select-option *ngFor="let equipoExistente of equiposDisponibles" [value]="equipoExistente.id">
+              {{ equipoExistente.nombre }}
+            </ion-select-option>
+          </ion-select>
+        </ion-item>
+
+        <ion-item *ngIf="equipoSeleccionadoId !== null" lines="none" class="field-wrap">
+          <ion-input label="Nombre del equipo" labelPlacement="floating" name="nombre" [(ngModel)]="equipo.nombre" readonly required></ion-input>
+        </ion-item>
+      </div>
+
+      <div class="summary-card">
+        <ion-item lines="none">
+          <ion-input label="Delegado" [value]="equipo.delegado?.nombre" readonly></ion-input>
+        </ion-item>
+        <ion-item lines="none">
+          <ion-input label="Celular" [value]="equipo.delegado?.numeroCelular" readonly></ion-input>
+        </ion-item>
+      </div>
+
+      <ion-button expand="block" type="submit" class="submit-btn">Enviar solicitud</ion-button>
+    </form>
+  </div>
+
   <ion-alert [isOpen]="alertOpen" [header]="alertOpen ? 'Aviso' : ''" [message]="mensajeError" [buttons]="alertButtons" (didDismiss)="alertOpen = false"></ion-alert>
 </ion-content>

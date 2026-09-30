@@ -40,17 +40,21 @@
               <ion-badge color="{{colorEstadoPartido(partido)}}">{{ partido.estadoPartido }}</ion-badge>
             </div>
             <div class="teams-line">
-              <div class="team team-home" [class.winner]="ganadorPartido(partido) === 'LOCAL'"><span>{{partido.equipoLocal?.nombre}}</span><img [src]="escudoEquipo(partido.equipoLocal)" alt=""></div>
+              <div class="team team-home" [class.winner]="ganadorPartido(partido) === 'LOCAL'"><span>{{partido.equipoLocal?.nombre}}</span><img appImageFallback="assets/images/shield-placeholder.svg" [src]="escudoEquipo(partido.equipoLocal)" [alt]="'Escudo de ' + (partido.equipoLocal?.nombre || 'equipo local')"></div>
               <div class="score-preview"><strong>{{ partido.anotacionesEquipoLocal ?? '-' }}</strong><small>VS</small><strong>{{ partido.anotacionesEquipoVisitante ?? '-' }}</strong></div>
-              <div class="team team-away" [class.winner]="ganadorPartido(partido) === 'VISITANTE'"><img [src]="escudoEquipo(partido.equipoVisitante)" alt=""><span>{{partido.equipoVisitante?.nombre}}</span></div>
+              <div class="team team-away" [class.winner]="ganadorPartido(partido) === 'VISITANTE'"><img appImageFallback="assets/images/shield-placeholder.svg" [src]="escudoEquipo(partido.equipoVisitante)" [alt]="'Escudo de ' + (partido.equipoVisitante?.nombre || 'equipo visitante')"><span>{{partido.equipoVisitante?.nombre}}</span></div>
             </div>
             <div class="penalty-score" *ngIf="(partido.penaltisEquipoLocal ?? 0) > 0 || (partido.penaltisEquipoVisitante ?? 0) > 0">
               Penaltis: {{ partido.penaltisEquipoLocal ?? 0 }} - {{ partido.penaltisEquipoVisitante ?? 0 }}
             </div>
             <div class="partido-card-bottom">
               <span>
-                <ion-icon name="map" size="large"></ion-icon>
+                <ion-icon name="location-outline" size="large"></ion-icon>
                 {{ partido.cancha?.nombre || 'Cancha pendiente' }}
+              </span>
+              <span *ngIf="esOrganizadorDelTorneo(partido) && partido.estadoPartido == 'PROGRAMADO'">
+                <ion-button fill="clear" size="small" title="Enviar programación al delegado local" (click)="$event.stopPropagation(); abrirWhatsappProgramacion(partido, partido.equipoLocal)"><ion-icon slot="icon-only" name="logo-whatsapp"></ion-icon></ion-button>
+                <ion-button fill="clear" size="small" title="Enviar programación al delegado visitante" (click)="$event.stopPropagation(); abrirWhatsappProgramacion(partido, partido.equipoVisitante)"><ion-icon slot="icon-only" name="logo-whatsapp"></ion-icon></ion-button>
               </span>
               <span>Ver partido</span>
             </div>
@@ -78,7 +82,7 @@
         <ion-item>
           <ion-datetime minuteValues="0,15,30,45" [(ngModel)]="partidoSeleccionado.fechaPartido" name="fecha"></ion-datetime>
         </ion-item>
-        <ion-note class="ion-padding-horizontal">Duración: {{ torneo.duracionMinutos || 90 }} minutos. Se reserva automáticamente una hora antes del siguiente partido.</ion-note>
+        <ion-note class="ion-padding-horizontal">Duración: {{ torneo.duracionMinutos || 90 }} minutos. La cancha queda disponible al terminar; el descanso de una hora solo aplica al mismo equipo entre torneos distintos.</ion-note>
         <ion-item>
           <ion-select label="Selecionar Cancha" placeholder="Cancha" [(ngModel)]="partidoSeleccionado.cancha!.id" name="canhca">
             <ion-select-option [value]="cancha.id" *ngFor="let cancha of listaCanchas">{{cancha.nombre}}</ion-select-option>

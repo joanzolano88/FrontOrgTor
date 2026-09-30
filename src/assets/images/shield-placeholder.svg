@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" role="img" aria-label="Escudo predeterminado">
+  <rect width="160" height="160" rx="28" fill="#26353a"/>
+  <path d="M80 24 126 42v35c0 31-19 50-46 63-27-13-46-32-46-63V42z" fill="#5aa99e"/>
+  <path d="M80 37 114 50v27c0 23-13 37-34 49-21-12-34-26-34-49V50z" fill="#edf3f1" opacity=".94"/>
+  <path d="M80 41v78c21-12 34-26 34-42V50z" fill="#e17a62"/>
+  <circle cx="80" cy="79" r="12" fill="#d49a43"/>
+</svg>

@@ -51,6 +51,35 @@
           <ion-select-option [value]="deporte" *ngFor="let deporte of deportes">{{ deporte.nombre }} ({{ deporte.minimoTitulares }}-{{ deporte.maximoTitulares }})</ion-select-option>
         </ion-select>
       </ion-item>
+      <ion-item class="ion-padding-horizontal">
+        <ion-select interface="action-sheet" [(ngModel)]="torneo.modoCambioJugador" label="Cambios de jugadores" labelPlacement="floating" name="modoCambios" required>
+          <ion-select-option value="LIBRES">Libres</ion-select-option>
+          <ion-select-option value="SALIR_ENTRAR">Salir y entrar</ion-select-option>
+          <ion-select-option value="LIMITADOS">Limitados</ion-select-option>
+        </ion-select>
+      </ion-item>
+      <ion-item class="ion-padding-horizontal" *ngIf="torneo.modoCambioJugador == 'LIMITADOS'">
+        <ion-input [(ngModel)]="torneo.maximoCambios" type="number" min="1" label="Cantidad máxima de cambios" labelPlacement="floating" name="maximoCambios" required></ion-input>
+      </ion-item>
+      <ion-item class="ion-padding-horizontal" *ngIf="torneo.modalidadTorneo != 'LIGA'">
+        <ion-select [(ngModel)]="torneo.faseInicioEliminatorias" label="Fase inicial de eliminatorias" labelPlacement="floating" name="faseInicioEliminatorias" required>
+          <ion-select-option value="TREINTAIDOSAVOS">Treintaidosavos</ion-select-option>
+          <ion-select-option value="DIECISEISAVOS">Dieciseisavos</ion-select-option>
+          <ion-select-option value="OCTAVOS">Octavos</ion-select-option>
+          <ion-select-option value="CUARTOS">Cuartos</ion-select-option>
+          <ion-select-option value="SEMIFINAL">Semifinal</ion-select-option>
+          <ion-select-option value="FINAL">Final</ion-select-option>
+        </ion-select>
+      </ion-item>
+      <ion-item class="ion-padding-horizontal">
+        <ion-input [(ngModel)]="torneo.amarillasParaSuspension" type="number" min="1" label="Amarillas para suspensión" labelPlacement="floating" name="amarillasParaSuspension"></ion-input>
+      </ion-item>
+      <ion-item class="ion-padding-horizontal">
+        <ion-input [(ngModel)]="torneo.partidosSuspensionRoja" type="number" min="1" label="Partidos de suspensión por roja o doble amarilla" labelPlacement="floating" name="partidosSuspensionRoja"></ion-input>
+      </ion-item>
+      <ion-item class="ion-padding-horizontal">
+        <ion-checkbox [(ngModel)]="torneo.expulsionPermanenteTorneo" name="expulsionPermanenteTorneo">Sanción permanente por expulsión o acumulación</ion-checkbox>
+      </ion-item>
       <ion-item class="ion-padding-horizontal" [ngClass]="{'error-input': tieneError(f, 'modalidad')}"
         [ngStyle]="{'--border-color': tieneError(f, 'modalidad') ? '#f44336' : '#404040'}">
         <ion-select interface="action-sheet" [(ngModel)]="torneo.modalidadTorneo" label="Modalidad Torneo" labelPlacement="floating" name="modalidad" 
@@ -82,6 +111,14 @@
         <ion-input type="number" [(ngModel)]="torneo.cantidadEquipos" label="Cantidad de Equipos {{textoCantidadEquipos()}}" labelPlacement="floating"
           name="cantidad-equi" required></ion-input>
       </ion-item>
+      <ng-container *ngIf="torneo.modalidadTorneo == 'ELIMINATORIAS_GRUPOS'">
+        <ion-item class="ion-padding-horizontal">
+          <ion-input type="number" min="1" [(ngModel)]="torneo.cantidadGruposEliminatoriaGrupos" label="Grupos en fase previa a eliminatorias" labelPlacement="floating" name="cantidadGruposEliminatoriaGrupos" required></ion-input>
+        </ion-item>
+        <ion-item class="ion-padding-horizontal">
+          <ion-input type="number" min="1" [(ngModel)]="torneo.cantidadEquiposEliminatoriaGrupos" label="Equipos por grupo en fase previa" labelPlacement="floating" name="cantidadEquiposEliminatoriaGrupos" required></ion-input>
+        </ion-item>
+      </ng-container>
       <!--
       <ion-item class="ion-padding-horizontal" [ngClass]="{'error-input': f.submitted && archivo == null}"
         [ngStyle]="{'--border-color': f.submitted && archivo == null ? '#f44336' : '#404040'}">

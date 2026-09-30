@@ -1,7 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { CrudService } from 'src/app/services/crud.service';
-import { Partido } from 'src/models/Partido';
 
 @Component({
   selector: 'app-agregar-partido',
@@ -9,24 +8,16 @@ import { Partido } from 'src/models/Partido';
   styleUrls: ['./agregar-partido.page.scss'],
   standalone: false
 })
-export class AgregarPartidoPage implements OnInit {
+export class AgregarPartidoPage {
 
-  listaPartidos: Partido[] = [];
-  cantidadPartidos: number | null = null;
-  fecha: string = new Date().toISOString();
-  hora: string = new Date().toISOString();
+  mensaje = '';
 
   constructor(private crud: CrudService, private route: ActivatedRoute) { }
 
-  ngOnInit() {
-  }
-  
   generarPartidos() {
-    this.crud.obtener("partido/generar_partidos/" + this.route.snapshot.paramMap.get('idTorneo')).subscribe((resp: Partido[]) =>{
-      console.log(resp);
+    this.crud.obtener("partido/generar_partidos/" + this.route.snapshot.paramMap.get('idTorneo')).subscribe({
+      next: () => this.mensaje = 'Generación de partidos completada.',
+      error: err => this.mensaje = err?.error?.message || 'No se pudieron generar los partidos.'
     });
-  }
-  generarPartido() {  
-    
   }
 }

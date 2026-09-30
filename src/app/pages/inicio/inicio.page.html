@@ -8,28 +8,58 @@
   <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
     <ion-refresher-content></ion-refresher-content>
   </ion-refresher>
-  <ion-list class="partidos-list">
-    <ion-item class="filters-panel">
-      <ion-datetime-button datetime="datetime" class="MuiDialog-paperFullScreen"></ion-datetime-button>
-      <ion-modal [keepContentsMounted]="true">
-        <ng-template>
-          <ion-datetime id="datetime" presentation="date" [(ngModel)]="fecha"></ion-datetime>
-        </ng-template>
-      </ion-modal>
-    </ion-item>
-    <ion-item class="filters-panel">
-      <ion-select label="Selecionar Torneo" [(ngModel)]="torneoId">
-        <ion-select-option [value]="toreno.id" *ngFor="let toreno of listaTorneo">
-          {{ toreno.nombre }}
+  <section class="search-panel">
+    <div class="date-picker" aria-label="Seleccionar fecha de partidos">
+      <ion-button fill="clear" class="date-arrow" aria-label="Día anterior" (click)="moverFecha(-1)">
+        <ion-icon slot="icon-only" name="chevron-back"></ion-icon>
+      </ion-button>
+      <div class="date-options">
+        <button *ngFor="let dia of fechasVisibles" type="button" class="date-option"
+          [class.selected]="dia.getTime() === fecha.getTime()" [attr.aria-pressed]="dia.getTime() === fecha.getTime()"
+          (click)="seleccionarFecha(dia)">
+          <span>{{ dia.getDate() }}</span>
+          <small>{{ etiquetaFecha(dia).split(' ')[1] }}</small>
+        </button>
+      </div>
+      <ion-button fill="clear" class="date-arrow" aria-label="Día siguiente" (click)="moverFecha(1)">
+        <ion-icon slot="icon-only" name="chevron-forward"></ion-icon>
+      </ion-button>
+    </div>
+
+    <div class="filters-grid">
+      <ion-select label="País" labelPlacement="stacked" placeholder="Seleccionar país"
+        [ngModel]="paisId" (ionChange)="seleccionarPais($event.detail.value)">
+        <ion-select-option *ngFor="let pais of paises" [value]="pais.id">{{ pais.nombre }}</ion-select-option>
+      </ion-select>
+      <ion-select label="Departamento" labelPlacement="stacked" placeholder="Seleccionar departamento"
+        [disabled]="!paisId" [ngModel]="departamentoId" (ionChange)="seleccionarDepartamento($event.detail.value)">
+        <ion-select-option *ngFor="let departamento of departamentos" [value]="departamento.id">
+          {{ departamento.nombre }}
         </ion-select-option>
       </ion-select>
-    </ion-item>
-    <ion-item class="filters-panel">
-      <ion-button size="default"
-        (click)="listarPartidosFechaTorneo(fecha!, torneoId!)">
-        Buscar
+      <ion-select label="Ciudad" labelPlacement="stacked" placeholder="Seleccionar ciudad"
+        [disabled]="!departamentoId" [ngModel]="ciudadId" (ionChange)="seleccionarCiudad($event.detail.value)">
+        <ion-select-option *ngFor="let ciudad of ciudades" [value]="ciudad.id">{{ ciudad.nombre }}</ion-select-option>
+      </ion-select>
+      <ion-select label="Torneo" labelPlacement="stacked" placeholder="Seleccionar torneo"
+        [disabled]="!ciudadId || cargandoTorneos || listaTorneo.length === 0" [ngModel]="torneoId"
+        (ionChange)="seleccionarTorneo($event.detail.value)">
+        <ion-select-option *ngFor="let torneo of listaTorneo" [value]="torneo.value">{{ torneo.label }}</ion-select-option>
+      </ion-select>
+    </div>
+
+    <div class="search-actions">
+      <span class="location-hint" *ngIf="ciudadId && !cargandoTorneos && listaTorneo.length === 0">No hay torneos registrados en esta ciudad.</span>
+      <ion-button class="search-button" (click)="listarPartidosFechaTorneo()"
+        [disabled]="!torneoId || buscandoPartidos">
+        <ion-spinner *ngIf="buscandoPartidos" name="crescent"></ion-spinner>
+        <ion-icon *ngIf="!buscandoPartidos" slot="start" name="search-outline"></ion-icon>
+        {{ buscandoPartidos ? 'Buscando' : 'Buscar partidos' }}
       </ion-button>
-    </ion-item>
+    </div>
+  </section>
+
+  <ion-list class="partidos-list">
     @for (partido of listaPartidos; track partido.id) {
     <ion-card class="partido-card" (click)="verPartido(partido.id!)">
       <ion-card-header class="partido-card-top">
@@ -38,9 +68,9 @@
       </ion-card-header>
       <ion-card-content>
         <div class="teams-line">
-          <div class="team team-home" [class.winner]="ganadorPartido(partido) === 'LOCAL'"><span>{{ partido.equipoLocal?.nombre }}</span><img [src]="escudoEquipo(partido.equipoLocal)" alt=""></div>
+          <div class="team team-home" [class.winner]="ganadorPartido(partido) === 'LOCAL'"><img appImageFallback="assets/images/shield-placeholder.svg" [src]="escudoEquipo(partido.equipoLocal)" [alt]="'Escudo de ' + (partido.equipoLocal?.nombre || 'equipo local')"><span>{{ partido.equipoLocal?.nombre || 'Equipo local' }}</span></div>
           <div class="score-preview"><strong>{{ partido.anotacionesEquipoLocal ?? '-' }}</strong><small>VS</small><strong>{{ partido.anotacionesEquipoVisitante ?? '-' }}</strong></div>
-          <div class="team team-away" [class.winner]="ganadorPartido(partido) === 'VISITANTE'"><img [src]="escudoEquipo(partido.equipoVisitante)" alt=""><span>{{ partido.equipoVisitante?.nombre }}</span></div>
+          <div class="team team-away" [class.winner]="ganadorPartido(partido) === 'VISITANTE'"><img appImageFallback="assets/images/shield-placeholder.svg" [src]="escudoEquipo(partido.equipoVisitante)" [alt]="'Escudo de ' + (partido.equipoVisitante?.nombre || 'equipo visitante')"><span>{{ partido.equipoVisitante?.nombre || 'Equipo visitante' }}</span></div>
         </div>
         <div class="penalty-score" *ngIf="(partido.penaltisEquipoLocal ?? 0) > 0 || (partido.penaltisEquipoVisitante ?? 0) > 0">
           Penaltis: {{ partido.penaltisEquipoLocal ?? 0 }} - {{ partido.penaltisEquipoVisitante ?? 0 }}
@@ -52,5 +82,10 @@
       </ion-card-content>
     </ion-card>
     }
+    <div class="empty-state" *ngIf="busquedaRealizada && !buscandoPartidos && listaPartidos.length === 0">
+      <ion-icon name="football-outline"></ion-icon>
+      <strong>No hay partidos para esta fecha</strong>
+      <span>Prueba con otro día o torneo de {{ nombreCiudadSeleccionada() }}.</span>
+    </div>
   </ion-list>
 </ion-content>

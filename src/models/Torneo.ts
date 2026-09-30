@@ -26,4 +26,9 @@ export class Torneo {
     cantidadGruposEliminatoriaGrupos?: number;
     modalidadEliminatoriasGrupos?: ModalidadFase;
     deporte?: Deporte;
+    modoCambioJugador?: 'LIBRES' | 'SALIR_ENTRAR' | 'LIMITADOS';
+    maximoCambios?: number;
+    amarillasParaSuspension?: number;
+    partidosSuspensionRoja?: number;
+    expulsionPermanenteTorneo?: boolean;
 }

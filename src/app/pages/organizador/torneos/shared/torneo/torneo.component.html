@@ -28,7 +28,6 @@
       } @else if (torneo.estadoTorneo == 'INSCRIPCIONES' || torneo.estadoTorneo == 'INSCRIPCIONES_ACTIVO') {
         <ion-button (click)="solicitarEquipo()">Solicitar participación</ion-button>
       }
-      <ion-button fill="solid" color="success" *ngIf="esJugador && (torneo.estadoTorneo == 'ACTIVO' || torneo.estadoTorneo == 'INSCRIPCIONES_ACTIVO')" (click)="abrirRegistroJugador()"><ion-icon size="large" slot="start" name="person-add-outline"></ion-icon>Unirme como jugador</ion-button>
     </div>
   </ion-card>
   <ion-card class="venues-panel">
@@ -56,26 +55,6 @@
     </div>
     <div class="empty-state" *ngIf="!listCancha.length">No hay canchas registradas para este torneo.</div>
   </ion-card>
-  <ion-modal [isOpen]="registroJugadorOpen" (didDismiss)="cerrarRegistroJugador()">
-    <ng-template>
-      <ion-header>
-        <ion-toolbar>
-          <ion-title>Registrarme en un equipo</ion-title>
-          <ion-buttons slot="end"><ion-button (click)="cerrarRegistroJugador()">Cerrar</ion-button></ion-buttons>
-        </ion-toolbar>
-      </ion-header>
-      <ion-content class="ion-padding">
-        <p class="join-copy">Selecciona el equipo del torneo al que perteneces.</p>
-        <ion-radio-group [(ngModel)]="equipoSeleccionado">
-          <ion-item *ngFor="let equipo of equipos">
-            <ion-radio slot="start" [value]="equipo"></ion-radio>
-            <ion-label><strong>{{ equipo.nombre }}</strong><small>{{ torneo.nombre }}</small></ion-label>
-          </ion-item>
-        </ion-radio-group>
-        <ion-button expand="block" color="success" (click)="registrarJugador()">Confirmar registro</ion-button>
-      </ion-content>
-    </ng-template>
-  </ion-modal>
   <ion-alert
   [isOpen]="isAlertOpen"
   header="{{mensajeError}}"

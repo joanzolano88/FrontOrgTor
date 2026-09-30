@@ -47,7 +47,7 @@ export class SolicitudesEquipoPage {
       }
     });
     this.crud.obtenerSolicitudesTodas(this.idTorneo).subscribe({
-      next: (equipos: Equipo[]) => this.aceptadas = (equipos || []).filter(equipo => equipo.faseActual != null),
+      next: (equipos: Equipo[]) => this.aceptadas = (equipos || []).filter(equipo => equipo.participacionTorneo?.estado === 'ACEPTADO'),
       error: () => this.aceptadas = []
     });
   }
@@ -65,10 +65,11 @@ export class SolicitudesEquipoPage {
   }
 
   confirmar(solicitud: Equipo) {
-    if (!solicitud.id) {
+    const idParticipacion = solicitud.participacionTorneo?.id;
+    if (!idParticipacion) {
       return;
     }
-    this.crud.aceptarSolicitudEquipo(solicitud.id).subscribe({
+    this.crud.aceptarSolicitudEquipo(idParticipacion).subscribe({
       next: (equipoAceptado: Equipo) => {
         this.solicitudes = this.solicitudes.filter(equipo => equipo.id !== solicitud.id);
         this.aceptadas = [equipoAceptado, ...this.aceptadas.filter(equipo => equipo.id !== equipoAceptado.id)];
@@ -95,10 +96,11 @@ export class SolicitudesEquipoPage {
   }
 
   confirmarRechazo(solicitud: Equipo) {
-    if (!solicitud.id) {
+    const idParticipacion = solicitud.participacionTorneo?.id;
+    if (!idParticipacion) {
       return;
     }
-    this.crud.rechazarSolicitudEquipo(solicitud.id).subscribe({
+    this.crud.rechazarSolicitudEquipo(idParticipacion).subscribe({
       next: () => {
         this.mensajeError = 'Solicitud rechazada correctamente.';
         this.alertOpen = true;

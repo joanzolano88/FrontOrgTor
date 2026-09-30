@@ -2,10 +2,12 @@ import { FaseActual } from "src/enums/FaseActual";
 import { Jugador } from "./Jugador";
 import { Persona } from "./Persona";
 import { Torneo } from "./Torneo";
+import { Ciudad } from "./Ciudad";
 
 export class Equipo {
     id?: number;
     nombre?: string;
+    ciudad?: Ciudad;
     puntos?: number;
     escudo?: string;
     bandera?: string;
@@ -30,4 +32,5 @@ export class Equipo {
     anotacionesEnContraEliminatoria?: number;
     listaJugadoresActivos?: Jugador[];
     listaJugadoresInactivos?: Jugador[];
+    participacionTorneo?: any;
 }

@@ -7,9 +7,9 @@
 
 .partidos-toolbar { padding: 14px 14px 8px; ; border-bottom: 1px solid #e5eaec; }
 .filter-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
-.filter-row ion-select { --border-radius: 9px; color: var(--ink); }
+.filter-row ion-select { color: var(--ink); }
 ion-list { background: transparent; margin: 10px 12px; }
-.group-header { --background: #17212b; --color: #fff; margin-bottom: 2px; }
+.group-header { --color: #fff; margin-bottom: 2px; }
 .group-kicker { display: block; color: #ffb58f; font-size: 10px; letter-spacing: 1.4px; font-weight: 700; }
 .group-header strong { display: block; font-size: 17px; margin-top: 2px; }
 .partido-card { display: block; padding: 14px 12px; ; border-bottom: 1px solid #edf0f1; cursor: pointer; 
@@ -22,11 +22,11 @@ ion-list { background: transparent; margin: 10px 12px; }
 .partido-card-top ion-badge { font-size: 15px; }
 .teams-line { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 8px; margin: 14px 0; color: var(--ink); }
 .team { display: flex; align-items: center; gap: 8px; font-weight: 700; min-width: 0;}
-.team span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap;  text-wrap: auto; }
+.team span { min-width: 0; white-space: normal; overflow-wrap: anywhere; line-height: 1.2; }
 .team-home { justify-content: flex-end; text-align: right; }
-.team.winner { color: #2f80ed; }
-.team.winner img { outline: 3px solid #2f80ed; }
-.team img { width: 32px; height: 32px; object-fit: contain; border-radius: 50%; background: #eef1f2; padding: 4px; }
+.team.winner { color: var(--ion-color-success); }
+.team.winner img { outline: 3px solid var(--ion-color-success); }
+.team img { width: 32px; height: 32px; object-fit: contain; border-radius: 50%; background: var(--app-surface-muted); padding: 4px; }
 .score-preview { display: flex; align-items: center; gap: 7px; color: var(--ink); }
 .score-preview strong { font-size: 21px; min-width: 15px; text-align: center; }
 .score-preview small { color: var(--muted); font-size: 9px; font-weight: 700; }
@@ -40,3 +40,11 @@ ion-list { background: transparent; margin: 10px 12px; }
 .partido-card-bottom span:last-child { font-weight: 700; }
 .modal-matchup { display: flex; justify-content: center; align-items: center; gap: 10px; padding: 10px 0 18px; color: var(--ink); }
 .modal-matchup span { font-weight: 800; }
+
+@media (max-width: 420px) {
+	.teams-line { grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 5px; }
+	.team { flex-direction: column; gap: 5px; text-align: center; }
+	.team-home { justify-content: flex-start; }
+	.team img { flex: 0 0 32px; }
+	.score-preview { gap: 4px; }
+}

@@ -5,6 +5,8 @@ import { Router } from '@angular/router';
 import { NgForm } from '@angular/forms';
 import { CrudService } from 'src/app/services/crud.service';
 import { Usuario } from 'src/models/Usuario';
+import { Equipo } from 'src/models/Equipo';
+import { Torneo } from 'src/models/Torneo';
 
 @Component({
   selector: 'app-tab3',
@@ -13,7 +15,7 @@ import { Usuario } from 'src/models/Usuario';
   standalone: false
 })
 export class Tab3Page implements OnInit {
-  imagenDef = "../../../assets/icon/usuario.png";
+  imagenDef = "assets/images/avatar-placeholder.svg";
   foto: any;
   identificacion: any;
   usuario: Usuario = new Usuario();
@@ -25,6 +27,15 @@ export class Tab3Page implements OnInit {
   paisSeleccionado?: number;
   departamentoSeleccionado?: number;
   ciudadSeleccionada?: number;
+  torneosCreados: Torneo[] = [];
+  equiposDelegado: Equipo[] = [];
+  equiposJugador: Equipo[] = [];
+  participacionesJugador: any[] = [];
+  invitacionesEquipoJugador: any[] = [];
+  cargandoInvitacionesEquipo = false;
+  errorInvitacionesEquipo = '';
+  notificacionesPendientes = 0;
+  editarPerfilOpen = false;
 
   constructor(private router: Router, private crud: CrudService, public extraer: ExtraerInfService,
           private alertController: AlertController) {
@@ -47,7 +58,11 @@ export class Tab3Page implements OnInit {
         this.crud.obtenerParametro(usuarioSesion.id, 'usuario').subscribe({
           next: (usuarioActual: Usuario) => {
             this.usuario = usuarioActual;
+            this.imagenDef = usuarioActual.foto ? 'data:image/png;base64,' + usuarioActual.foto : 'assets/images/avatar-placeholder.svg';
             localStorage.setItem('usuario', JSON.stringify(usuarioActual));
+            this.cargarPerfilRol(usuarioActual.id);
+            if (usuarioActual.id) this.cargarContadorNotificaciones(usuarioActual.id);
+            if (usuarioActual.tipoUsuario === 'JUGADOR' && usuarioActual.id) this.cargarInvitacionesEquipo(usuarioActual.id);
             this.cargarPaises();
           },
           error: () => this.cargarPaises()
@@ -58,6 +73,87 @@ export class Tab3Page implements OnInit {
     this.usuario = new Usuario();
     this.confirmarContrasena = '';
     this.cargarPaises();
+  }
+
+  private cargarContadorNotificaciones(usuarioId: number) {
+    this.crud.obtenerNotificacionesPendientesCantidad(usuarioId).subscribe({
+      next: cantidad => this.notificacionesPendientes = cantidad || 0,
+      error: () => this.notificacionesPendientes = 0
+    });
+  }
+
+  abrirNotificaciones() {
+    this.router.navigateByUrl('/auth/notificaciones');
+  }
+
+  private cargarPerfilRol(id?: number) {
+    if (!id) return;
+    this.crud.obtenerPerfilCompleto(id).subscribe(perfil => {
+      this.torneosCreados = perfil.torneosCreados || [];
+      this.equiposDelegado = perfil.equiposDelegado || [];
+      this.equiposJugador = perfil.equiposJugador || [];
+      this.participacionesJugador = perfil.participaciones || [];
+    });
+  }
+
+  private cargarInvitacionesEquipo(usuarioId: number) {
+    this.cargandoInvitacionesEquipo = true;
+    this.errorInvitacionesEquipo = '';
+    this.crud.obtenerInvitacionesEquipoJugador(usuarioId).subscribe({
+      next: invitaciones => {
+        this.invitacionesEquipoJugador = invitaciones || [];
+        this.cargandoInvitacionesEquipo = false;
+      },
+      error: err => {
+        this.invitacionesEquipoJugador = [];
+        this.errorInvitacionesEquipo = err?.error?.message || 'No se pudieron cargar las invitaciones.';
+        this.cargandoInvitacionesEquipo = false;
+      }
+    });
+  }
+
+  responderInvitacionEquipo(invitacion: any, aceptar: boolean) {
+    const usuarioId = this.crud.obtenerUsuario().id;
+    if (!usuarioId || !invitacion?.id) return;
+    this.crud.responderInvitacionEquipo(invitacion.id, usuarioId, aceptar).subscribe({
+      next: () => {
+        this.invitacionesEquipoJugador = this.invitacionesEquipoJugador.filter(item => item.id !== invitacion.id);
+        if (aceptar && invitacion.equipoId && !this.equiposJugador.some(equipo => equipo.id === invitacion.equipoId)) {
+          this.equiposJugador = [...this.equiposJugador, { id: invitacion.equipoId, nombre: invitacion.equipoNombre } as Equipo];
+        }
+      },
+      error: err => this.errorInvitacionesEquipo = err?.error?.message || 'No se pudo responder la invitación.'
+    });
+  }
+
+  participacionDeEquipo(equipo?: Equipo): any {
+    return this.participacionesJugador.find(item => item.equipo?.id === equipo?.id);
+  }
+
+  abrirEquipo(equipo?: Equipo) {
+    if (!equipo?.id) return;
+    const rutaEquipo = equipo.torneo?.id
+      ? `/auth/torneos/torneo/${equipo.torneo.id}/equipo/${equipo.id}`
+      : `/auth/equipo/${equipo.id}`;
+    this.router.navigateByUrl(rutaEquipo);
+  }
+
+  abrirTorneo(torneo?: Torneo) {
+    if (torneo?.id) this.router.navigateByUrl(`/auth/torneos/torneo/${torneo.id}`);
+  }
+
+  crearEquipoDelegado() {
+    this.router.navigateByUrl('/auth/equipo-configurar');
+  }
+
+  abrirEdicionPerfil() {
+    this.editarPerfilOpen = true;
+  }
+
+  cerrarEdicionPerfil() {
+    this.editarPerfilOpen = false;
+    this.foto = undefined;
+    this.cargarPerfil();
   }
 
   private normalizar(texto: string): string {
@@ -171,8 +267,11 @@ export class Tab3Page implements OnInit {
       return;
     }
     if (this.url == '/auth/usuario') {
-      this.crud.actualizarArchivo(this.usuario,'usuario', this.foto).subscribe(async (resp) =>{
+      this.crud.actualizarArchivo(this.usuario,'usuario', this.foto).subscribe(async (resp: Usuario) =>{
         this.usuario = resp;
+        localStorage.setItem('usuario', JSON.stringify(resp));
+        this.imagenDef = resp.foto ? 'data:image/png;base64,' + resp.foto : this.imagenDef;
+        this.editarPerfilOpen = false;
         const alert = await  this.alertController.create({
           header: 'Informacion usuario actulizada',
           buttons: ['Aceptar'],
@@ -195,8 +294,12 @@ export class Tab3Page implements OnInit {
   validarBackBtn() {
     return this.url == '/auth/login/registrar';
   }
-  activarSubirArchivo(elemtIon: IonInput){
-    let btnFile: any = elemtIon["el"].children[0];
+  activarSubirArchivo(elemento: IonInput | HTMLInputElement){
+    if (elemento instanceof HTMLInputElement) {
+      elemento.click();
+      return;
+    }
+    const btnFile: any = elemento['el'].children[0];
     btnFile.click();
   }
   cargarImg(input: Event) {

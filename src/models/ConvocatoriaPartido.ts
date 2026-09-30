@@ -5,4 +5,7 @@ export class ConvocatoriaPartido {
   jugador?: Jugador;
   titular?: boolean;
   numeroUniforme?: number;
+  fueTitular?: boolean;
+  expulsado?: boolean;
+  cambiosRealizados?: number;
 }

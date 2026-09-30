@@ -42,8 +42,8 @@
       <ion-card-content>
         <div class="teams-line">
           <div class="team team-home">
-            <span>{{ partido.equipoLocal?.nombre }}</span>
-            <img [src]="escudoEquipo(partido.equipoLocal)" alt="">
+            <img appImageFallback="assets/images/shield-placeholder.svg" [src]="escudoEquipo(partido.equipoLocal)" [alt]="'Escudo de ' + (partido.equipoLocal?.nombre || 'equipo local')">
+            <span>{{ partido.equipoLocal?.nombre || 'Equipo local' }}</span>
           </div>
           <div class="score-preview">
             <strong>{{ partido.anotacionesEquipoLocal ?? '-' }}</strong>
@@ -51,8 +51,8 @@
             <strong>{{ partido.anotacionesEquipoVisitante ?? '-' }}</strong>
           </div>
           <div class="team team-away">
-            <img [src]="escudoEquipo(partido.equipoVisitante)" alt="">
-            <span>{{ partido.equipoVisitante?.nombre }}</span>
+            <img appImageFallback="assets/images/shield-placeholder.svg" [src]="escudoEquipo(partido.equipoVisitante)" [alt]="'Escudo de ' + (partido.equipoVisitante?.nombre || 'equipo visitante')">
+            <span>{{ partido.equipoVisitante?.nombre || 'Equipo visitante' }}</span>
           </div>
         </div>
         <div class="penalty-score" *ngIf="(partido.penaltisEquipoLocal ?? 0) > 0 || (partido.penaltisEquipoVisitante ?? 0) > 0">

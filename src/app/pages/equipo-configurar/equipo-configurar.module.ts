@@ -6,6 +6,7 @@ import { IonicModule } from '@ionic/angular';
 
 import { EquipoConfigurarPageRoutingModule } from './equipo-configurar-routing.module';
 import { EquipoConfigurarPage } from './equipo-configurar.page';
+import { SharedModule } from 'src/app/shared/shared.module';
 
 
 @NgModule({
@@ -13,6 +14,7 @@ import { EquipoConfigurarPage } from './equipo-configurar.page';
     CommonModule,
     FormsModule,
     IonicModule,
+    SharedModule,
     EquipoConfigurarPageRoutingModule
   ],
   declarations: [EquipoConfigurarPage]

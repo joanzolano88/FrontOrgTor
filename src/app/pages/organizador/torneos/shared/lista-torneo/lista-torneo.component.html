@@ -3,33 +3,33 @@
     <ion-searchbar [(ngModel)]="filtroNombre" (ionInput)="filtrar()" placeholder="Buscar por nombre" mode="ios"></ion-searchbar>
   </ion-item>
 
-  <div class="filtro-grid">
-    <ion-item lines="none">
-      <ion-select [(ngModel)]="filtroPais" (ionChange)="filtrar()" interface="popover" placeholder="País">
+  <ion-list>
+    <ion-item class="filters-panel">
+      <ion-select [(ngModel)]="filtroPais" (ionChange)="filtrar()"  label="País">
         <ion-select-option *ngFor="let pais of paises" [value]="pais">{{ pais }}</ion-select-option>
       </ion-select>
     </ion-item>
 
-    <ion-item lines="none">
-      <ion-select [(ngModel)]="filtroDepartamento" (ionChange)="cambiarDepartamento()" interface="popover" placeholder="Departamento">
+    <ion-item class="filters-panel">
+      <ion-select [(ngModel)]="filtroDepartamento" (ionChange)="cambiarDepartamento()" label="Departamento">
         <ion-select-option *ngFor="let departamento of departamentos" [value]="departamento">{{ departamento }}</ion-select-option>
       </ion-select>
     </ion-item>
 
-    <ion-item lines="none">
-      <ion-select [(ngModel)]="filtroCiudad" (ionChange)="filtrar()" interface="popover" placeholder="Ciudad">
+    <ion-item class="filters-panel">
+      <ion-select [(ngModel)]="filtroCiudad" (ionChange)="filtrar()" label="Ciudad">
         <ion-select-option *ngFor="let ciudad of ciudadesPorDepartamento" [value]="ciudad">{{ ciudad }}</ion-select-option>
       </ion-select>
     </ion-item>
 
-    <ion-item lines="none">
-      <ion-select [(ngModel)]="filtroEstado" (ionChange)="filtrar()" interface="popover" placeholder="Estado">
+    <ion-item class="filters-panel">
+      <ion-select [(ngModel)]="filtroEstado" (ionChange)="filtrar()" label="Estado">
         <ion-select-option *ngFor="let estado of estadosTorneo" [value]="estado">{{ estado }}</ion-select-option>
       </ion-select>
     </ion-item>
-  </div>
+  </ion-list>
 
-  <ion-item lines="none" *ngIf="esOrganizador" class="toggle-item">
+  <ion-item *ngIf="esOrganizador" class="toggle-item">
     <ion-label>Solo mis torneos</ion-label>
     <ion-toggle [(ngModel)]="mostrarSoloMios" (ionChange)="cambiarSoloMios()"></ion-toggle>
   </ion-item>

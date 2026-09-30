@@ -1,0 +1,315 @@
+:host {
+	--profile-ink: var(--app-ink);
+	--profile-muted: var(--app-muted);
+	--profile-line: var(--app-border);
+	--profile-mint: var(--app-mint);
+	--profile-coral: var(--app-coral);
+}
+
+.profile-page {
+	color: var(--profile-ink);
+}
+
+.profile-header ion-toolbar {
+	--color: #fff;
+}
+
+.profile-hero {
+	position: relative;
+	overflow: hidden;
+	padding: 34px clamp(20px, 6vw, 72px) 28px;
+	color: #fff;
+	background: var(--ion-card-background);
+}
+
+.hero-glow {
+	position: absolute;
+	width: 280px;
+	height: 280px;
+	right: -90px;
+	top: -120px;
+	border-radius: 50%;
+	background: rgba(215, 238, 229, .15);
+}
+
+.profile-identity {
+	position: relative;
+	z-index: 1;
+	display: flex;
+	align-items: center;
+	gap: 18px;
+	max-width: 980px;
+	margin: 0 auto;
+}
+
+.edit-profile-button {
+	margin-left: auto;
+	--color: #fff;
+	--border-color: rgba(255, 255, 255, .45);
+	--border-radius: 9px;
+	border: 1px solid rgba(255, 255, 255, .35);
+}
+
+.avatar-button {
+	position: relative;
+	padding: 0;
+	border: 0;
+	background: transparent;
+	cursor: pointer;
+}
+
+.avatar-button ion-avatar {
+	width: 92px;
+	height: 92px;
+	border: 4px solid var(--profile-mint);
+	box-shadow: 0 8px 24px rgba(0, 0, 0, .2);
+}
+
+.avatar-button img {
+	object-fit: cover;
+}
+
+.avatar-edit {
+	position: absolute;
+	right: -3px;
+	bottom: -3px;
+	display: grid;
+	place-items: center;
+	width: 30px;
+	height: 30px;
+	border-radius: 50%;
+	color: var(--profile-ink);
+	background: var(--profile-mint);
+}
+
+.identity-copy h1,
+.register-hero h1 {
+	margin: 4px 0;
+	font-size: clamp(28px, 5vw, 42px);
+	letter-spacing: 0;
+}
+
+.identity-copy p,
+.register-hero p {
+	margin: 0;
+	color: #b9c8c9;
+}
+
+.eyebrow {
+	display: block;
+	color: var(--profile-coral);
+	font-size: 14px;
+	font-weight: 800;
+	letter-spacing: 1.5px;
+	text-transform: uppercase;
+}
+
+.profile-counts {
+	position: relative;
+	z-index: 1;
+	display: flex;
+	gap: 34px;
+	max-width: 980px;
+	margin: 28px auto 0;
+}
+
+.profile-counts div {
+	display: grid;
+	gap: 2px;
+	min-width: 80px;
+}
+
+.profile-counts strong {
+	font-size: 22px;
+}
+
+.profile-counts span {
+	color: #b9c8c9;
+	font-size: 15px;
+}
+
+.register-hero {
+	padding: 36px clamp(20px, 6vw, 72px);
+	color: #fff;
+	background: var(--ion-card-background);
+}
+
+.profile-form,
+.profile-context {
+	width: min(980px, calc(100% - 32px));
+	margin: 22px auto;
+}
+
+.section-block {
+	padding: 22px;
+	border: 1px solid var(--profile-line);
+	border-radius: 16px;
+	box-shadow: 0 8px 24px rgba(23, 36, 45, .05);
+}
+
+.section-heading {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 14px;
+	margin-bottom: 18px;
+}
+
+.section-heading h2 {
+	margin: 4px 0 0;
+	font-size: 21px;
+}
+
+.section-heading>ion-icon {
+	color: var(--profile-coral);
+	font-size: 22px;
+}
+
+.form-grid {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 10px 14px;
+}
+
+.form-grid ion-item,
+.role-item {
+	--border-color: var(--profile-line);
+	margin-bottom: 0;
+}
+
+.role-item {
+	margin-top: 14px;
+}
+
+.form-actions {
+	display: flex;
+	gap: 10px;
+	margin-top: 20px;
+}
+
+.form-actions ion-button {
+	--border-radius: 9px;
+	min-width: 120px;
+}
+
+.form-actions ion-button:first-child {
+	--background-activated: #d96855;
+}
+
+.context-heading {
+	margin-top: 30px;
+}
+
+.content-grid {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 14px;
+}
+
+.info-card {
+	display: flex;
+	align-items: center;
+	gap: 14px;
+	margin: 0;
+	padding: 15px;
+	border: 1px solid var(--profile-line);
+	border-radius: 14px;
+	box-shadow: 0 6px 18px rgba(23, 36, 45, .05);
+	cursor: pointer;
+	transition: transform .18s ease, box-shadow .18s ease;
+}
+
+.card-mark,
+.team-shield {
+	display: grid;
+	place-items: center;
+	flex: 0 0 54px;
+	width: 54px;
+	height: 54px;
+	border-radius: 12px;
+}
+
+.tournament-mark {
+	font-size: 26px;
+}
+
+.team-shield {
+	overflow: hidden;
+}
+
+.team-shield img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+.card-content {
+	min-width: 0;
+	flex: 1;
+}
+
+.card-content h3 {
+	margin: 7px 0 3px;
+	overflow: hidden;
+	font-size: 17px;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.card-content p,
+.card-content small {
+	display: block;
+	margin: 0;
+	overflow: hidden;
+	color: var(--profile-muted);
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.card-content small {
+	margin-top: 6px;
+	font-size: 14px;
+}
+
+.card-content ion-badge {
+	font-size: 13px;
+}
+
+@media (max-width: 640px) {
+	.profile-hero {
+		padding: 28px 18px 24px;
+	}
+
+	.profile-form,
+	.profile-context {
+		width: calc(100% - 24px);
+	}
+
+	.section-block {
+		padding: 16px;
+	}
+
+	.form-grid,
+	.content-grid {
+		grid-template-columns: 1fr;
+	}
+
+	.profile-counts {
+		gap: 22px;
+		margin-top: 24px;
+	}
+
+	.profile-counts strong {
+		font-size: 19px;
+	}
+
+	.profile-identity {
+		align-items: flex-start;
+		flex-wrap: wrap;
+	}
+
+	.edit-profile-button {
+		width: 100%;
+		margin-left: 0;
+	}
+}

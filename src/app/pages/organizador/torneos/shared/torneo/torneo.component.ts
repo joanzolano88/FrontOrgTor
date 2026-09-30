@@ -26,11 +26,6 @@ export class TorneoComponent {
   isAlertOpen = false;
   alertButtons = ['Aceptar'];
   mensajeError: string = "";
-  equipos: Equipo[] = [];
-  esJugador = false;
-  registroJugadorOpen = false;
-  equipoSeleccionado?: Equipo;
-
   constructor(private crud: CrudService, private route: ActivatedRoute,
     private router: Router, private alertController: AlertController) {
   }
@@ -39,8 +34,6 @@ export class TorneoComponent {
       this.torneo = respT;
       const usuario = this.crud.obtenerUsuario();
       this.esPropietario = this.validarOrganizador && this.torneo.encargadoTorneo?.id === usuario?.id;
-      this.esJugador = usuario?.tipoUsuario === TipoUsuario.JUGADOR;
-      this.crud.obtener('equipo/torneo/' + this.torneo.id).subscribe((equipos: Equipo[]) => this.equipos = equipos || []);
       this.crud.obtener('cancha/torneo/' + this.torneo.id).subscribe((respC: Cancha[]) =>{
         this.listCancha = respC;
       });
@@ -80,32 +73,6 @@ export class TorneoComponent {
       return;
     }
     this.router.navigateByUrl('/auth/torneos/torneo/' + this.torneo.id + '/solicitar-equipo');
-  }
-  abrirRegistroJugador() {
-    this.equipoSeleccionado = undefined;
-    this.registroJugadorOpen = true;
-  }
-  cerrarRegistroJugador() {
-    this.registroJugadorOpen = false;
-  }
-  registrarJugador() {
-    const usuarioId = this.crud.obtenerUsuario().id;
-    if (!usuarioId || !this.torneo.id || !this.equipoSeleccionado?.id) {
-      this.mensajeError = 'Selecciona un equipo para continuar.';
-      this.setOpen(true);
-      return;
-    }
-    this.crud.crear({}, `equipo/torneo/${this.torneo.id}/jugador/${this.equipoSeleccionado.id}?usuarioId=${usuarioId}`).subscribe({
-      next: () => {
-        this.cerrarRegistroJugador();
-        this.mensajeError = 'Te registraste correctamente en el equipo.';
-        this.setOpen(true);
-      },
-      error: err => {
-        this.mensajeError = err?.error?.message || 'No se pudo registrar el jugador.';
-        this.setOpen(true);
-      }
-    });
   }
   verSolicitudes() {
     this.router.navigateByUrl('/auth/torneos/torneo/' + this.torneo.id + '/solicitudes');

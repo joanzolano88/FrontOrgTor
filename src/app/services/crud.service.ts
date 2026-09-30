@@ -90,6 +90,113 @@ export class CrudService {
     return this.http.get<any[]>(`${this.url}equipo/delegado/${idUsuario}`);
   }
 
+  obtenerEquipoEnTorneo(idEquipo: number, idTorneo: number) {
+    return this.http.get<any>(`${this.url}equipo/${idEquipo}/torneo/${idTorneo}`);
+  }
+
+  obtenerTorneosEquipo(idEquipo: number) {
+    return this.http.get<any[]>(`${this.url}equipo/${idEquipo}/torneos`);
+  }
+
+  agregarJugadorATorneo(idEquipo: number, idTorneo: number, idJugador: number, usuarioId: number) {
+    return this.http.post<any>(`${this.url}equipo/${idEquipo}/torneo/${idTorneo}/jugadores/${idJugador}?usuarioId=${usuarioId}`, {});
+  }
+
+  eliminarJugadorDeTorneo(idEquipo: number, idTorneo: number, idJugador: number, usuarioId: number) {
+    return this.http.delete(`${this.url}equipo/${idEquipo}/torneo/${idTorneo}/jugadores/${idJugador}?usuarioId=${usuarioId}`);
+  }
+
+  obtenerNotificacionesPendientes(idUsuario: number) {
+    return this.http.get<any[]>(`${this.url}usuario/${idUsuario}/notificaciones/pendientes`);
+  }
+
+  obtenerNotificaciones(idUsuario: number) {
+    return this.http.get<any[]>(`${this.url}usuario/${idUsuario}/notificaciones`);
+  }
+
+  obtenerNotificacionesPendientesCantidad(idUsuario: number) {
+    return this.http.get<number>(`${this.url}usuario/${idUsuario}/notificaciones/no-leidas/count`);
+  }
+
+  marcarNotificacionLeida(idUsuario: number, idNotificacion: number) {
+    return this.http.put(`${this.url}usuario/${idUsuario}/notificaciones/${idNotificacion}/leida`, {});
+  }
+
+  eliminarNotificacion(idUsuario: number, idNotificacion: number) {
+    return this.http.delete(`${this.url}usuario/${idUsuario}/notificaciones/${idNotificacion}`);
+  }
+
+  solicitarUnirseEquipo(idEquipo: number, usuarioId: number) {
+    return this.http.post(`${this.url}equipo/${idEquipo}/solicitud-jugador?usuarioId=${usuarioId}`, {});
+  }
+
+  buscarJugadorEquipo(idEquipo: number, cedula: string, usuarioId: number) {
+    return this.http.get<any>(`${this.url}equipo/${idEquipo}/jugadores/buscar?cedula=${encodeURIComponent(cedula)}&usuarioId=${usuarioId}`);
+  }
+
+  eliminarJugadorEquipo(idEquipo: number, idJugador: number, usuarioId: number) {
+    return this.http.delete(`${this.url}equipo/${idEquipo}/jugadores/${idJugador}?usuarioId=${usuarioId}`);
+  }
+
+  obtenerSolicitudesJugadores(idEquipo: number, usuarioId: number) {
+    return this.http.get<any[]>(`${this.url}equipo/${idEquipo}/solicitudes-jugador?usuarioId=${usuarioId}`);
+  }
+
+  aceptarSolicitudJugador(idSolicitud: number, usuarioId: number) {
+    return this.http.put<any>(`${this.url}equipo/solicitudes-jugador/${idSolicitud}/aceptar?usuarioId=${usuarioId}`, {});
+  }
+
+  rechazarSolicitudJugador(idSolicitud: number, usuarioId: number) {
+    return this.http.delete(`${this.url}equipo/solicitudes-jugador/${idSolicitud}/rechazar?usuarioId=${usuarioId}`);
+  }
+
+  invitarJugadorAEquipo(idEquipo: number, cedula: string, usuarioId: number) {
+    return this.http.post<any>(`${this.url}equipo/${idEquipo}/invitaciones-jugador?cedula=${encodeURIComponent(cedula)}&usuarioId=${usuarioId}`, {});
+  }
+
+  obtenerInvitacionesEquipoJugador(usuarioId: number) {
+    return this.http.get<any[]>(`${this.url}equipo/invitaciones-jugador?usuarioId=${usuarioId}`);
+  }
+
+  responderInvitacionEquipo(idInvitacion: number, usuarioId: number, aceptar: boolean) {
+    const accion = aceptar ? 'aceptar' : 'rechazar';
+    return this.http.put<any>(`${this.url}equipo/invitaciones-jugador/${idInvitacion}/${accion}?usuarioId=${usuarioId}`, {});
+  }
+
+  obtenerParticipacionesTorneo(idTorneo: number) {
+    return this.http.get<any[]>(`${this.url}equipo/torneo/${idTorneo}/participaciones`);
+  }
+
+  obtenerParticipacionesEquipo(idEquipo: number) {
+    return this.http.get<any[]>(`${this.url}equipo/${idEquipo}/participaciones`);
+  }
+
+  obtenerSancionesTorneo(idTorneo: number) {
+    return this.http.get<any[]>(`${this.url}partido/torneo/${idTorneo}/sanciones`);
+  }
+
+  modificarSancionPartido(idPartido: number, idJugador: number, usuarioId: number, levantar: boolean) {
+    const accion = levantar ? 'levantar' : 'restaurar';
+    return this.http.put<any>(`${this.url}partido/${idPartido}/sanciones/${idJugador}/${accion}?usuarioId=${usuarioId}`, {});
+  }
+
+  cambiarEquipoJugador(idTorneo: number, idJugador: number, idEquipoNuevo: number, usuarioId: number) {
+    return this.http.put<any>(`${this.url}equipo/torneo/${idTorneo}/jugador/${idJugador}/cambiar-equipo/${idEquipoNuevo}?usuarioId=${usuarioId}`, {});
+  }
+
+  sustituirJugador(idPartido: number, titularId: number, suplenteId: number, usuarioId: number) {
+    return this.http.post(`${this.url}partido/${idPartido}/sustituciones?titularId=${titularId}&suplenteId=${suplenteId}&usuarioId=${usuarioId}`, {});
+  }
+
+  obtenerPerfilJugador(idJugador: number, idTorneo?: number) {
+    const torneoQuery = idTorneo ? `?torneoId=${idTorneo}` : '';
+    return this.http.get<any>(`${this.url}jugador/${idJugador}/perfil${torneoQuery}`);
+  }
+
+  obtenerPerfilCompleto(idUsuario: number) {
+    return this.http.get<any>(`${this.url}usuario/${idUsuario}/perfil`);
+  }
+
   rechazarSolicitudEquipo(idEquipo: number) {
     return this.http.delete(`${this.url}equipo/solicitud/${idEquipo}/rechazar`);
   }
@@ -102,15 +209,12 @@ export class CrudService {
     return this.http.get<any[]>(`${this.url}equipo/solicitudes/torneo/${idTorneo}/todas`);
   }
 
-  obtenerPagosEquipo(idEquipo: number) {
-    return this.http.get<any[]>(`${this.url}pago-inscripcion/equipo/${idEquipo}`);
+  obtenerPagosTorneo(idTorneo: number, usuarioId: number) {
+    return this.http.get<any[]>(`${this.url}pagos/torneo/${idTorneo}?usuarioId=${usuarioId}`);
   }
 
-  registrarPagoEquipo(idEquipo: number, pago: any) {
-    return this.http.post<any>(`${this.url}pago-inscripcion/equipo/${idEquipo}`, {
-      ...pago,
-      usuarioId: this.obtenerUsuario().id
-    });
+  registrarPagoTorneo(idTorneo: number, pago: any, usuarioId: number) {
+    return this.http.post<any>(`${this.url}pagos/torneo/${idTorneo}`, { ...pago, usuarioId });
   }
 
   actualizarUsuario(objeto: any, tipo: string, archivo1: any, archivo2: any) {
@@ -153,6 +257,9 @@ export class CrudService {
   }
   obtenerCiudadesPorDepartamento(departamentoId: number) {
     return this.http.get<any[]>(`${this.url}ciudad/departamento/${departamentoId}`);
+  }
+  obtenerTorneosPorCiudad(ciudadId: number) {
+    return this.http.get<{ label: string; value: number }[]>(`${this.url}torneo/ciudad/${ciudadId}`);
   }
   obtenerToken() {
     return localStorage.getItem('token');

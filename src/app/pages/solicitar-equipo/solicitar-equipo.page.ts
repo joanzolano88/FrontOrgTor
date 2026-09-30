@@ -17,7 +17,6 @@ export class SolicitarEquipoPage {
   torneo: Torneo = new Torneo();
   equiposDisponibles: Equipo[] = [];
   equipoSeleccionadoId: number | null = null;
-  escudo: File | undefined;
   mensajeError = '';
   alertOpen = false;
   readonly alertButtons = ['Aceptar'];
@@ -25,12 +24,19 @@ export class SolicitarEquipoPage {
   constructor(private crud: CrudService, private route: ActivatedRoute,
     private router: Router, private alertController: AlertController) {
     const idTorneo = this.route.snapshot.paramMap.get('idTorneo');
+    const equipoSeleccionado = this.route.snapshot.queryParamMap.get('equipo');
+    const equipoSeleccionadoId = equipoSeleccionado ? Number(equipoSeleccionado) : null;
     const usuarioLogueado = this.crud.obtenerUsuario();
     if (usuarioLogueado) {
       this.equipo.delegado = usuarioLogueado;
       if (usuarioLogueado.id) {
         this.crud.obtenerEquiposDelegado(usuarioLogueado.id).subscribe({
-          next: equipos => this.equiposDisponibles = equipos || []
+          next: equipos => {
+            this.equiposDisponibles = equipos || [];
+            if (equipoSeleccionadoId !== null) {
+              this.seleccionarEquipo(equipoSeleccionadoId);
+            }
+          }
         });
       }
       if (!usuarioLogueado.nombre || !usuarioLogueado.numeroCelular) {
@@ -44,7 +50,6 @@ export class SolicitarEquipoPage {
 
   seleccionarEquipo(id: number | null) {
     this.equipoSeleccionadoId = id;
-    this.escudo = undefined;
     if (id === null) {
       const usuario = this.crud.obtenerUsuario();
       this.equipo = new Equipo();
@@ -71,19 +76,9 @@ export class SolicitarEquipoPage {
     return defecto;
   }
 
-  cargarEscudo(event: Event, imagen: HTMLImageElement) {
-    const input = event.target as HTMLInputElement;
-    if (input.files?.length) {
-      this.escudo = input.files[0];
-      imagen.src = URL.createObjectURL(this.escudo);
-    }
-  }
-
   enviar(form: NgForm) {
-    if (form.invalid || (!this.escudo && this.equipoSeleccionadoId === null)) {
-      this.mensajeError = this.equipoSeleccionadoId === null
-        ? 'Completa el nombre y selecciona un escudo.'
-        : 'Selecciona un equipo válido.';
+    if (form.invalid || this.equipoSeleccionadoId === null) {
+      this.mensajeError = 'Selecciona un equipo válido.';
       this.alertOpen = true;
       return;
     }
@@ -105,7 +100,7 @@ export class SolicitarEquipoPage {
       return;
     }
     this.equipo.torneo = this.torneo;
-    this.crud.enviarSolicitudEquipo(this.equipo, this.escudo).subscribe({
+    this.crud.enviarSolicitudEquipo(this.equipo, undefined).subscribe({
       next: async () => {
         this.mensajeError = 'Solicitud enviada correctamente. El organizador revisará tu equipo.';
         this.alertOpen = true;

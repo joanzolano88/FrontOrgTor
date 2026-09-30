@@ -1,0 +1,111 @@
+.team-shell {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.header-card,
+.card-block {
+  background: var(--app-surface);
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius);
+  padding: 18px 16px;
+  box-shadow: 0 6px 18px rgba(32, 45, 50, 0.06);
+}
+
+.header-card {
+  border-left: 4px solid var(--app-coral);
+}
+
+.eyebrow {
+  display: inline-block;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--app-coral);
+  margin-bottom: 8px;
+}
+
+.header-card h2,
+.delegado-header h3 {
+  margin: 0;
+}
+
+.header-card p {
+  margin: 8px 0 0;
+  color: var(--app-muted);
+}
+
+.team-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.field-wrap {
+  margin-bottom: 0;
+}
+
+.upload-block {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.upload-label {
+  font-size: 0.82rem;
+  color: var(--app-muted);
+  font-weight: 600;
+}
+
+.upload-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 140px;
+  border: 1.5px dashed var(--app-teal);
+  border-radius: var(--app-radius);
+  background: var(--app-surface-muted);
+  padding: 16px;
+}
+
+.upload-box img {
+  width: 82px;
+  height: 82px;
+  border-radius: 18px;
+  object-fit: cover;
+}
+
+.upload-box span {
+  color: var(--app-ink);
+  font-weight: 600;
+}
+
+.delegado-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.delegado-actions {
+  display: flex;
+  gap: 10px;
+  color: var(--app-teal);
+}
+
+.delegado-summary {
+  margin-top: 8px;
+}
+
+.secondary-btn,
+.submit-btn {
+  --border-radius: 9px;
+  margin-top: 12px;
+  height: 48px;
+  font-weight: 700;
+}

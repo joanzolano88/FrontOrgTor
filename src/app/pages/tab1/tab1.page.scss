@@ -1,21 +1,21 @@
 :host {
-	--ink: #17212b;
-	--muted: #71808d;
-	--surface: #f4f7f8;
-	--accent: #e86f2d;
+	--ink: var(--app-ink);
+	--muted: var(--app-muted);
+	--surface: var(--ion-background-color);
+	--accent: var(--app-coral);
 }
 
 ion-content { --background: var(--surface); }
-.filters-panel { --background: #fff; --border-color: #e5eaec; }
-.partido-card { margin: 12px 14px; background: #fff; color: var(--ink); border-radius: 12px; box-shadow: 0 5px 16px rgba(23,33,43,.08); cursor: pointer; }
+.filters-panel { --background: var(--app-surface); --border-color: var(--app-border); }
+.partido-card { margin: 12px 14px; background: var(--app-surface); color: var(--ink); border-radius: var(--app-radius); box-shadow: 0 5px 16px rgba(32,45,50,.08); cursor: pointer; }
 .partido-card-top, .partido-card-bottom { display: flex; align-items: center; justify-content: space-between; gap: 10px; color: var(--muted); font-size: 12px; }
 .partido-card-top { padding-bottom: 4px; }
 .partido-card-top ion-badge { font-size: 10px; }
-.teams-line { display: grid; grid-template-columns: minmax(0,1fr) auto minmax(0,1fr); align-items: center; gap: 8px; }
-.team { display: flex; align-items: center; gap: 8px; font-weight: 700; min-width: 0; }
-.team span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.team-home { justify-content: flex-end; text-align: right; }
-.team img { width: 32px; height: 32px; object-fit: contain; border-radius: 50%; background: #eef1f2; padding: 4px; }
+.teams-line { display: grid; grid-template-columns: minmax(0,1fr) auto minmax(0,1fr); align-items: start; gap: 8px; }
+.team { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 7px; min-width: 0; font-weight: 700; text-align: center; }
+.team span { display: block; width: 100%; min-width: 0; overflow: visible; font-size: 14px; line-height: 1.2; white-space: normal; overflow-wrap: anywhere; word-break: normal; }
+.team-home { justify-content: flex-start; text-align: center; }
+.team img { width: 32px; height: 32px; object-fit: contain; border-radius: 50%; background: var(--app-surface-muted); padding: 4px; }
 .score-preview { display: flex; align-items: center; gap: 7px; color: var(--ink); }
 .score-preview strong { font-size: 21px; min-width: 15px; text-align: center; }
 .score-preview small { color: var(--muted); font-size: 9px; font-weight: 700; }

@@ -144,7 +144,7 @@ export class ListaPartidosPage implements OnInit{
     return `${fechaPartido.toLocaleDateString('es-CO')} ${fechaPartido.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' })}`;
   }
   escudoEquipo(equipo?: Equipo): string {
-    return equipo?.escudo ? 'data:image/png;base64,' + equipo.escudo : 'assets/icon/favicon.png';
+    return equipo?.escudo ? 'data:image/png;base64,' + equipo.escudo : '';
   }
   iniciarPartido() {
     if (!this.esOrganizadorDelTorneo()) {
@@ -179,9 +179,17 @@ export class ListaPartidosPage implements OnInit{
   setOpen(isOpen: boolean) {
     this.isAlertOpen = isOpen;
   }
-  esOrganizadorDelTorneo(): boolean {
+  esOrganizadorDelTorneo(partido = this.partidoSeleccionado): boolean {
     const usuario = this.crud.obtenerUsuario();
-    return this.sesionService.validacionOrganizador() && usuario.id === this.partidoSeleccionado.torneo?.encargadoTorneo?.id;
+    return this.sesionService.validacionOrganizador() && usuario.id === (partido.torneo || this.torneo).encargadoTorneo?.id;
+  }
+  abrirWhatsappProgramacion(partido: Partido, equipo?: Equipo) {
+    const numero = equipo?.delegado?.numeroCelular;
+    if (!numero || !partido.fechaPartido) return;
+    const telefono = numero.replace(/\D/g, '');
+    const fecha = this.mostrarFechaPartido(partido.fechaPartido);
+    const mensaje = `Partido programado: ${partido.equipoLocal?.nombre} vs ${partido.equipoVisitante?.nombre}. Fecha y hora: ${fecha}. Cancha: ${partido.cancha?.nombre || 'pendiente'} (${partido.cancha?.direccion || ''}). Torneo: ${partido.torneo?.nombre || this.torneo.nombre}.`;
+    window.open(`https://wa.me/57${telefono}?text=${encodeURIComponent(mensaje)}`, '_blank');
   }
   llenarListaFases() {
     if (this.torneo.modalidadTorneo == ModalidadTorneo.ELIMINATORIAS_GRUPOS) {
