@@ -20,12 +20,17 @@ import { TipoUsuario } from 'src/enums/TipoUsuario';
 export class TorneoComponent {
   @Input() validarOrganizador: Boolean = false;
   esPropietario = false;
+  puedeRegistrarEquipos = false;
   torneo: Torneo = new Torneo();
   listCancha: Cancha[] = [];
   documento: string = "";
   isAlertOpen = false;
   alertButtons = ['Aceptar'];
   mensajeError: string = "";
+  identificacionAyudante = '';
+  ayudantes: any[] = [];
+  cargandoAyudantes = false;
+  generandoPartidos = false;
   constructor(private crud: CrudService, private route: ActivatedRoute,
     private router: Router, private alertController: AlertController) {
   }
@@ -34,6 +39,15 @@ export class TorneoComponent {
       this.torneo = respT;
       const usuario = this.crud.obtenerUsuario();
       this.esPropietario = this.validarOrganizador && this.torneo.encargadoTorneo?.id === usuario?.id;
+      if (this.esPropietario) {
+        this.puedeRegistrarEquipos = true;
+      } else if (this.torneo.id && usuario?.id) {
+        this.crud.obtener(`torneo/${this.torneo.id}/puede-registrar-equipos`).subscribe({
+          next: (puede: unknown) => this.puedeRegistrarEquipos = puede === true,
+          error: () => this.puedeRegistrarEquipos = false
+        });
+      }
+      if (this.esPropietario && this.torneo.id && usuario?.id) this.cargarAyudantes(this.torneo.id, usuario.id);
       this.crud.obtener('cancha/torneo/' + this.torneo.id).subscribe((respC: Cancha[]) =>{
         this.listCancha = respC;
       });
@@ -63,8 +77,93 @@ export class TorneoComponent {
   agregarEquipo() {
     this.router.navigateByUrl('/auth/torneos/torneo/' + this.torneo.id + '/crear-equipo');
   }
-  agregarPartido() {
-    this.router.navigateByUrl('/auth/torneos/torneo/' + this.torneo.id + '/agregar-partido');
+  registrarEquipoPlanilla() {
+    this.router.navigateByUrl('/auth/torneos/torneo/' + this.torneo.id + '/registro-planilla');
+  }
+  cargarAyudantes(torneoId: number, usuarioId: number) {
+    this.cargandoAyudantes = true;
+    this.crud.obtenerAyudantesTorneo(torneoId, usuarioId).subscribe({
+      next: ayudantes => {
+        this.ayudantes = ayudantes || [];
+        this.cargandoAyudantes = false;
+      },
+      error: error => {
+        this.ayudantes = [];
+        this.cargandoAyudantes = false;
+        this.mensajeError = error?.error?.message || 'No se pudieron cargar los ayudantes.';
+        this.setOpen(true);
+      }
+    });
+  }
+  agregarAyudante() {
+    const usuarioId = this.crud.obtenerUsuario().id;
+    if (!usuarioId || !this.torneo.id || !this.identificacionAyudante.trim()) return;
+    this.crud.agregarAyudanteTorneo(this.torneo.id, usuarioId, this.identificacionAyudante.trim()).subscribe({
+      next: () => {
+        this.identificacionAyudante = '';
+        this.cargarAyudantes(this.torneo.id!, usuarioId);
+      },
+      error: error => {
+        this.mensajeError = error?.error?.message || 'No se pudo agregar el ayudante.';
+        this.setOpen(true);
+      }
+    });
+  }
+  eliminarAyudante(ayudanteUsuarioId: number) {
+    const usuarioId = this.crud.obtenerUsuario().id;
+    if (!usuarioId || !this.torneo.id) return;
+    this.crud.eliminarAyudanteTorneo(this.torneo.id, ayudanteUsuarioId, usuarioId).subscribe({
+      next: () => this.cargarAyudantes(this.torneo.id!, usuarioId),
+      error: error => {
+        this.mensajeError = error?.error?.message || 'No se pudo quitar el ayudante.';
+        this.setOpen(true);
+      }
+    });
+  }
+  async generarPartidos(): Promise<void> {
+    if (!this.esPropietario || !this.torneo.id || this.generandoPartidos) return;
+
+    const confirmacion = await this.alertController.create({
+      header: 'Generar partidos',
+      message: '¿Deseas generar los partidos pendientes de la fase actual?',
+      buttons: [
+        { text: 'Cancelar', role: 'cancel' },
+        { text: 'Generar', role: 'confirm' }
+      ]
+    });
+    await confirmacion.present();
+    const { role } = await confirmacion.onDidDismiss();
+    if (role !== 'confirm') return;
+
+    this.generandoPartidos = true;
+    this.crud.obtener(`partido/generar_partidos/${this.torneo.id}`).subscribe({
+      next: (partidos: unknown) => {
+        this.generandoPartidos = false;
+        const cantidadGenerada = Array.isArray(partidos) ? partidos.length : 0;
+        void this.mostrarResultadoPartidos(
+          cantidadGenerada > 0 ? 'Partidos generados' : 'Sin partidos pendientes',
+          cantidadGenerada > 0
+            ? `Se generaron ${cantidadGenerada} partido${cantidadGenerada === 1 ? '' : 's'}.`
+            : 'Ya no hay partidos por generar.'
+        );
+      },
+      error: (error: HttpErrorResponse) => {
+        this.generandoPartidos = false;
+        void this.mostrarResultadoPartidos(
+          'No se pudieron generar los partidos',
+          error.error?.message || 'Ocurrió un error al generar los partidos.'
+        );
+      }
+    });
+  }
+
+  private async mostrarResultadoPartidos(header: string, message: string): Promise<void> {
+    const resultado = await this.alertController.create({
+      header,
+      message,
+      buttons: ['Aceptar']
+    });
+    await resultado.present();
   }
   solicitarEquipo() {
     if (!this.crud.verSesion()) {

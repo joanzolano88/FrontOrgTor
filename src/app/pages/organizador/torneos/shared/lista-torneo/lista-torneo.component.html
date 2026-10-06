@@ -1,39 +1,27 @@
-<ion-list class="filtros-torneos">
+<section class="search-panel">
   <ion-item lines="none" class="filtro-busqueda">
     <ion-searchbar [(ngModel)]="filtroNombre" (ionInput)="filtrar()" placeholder="Buscar por nombre" mode="ios"></ion-searchbar>
   </ion-item>
-
-  <ion-list>
-    <ion-item class="filters-panel">
-      <ion-select [(ngModel)]="filtroPais" (ionChange)="filtrar()"  label="País">
+  <div class="filters-grid">
+      <ion-select [(ngModel)]="filtroPais" (ionChange)="filtrar()"  label="País" placeholder="Seleccionar País" labelPlacement="stacked">
         <ion-select-option *ngFor="let pais of paises" [value]="pais">{{ pais }}</ion-select-option>
       </ion-select>
-    </ion-item>
-
-    <ion-item class="filters-panel">
-      <ion-select [(ngModel)]="filtroDepartamento" (ionChange)="cambiarDepartamento()" label="Departamento">
+      <ion-select [(ngModel)]="filtroDepartamento" (ionChange)="cambiarDepartamento()" label="Departamento" placeholder="Seleccionar Departamento" labelPlacement="stacked">
         <ion-select-option *ngFor="let departamento of departamentos" [value]="departamento">{{ departamento }}</ion-select-option>
       </ion-select>
-    </ion-item>
-
-    <ion-item class="filters-panel">
-      <ion-select [(ngModel)]="filtroCiudad" (ionChange)="filtrar()" label="Ciudad">
+      <ion-select [(ngModel)]="filtroCiudad" (ionChange)="filtrar()" label="Ciudad" placeholder="Seleccionar Ciudad" labelPlacement="stacked">
         <ion-select-option *ngFor="let ciudad of ciudadesPorDepartamento" [value]="ciudad">{{ ciudad }}</ion-select-option>
       </ion-select>
-    </ion-item>
-
-    <ion-item class="filters-panel">
-      <ion-select [(ngModel)]="filtroEstado" (ionChange)="filtrar()" label="Estado">
+      <ion-select [(ngModel)]="filtroEstado" (ionChange)="filtrar()" label="Estado" placeholder="Seleccionar Estado" labelPlacement="stacked">
         <ion-select-option *ngFor="let estado of estadosTorneo" [value]="estado">{{ estado }}</ion-select-option>
       </ion-select>
-    </ion-item>
-  </ion-list>
+  </div>
+</section>
 
-  <ion-item *ngIf="esOrganizador" class="toggle-item">
-    <ion-label>Solo mis torneos</ion-label>
-    <ion-toggle [(ngModel)]="mostrarSoloMios" (ionChange)="cambiarSoloMios()"></ion-toggle>
-  </ion-item>
-</ion-list>
+<ion-item *ngIf="esOrganizador" class="toggle-item">
+  <ion-label>Solo mis torneos</ion-label>
+  <ion-toggle [(ngModel)]="mostrarSoloMios" (ionChange)="cambiarSoloMios()"></ion-toggle>
+</ion-item>
 
 <ion-list class="lista-torneos">
   <ng-container *ngFor="let torneo of listaTorneosFiltrados">

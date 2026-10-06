@@ -92,7 +92,7 @@
             </div>
             <div class="player-info">
               <strong>{{ jugador.nombre }}</strong>
-              <small *ngIf="jugador.cedula">Cédula: {{ jugador.cedula }}</small>
+              <small *ngIf="jugador.identificacion">Identificación: {{ jugador.identificacion }}</small>
             </div>
             <ion-button *ngIf="esDelegado" fill="clear" color="danger" (click)="eliminarJugador(jugador)">
               <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
@@ -109,7 +109,7 @@
 
         <div class="inline-add" *ngIf="esDelegado">
           <ion-item lines="none">
-            <ion-input label="Cédula del jugador" labelPlacement="floating" [(ngModel)]="cedulaJugador"></ion-input>
+            <ion-input label="Identificación del jugador" labelPlacement="floating" [(ngModel)]="identificacionJugador"></ion-input>
           </ion-item>
           <ion-button fill="solid" color="primary" (click)="buscarYAgregarJugador()">
             <ion-icon slot="icon-only" name="person-add-outline"></ion-icon>
@@ -123,7 +123,7 @@
           <div class="request-item" *ngFor="let solicitud of solicitudesJugadores">
             <div>
               <strong>{{ solicitud.jugador?.nombre }}</strong>
-              <small>{{ solicitud.jugador?.cedula }}</small>
+              <small>{{ solicitud.jugador?.identificacion }}</small>
             </div>
             <div class="request-actions">
               <ion-button fill="clear" color="success" (click)="resolverSolicitudJugador(solicitud, true)">
@@ -161,7 +161,7 @@
       <ion-header><ion-toolbar><ion-title>Perfil del jugador</ion-title><ion-buttons slot="end"><ion-button (click)="perfilJugadorModalOpen = false">Cerrar</ion-button></ion-buttons></ion-toolbar></ion-header>
       <ion-content class="ion-padding" *ngIf="perfilJugadorData as perfil">
         <h2>{{ perfil.jugador?.nombre }}</h2>
-        <p>Cédula: {{ perfil.jugador?.cedula || 'No registrada' }}</p>
+        <p>Identificación: {{ perfil.jugador?.identificacion || 'No registrada' }}</p>
         <p>Celular: {{ perfil.jugador?.numeroCelular || 'No registrado' }}</p>
         <ng-container *ngIf="perfil.participacionTorneo as participacion">
           <h3>{{ participacion.torneo?.nombre }}</h3>

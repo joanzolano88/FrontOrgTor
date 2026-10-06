@@ -22,11 +22,11 @@
       </button>
       <div class="identity-copy"><span class="eyebrow">Perfil {{ usuario.tipoUsuario | titlecase }}</span><h1>{{ usuario.nombre || 'Tu perfil' }}</h1><p>{{ usuario.ubicacion || 'Agrega tu ubicación' }}</p></div>
       <div class="profile-actions-inline">
-        <ion-button class="edit-profile-button" fill="clear" (click)="abrirEdicionPerfil()"><ion-icon slot="start" name="create-outline"></ion-icon>Editar perfil</ion-button>
+        <ion-button fill="outline" color="medium"  (click)="abrirEdicionPerfil()"><ion-icon slot="start" name="create-outline"></ion-icon>Editar perfil</ion-button>
         <ion-button *ngIf="url == '/auth/usuario'" fill="outline" color="medium" (click)="cerrarSesion()">Cerrar sesión</ion-button>
       </div>
     </div>
-    <div class="profile-counts"><div><strong>{{ torneosCreados.length }}</strong><span>Torneos</span></div><div><strong>{{ usuario.tipoUsuario == 'JUGADOR' ? equiposJugador.length : equiposDelegado.length }}</strong><span>Equipos</span></div><div><strong>{{ participacionesJugador.length }}</strong><span>Participaciones</span></div></div>
+    <div class="profile-counts"><div><strong>{{ torneosCreados.length }}</strong><span>Torneos</span></div><div><strong>{{ cantidadEquiposPerfil() }}</strong><span>Equipos</span></div><div><strong>{{ participacionesJugador.length }}</strong><span>Participaciones</span></div></div>
   </section>
   <ng-template #registerHero><section class="register-hero"><span class="eyebrow">Nuevo registro</span><h1>Crea tu perfil</h1><p>Completa tus datos para participar en la organización deportiva.</p></section></ng-template>
   <form (ngSubmit)="onSubmit(f)" #f="ngForm" class="profile-form" *ngIf="url != '/auth/usuario' || editarPerfilOpen">
@@ -54,8 +54,8 @@
       <ion-item [ngClass]="{'error-input': f.submitted && f.controls['celular'].errors}" title="{{extraer.erroresForm(f.controls['celular'])}}">
         <ion-input label="Celular" labelPlacement="floating" required name="celular" type="tel" [(ngModel)]="usuario.numeroCelular" minlength="6"></ion-input>
       </ion-item>
-      <ion-item [ngClass]="{'error-input': f.submitted && f.controls['cedula'].errors}" title="{{extraer.erroresForm(f.controls['cedula'])}}">
-        <ion-input label="Cédula" labelPlacement="floating" required name="cedula" [(ngModel)]="usuario.cedula" minlength="5"></ion-input>
+      <ion-item [ngClass]="{'error-input': f.submitted && f.controls['identificacion'].errors}" title="{{extraer.erroresForm(f.controls['identificacion'])}}">
+        <ion-input label="Identificación" labelPlacement="floating" required name="identificacion" [(ngModel)]="usuario.identificacion" minlength="5"></ion-input>
       </ion-item>
       <ion-item *ngIf="url == '/auth/login/registrar'" [ngClass]="{'error-input': f.submitted && f.controls['fecha-nacimiento'].errors}" title="{{extraer.erroresForm(f.controls['fecha-nacimiento'])}}">
         <ion-input label="Fecha de nacimiento" labelPlacement="floating" type="date" required name="fecha-nacimiento"
@@ -100,32 +100,120 @@
     </section>
   </form>
   <section class="profile-context" *ngIf="url == '/auth/usuario'">
-    <div class="section-heading context-heading" *ngIf="usuario.tipoUsuario != 'DELEGADO'">
-      <div><span class="eyebrow">Tu actividad</span><h2>{{ usuario.tipoUsuario == 'ORGANIZADOR' ? 'Torneos creados' : 'Mis equipos' }}</h2></div>
-      <ion-icon name="arrow-forward-outline"></ion-icon>
+    <div class="activity-header">
+      <div><span class="eyebrow">Tu actividad</span><h2>{{ usuario.tipoUsuario == 'ORGANIZADOR' ? 'Resumen de gestión' : 'Tu actividad deportiva' }}</h2></div>
+      <span class="activity-total">{{ cantidadEquiposPerfil() }} equipos</span>
     </div>
 
-    <div *ngIf="usuario.tipoUsuario == 'DELEGADO'" class="delegado-actions">
-      <ion-button expand="block" color="primary" (click)="crearEquipoDelegado()">Crear equipo</ion-button>
+    <div *ngIf="usuario.tipoUsuario == 'DELEGADO' || usuario.tipoUsuario == 'ORGANIZADOR'" class="delegado-actions">
+      <ion-button expand="block" color="primary" (click)="crearEquipoDelegado()"><ion-icon slot="start" name="add-circle-outline"></ion-icon>{{ usuario.tipoUsuario == 'ORGANIZADOR' ? 'Crear mi equipo' : 'Crear equipo' }}</ion-button>
     </div>
 
-    <div class="section-heading context-heading" *ngIf="usuario.tipoUsuario == 'DELEGADO'">
-      <div><span class="eyebrow">Mis equipos</span><h2>Equipos creados</h2></div>
+    <div class="activity-feedback" *ngIf="cargandoActividadPerfil">
+      <ion-spinner name="crescent"></ion-spinner><span>Cargando torneos y equipos...</span>
     </div>
+    <ion-note class="activity-error" color="danger" *ngIf="errorActividadPerfil">{{ errorActividadPerfil }}</ion-note>
 
-    <div class="content-grid" *ngIf="usuario.tipoUsuario == 'ORGANIZADOR'"><ion-card class="info-card tournament-card" button *ngFor="let torneo of torneosCreados" (click)="abrirTorneo(torneo)"><div class="card-mark tournament-mark"><ion-icon name="trophy-outline"></ion-icon></div><div class="card-content"><ion-badge [color]="torneo.estadoTorneo == 'FINALIZADO' ? 'medium' : 'success'">{{ torneo.estadoTorneo }}</ion-badge><h3>{{ torneo.nombre }}</h3><p>{{ torneo.ubicacion || 'Ubicación pendiente' }}</p><small>{{ torneo.modalidadTorneo }} · {{ torneo.cantidadEquipos || 0 }} equipos</small></div><ion-icon class="card-arrow" name="chevron-forward-outline"></ion-icon></ion-card></div>
-    <div class="content-grid" *ngIf="usuario.tipoUsuario == 'DELEGADO'"><ion-card class="info-card team-card" button *ngFor="let equipo of equiposDelegado" (click)="abrirEquipo(equipo)"><div class="team-shield"><img appImageFallback="assets/images/shield-placeholder.svg" [src]="equipo.escudo ? 'data:image/png;base64,' + equipo.escudo : ''" alt="Escudo del equipo"></div><div class="card-content"><ion-badge color="primary">Equipo</ion-badge><h3>{{ equipo.nombre }}</h3><p>{{ equipo.torneo?.nombre || 'Sin torneo asignado aún' }}</p><small>{{ equipo.ciudad ? equipo.ciudad.nombre : 'Ciudad no registrada' }}</small></div><ion-icon class="card-arrow" name="chevron-forward-outline"></ion-icon></ion-card></div>
-    <div class="content-grid" *ngIf="usuario.tipoUsuario == 'JUGADOR'"><ion-card class="info-card team-card" button *ngFor="let equipo of equiposJugador" (click)="abrirEquipo(equipo)"><div class="team-shield"><img appImageFallback="assets/images/shield-placeholder.svg" [src]="equipo.escudo ? 'data:image/png;base64,' + equipo.escudo : ''" alt="Escudo del equipo"></div><div class="card-content"><ion-badge [color]="participacionDeEquipo(equipo)?.participando ? 'success' : 'primary'">{{ participacionDeEquipo(equipo)?.participando ? 'Participando' : 'Mi equipo' }}</ion-badge><h3>{{ equipo.nombre }}</h3><p>{{ equipo.torneo?.nombre }}</p><small>{{ equipo.torneo?.ubicacion || 'Ubicación pendiente' }} <span *ngIf="participacionDeEquipo(equipo)?.cambioEquipo">· Cambio registrado</span></small></div><ion-icon class="card-arrow" name="chevron-forward-outline"></ion-icon></ion-card></div>
-    <section class="section-block team-invitations" *ngIf="usuario.tipoUsuario == 'JUGADOR'">
-      <div class="section-heading"><div><span class="eyebrow">Plantel</span><h2>Invitaciones a equipos</h2></div></div>
-      <ion-item *ngIf="cargandoInvitacionesEquipo" lines="none"><ion-spinner slot="start"></ion-spinner><ion-label>Cargando invitaciones...</ion-label></ion-item>
-      <ion-note color="danger" *ngIf="errorInvitacionesEquipo">{{ errorInvitacionesEquipo }}</ion-note>
-      <ion-item *ngFor="let invitacion of invitacionesEquipoJugador">
-        <ion-label>{{ invitacion.equipoNombre }}<small>Invitación recibida {{ invitacion.creadaEn | date:'medium' }}</small></ion-label>
-        <ion-button slot="end" color="success" (click)="responderInvitacionEquipo(invitacion, true)">Aceptar</ion-button>
-        <ion-button slot="end" fill="clear" color="medium" (click)="responderInvitacionEquipo(invitacion, false)">Rechazar</ion-button>
-      </ion-item>
-      <p class="empty-invitations" *ngIf="!cargandoInvitacionesEquipo && !errorInvitacionesEquipo && !invitacionesEquipoJugador.length">No tienes invitaciones pendientes.</p>
-    </section>
+    <ion-accordion-group class="profile-accordions" [multiple]="true">
+      <ion-accordion value="torneos" *ngIf="usuario.tipoUsuario == 'ORGANIZADOR'">
+        <ion-item slot="header" class="profile-accordion-header" lines="none">
+          <ion-icon slot="start" name="trophy-outline"></ion-icon>
+          <ion-label><span class="eyebrow">Organización</span><h2>Torneos creados</h2></ion-label>
+          <ion-badge slot="end" class="list-count">{{ torneosCreados.length }}</ion-badge>
+        </ion-item>
+        <div slot="content" class="profile-accordion-content">
+          <div class="content-grid" *ngIf="!cargandoActividadPerfil && !errorActividadPerfil && torneosCreados.length">
+            <ion-card class="info-card tournament-card" button *ngFor="let torneo of torneosCreados" (click)="abrirTorneo(torneo)">
+              <div class="card-mark tournament-mark"><ion-icon name="trophy-outline"></ion-icon></div>
+              <div class="card-content">
+                <div class="card-overline"><span>Torneo</span><ion-badge [color]="torneo.estadoTorneo == 'FINALIZADO' ? 'medium' : 'success'">{{ torneo.estadoTorneo == 'INSCRIPCIONES_ACTIVO' ? 'Inscripciones activas' : (torneo.estadoTorneo | titlecase) }}</ion-badge></div>
+                <h3>{{ torneo.nombre }}</h3>
+                <p><ion-icon name="location-outline"></ion-icon>{{ torneo.ubicacion || 'Ubicación pendiente' }}</p>
+                <small>{{ torneo.modalidadTorneo?.replace('_', ' ') | titlecase }} <span *ngIf="torneo.cantidadEquipos">· {{ torneo.cantidadEquipos }} por grupo</span></small>
+              </div>
+              <ion-icon class="card-arrow" name="chevron-forward-outline"></ion-icon>
+            </ion-card>
+          </div>
+          <div class="empty-state" *ngIf="!cargandoActividadPerfil && !errorActividadPerfil && !torneosCreados.length">
+            <span class="empty-icon"><ion-icon name="trophy-outline"></ion-icon></span><strong>Aún no has creado torneos</strong><p>Los torneos que organices aparecerán aquí.</p>
+          </div>
+        </div>
+      </ion-accordion>
+
+      <ion-accordion value="equipos-delegado" *ngIf="usuario.tipoUsuario == 'DELEGADO' || usuario.tipoUsuario == 'ORGANIZADOR'">
+        <ion-item slot="header" class="profile-accordion-header" lines="none">
+          <ion-icon slot="start" name="shield-outline"></ion-icon>
+          <ion-label><span class="eyebrow">Planteles</span><h2>Equipos creados</h2></ion-label>
+          <ion-badge slot="end" class="list-count">{{ equiposDelegado.length }}</ion-badge>
+        </ion-item>
+        <div slot="content" class="profile-accordion-content">
+          <div class="content-grid" *ngIf="!cargandoActividadPerfil && !errorActividadPerfil && equiposDelegado.length">
+            <ion-card class="info-card team-card" button *ngFor="let equipo of equiposDelegado" (click)="abrirEquipo(equipo)">
+              <div class="team-shield"><img appImageFallback="assets/images/shield-placeholder.svg" [src]="equipo.escudo ? 'data:image/png;base64,' + equipo.escudo : ''" alt="Escudo del equipo"></div>
+              <div class="card-content">
+                <div class="card-overline"><span>Equipo delegado</span><ion-badge color="primary">Plantel</ion-badge></div>
+                <h3>{{ equipo.nombre }}</h3>
+                <p><ion-icon name="trophy-outline"></ion-icon>{{ equipo.torneo?.nombre || 'Sin torneo asignado' }}</p>
+                <small><ion-icon name="location-outline"></ion-icon>{{ equipo.ciudad?.nombre || 'Ciudad no registrada' }}</small>
+              </div>
+              <ion-icon class="card-arrow" name="chevron-forward-outline"></ion-icon>
+            </ion-card>
+          </div>
+          <div class="empty-state" *ngIf="!cargandoActividadPerfil && !errorActividadPerfil && !equiposDelegado.length">
+            <span class="empty-icon"><ion-icon name="shield-outline"></ion-icon></span><strong>No hay equipos creados</strong><p>Crea un equipo para administrar su plantel y sus torneos.</p>
+          </div>
+        </div>
+      </ion-accordion>
+
+      <ion-accordion value="equipos-jugador" *ngIf="usuario.tipoUsuario == 'JUGADOR' || equiposJugador.length">
+        <ion-item slot="header" class="profile-accordion-header" lines="none">
+          <ion-icon slot="start" name="people-outline"></ion-icon>
+          <ion-label><span class="eyebrow">Como jugador</span><h2>Mis equipos de juego</h2></ion-label>
+          <ion-badge slot="end" class="list-count">{{ equiposJugador.length }}</ion-badge>
+        </ion-item>
+        <div slot="content" class="profile-accordion-content">
+          <div class="content-grid" *ngIf="!cargandoActividadPerfil && !errorActividadPerfil && equiposJugador.length">
+            <ion-card class="info-card team-card player-team-card" button *ngFor="let equipo of equiposJugador" (click)="abrirEquipo(equipo)">
+              <div class="team-shield"><img appImageFallback="assets/images/shield-placeholder.svg" [src]="equipo.escudo ? 'data:image/png;base64,' + equipo.escudo : ''" alt="Escudo del equipo"></div>
+              <div class="card-content">
+                <div class="card-overline"><span>Participación</span><ion-badge [color]="participacionDeEquipo(equipo)?.participando ? 'success' : 'primary'">{{ participacionDeEquipo(equipo)?.participando ? 'En juego' : 'Inscrito' }}</ion-badge></div>
+                <h3>{{ equipo.nombre }}</h3>
+                <p><ion-icon name="trophy-outline"></ion-icon>{{ equipo.torneo?.nombre || 'Torneo sin asignar' }}</p>
+                <small>{{ equipo.torneo?.ubicacion || 'Ubicación pendiente' }} <span *ngIf="participacionDeEquipo(equipo)?.cambioEquipo">· Cambio registrado</span></small>
+              </div>
+              <ion-icon class="card-arrow" name="chevron-forward-outline"></ion-icon>
+            </ion-card>
+          </div>
+          <div class="empty-state" *ngIf="!cargandoActividadPerfil && !errorActividadPerfil && usuario.tipoUsuario == 'JUGADOR' && !equiposJugador.length">
+            <span class="empty-icon"><ion-icon name="people-outline"></ion-icon></span><strong>Aún no perteneces a un equipo</strong><p>Cuando te unas a un plantel, encontrarás aquí sus datos.</p>
+          </div>
+        </div>
+      </ion-accordion>
+
+      <ion-accordion value="invitaciones" *ngIf="usuario.identificacion">
+        <ion-item slot="header" class="profile-accordion-header" lines="none">
+          <ion-icon slot="start" name="mail-unread-outline"></ion-icon>
+          <ion-label><span class="eyebrow">Plantel</span><h2>Invitaciones a equipos</h2></ion-label>
+          <ion-badge slot="end" class="list-count">{{ invitacionesEquipoJugador.length }}</ion-badge>
+        </ion-item>
+        <div slot="content" class="profile-accordion-content">
+          <div class="activity-feedback invitation-loading" *ngIf="cargandoInvitacionesEquipo"><ion-spinner name="crescent"></ion-spinner><span>Cargando invitaciones...</span></div>
+          <ion-note color="danger" class="activity-error" *ngIf="errorInvitacionesEquipo">{{ errorInvitacionesEquipo }}</ion-note>
+          <div class="invitation-list" *ngIf="!cargandoInvitacionesEquipo && !errorInvitacionesEquipo">
+            <article class="invitation-item" *ngFor="let invitacion of invitacionesEquipoJugador">
+              <span class="invitation-mark"><ion-icon name="mail-unread-outline"></ion-icon></span>
+              <div class="invitation-copy"><span class="invitation-kicker">Invitación pendiente</span><h3>{{ invitacion.equipoNombre }}</h3><p>Recibida {{ invitacion.creadaEn | date:'mediumDate' }}</p></div>
+              <div class="invitation-actions">
+                <ion-button size="small" color="success" (click)="responderInvitacionEquipo(invitacion, true)"><ion-icon slot="start" name="checkmark-outline"></ion-icon>Aceptar</ion-button>
+                <ion-button size="small" fill="outline" color="medium" (click)="responderInvitacionEquipo(invitacion, false)"><ion-icon slot="start" name="close-outline"></ion-icon>Rechazar</ion-button>
+              </div>
+            </article>
+          </div>
+          <div class="empty-state invitation-empty" *ngIf="!cargandoInvitacionesEquipo && !errorInvitacionesEquipo && !invitacionesEquipoJugador.length">
+            <span class="empty-icon"><ion-icon name="mail-open-outline"></ion-icon></span><strong>Sin invitaciones pendientes</strong><p>Las nuevas invitaciones de equipo aparecerán aquí.</p>
+          </div>
+        </div>
+      </ion-accordion>
+    </ion-accordion-group>
   </section>
 </ion-content>

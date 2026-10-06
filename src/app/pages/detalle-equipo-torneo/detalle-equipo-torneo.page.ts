@@ -22,6 +22,8 @@ export class DetalleEquipoTorneoPage implements OnInit {
   jugadorInscripcionId?: number;
   esOrganizador = false;
   esDelegado = false;
+  usuarioId?: number;
+  usuarioIdentificacion?: string;
   error = '';
   cargando = true;
   readonly equipoId: number;
@@ -35,6 +37,8 @@ export class DetalleEquipoTorneoPage implements OnInit {
 
   ngOnInit() {
     const usuario = this.crud.obtenerUsuario();
+    this.usuarioId = usuario.id;
+    this.usuarioIdentificacion = usuario.identificacion;
     const esTipoOrganizador = this.sesion.validacionOrganizador();
     this.crud.obtenerEquipoEnTorneo(this.equipoId, this.torneoId).subscribe({
       next: equipo => {
@@ -75,6 +79,18 @@ export class DetalleEquipoTorneoPage implements OnInit {
 
   jugadorInscrito(jugadorId?: number): boolean {
     return !!jugadorId && this.jugadores.some(item => item.jugador?.id === jugadorId);
+  }
+
+  yaEstoyInscrito(): boolean {
+    return !!this.usuarioIdentificacion && this.jugadores.some(item => item.jugador?.identificacion === this.usuarioIdentificacion);
+  }
+
+  unirmeComoJugador() {
+    if (!this.usuarioId || this.participacion?.estado !== 'ACEPTADO' || this.yaEstoyInscrito()) return;
+    this.crud.registrarseComoJugador(this.equipoId, this.torneoId, this.usuarioId).subscribe({
+      next: () => this.cargarJugadores(),
+      error: err => this.error = err?.error?.message || 'No se pudo registrar tu participación.'
+    });
   }
 
   agregarJugador(jugador: any) {

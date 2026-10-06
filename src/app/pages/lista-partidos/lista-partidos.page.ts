@@ -103,6 +103,25 @@ export class ListaPartidosPage implements OnInit{
     return '';
   }
   selecionarFecha(btnModal: IonButton, partido: Partido) {    
+    if (partido.estadoPartido === EstadoPartido.EN_PROCESO || partido.estadoPartido === EstadoPartido.TERMINADO) {
+      this.router.navigateByUrl('/auth/partidos/partido/' + partido.id);
+      return;
+    }
+    const usuarioId = this.crud.obtenerUsuario().id;
+    if (!usuarioId || !partido.id) return;
+    this.crud.puedeGestionarPartido(partido.id, usuarioId).subscribe(permitido => {
+      if (!permitido) {
+        this.mensajeError = 'No puedes gestionar un partido en el que participas. Debe hacerlo otro ayudante.';
+        this.setOpen(true);
+        return;
+      }
+      this.abrirModalProgramacion(btnModal, partido);
+    }, error => {
+      this.mensajeError = error?.error?.message || 'No se pudo validar el permiso de gestión.';
+      this.setOpen(true);
+    });
+  }
+  private abrirModalProgramacion(btnModal: IonButton, partido: Partido) {
     this.partidoSeleccionado = partido;
     if (this.partidoSeleccionado.cancha == undefined) {
       this.partidoSeleccionado.cancha = new Cancha();
@@ -115,7 +134,8 @@ export class ListaPartidosPage implements OnInit{
     this.textoPartido = partido.equipoLocal?.nombre + " vs " + partido.equipoVisitante?.nombre;
   }
   asignarFecha() {
-    this.crud.actualizar(this.partidoSeleccionado, "partido/asignar_fecha").subscribe((resp: Partido) => {
+    const usuarioId = this.crud.obtenerUsuario().id;
+    this.crud.actualizar(this.partidoSeleccionado, `partido/asignar_fecha?usuarioId=${usuarioId}`).subscribe((resp: Partido) => {
       this.partidoSeleccionado = resp;
       this.listaPartidos();
     }, error =>{
@@ -154,7 +174,8 @@ export class ListaPartidosPage implements OnInit{
     }
     this.modal.dismiss(null, 'cancel');
     this.router.navigateByUrl('/auth/partidos/partido/' + this.partidoSeleccionado.id);
-    this.crud.actualizar(null, "partido/iniciar/"+ this.partidoSeleccionado.id).subscribe((resp: Partido) => {
+    const usuarioId = this.crud.obtenerUsuario().id;
+    this.crud.actualizar(null, `partido/iniciar/${this.partidoSeleccionado.id}?usuarioId=${usuarioId}`).subscribe((resp: Partido) => {
       this.partidoSeleccionado = resp;
       this.listaPartidos();
     }, error => {
@@ -163,7 +184,8 @@ export class ListaPartidosPage implements OnInit{
     });
   }
   cancelarPartido() {
-    this.crud.actualizar(null, "partido/cancelar/"+ this.partidoSeleccionado.id).subscribe((resp: Partido) => {
+    const usuarioId = this.crud.obtenerUsuario().id;
+    this.crud.actualizar(null, `partido/cancelar/${this.partidoSeleccionado.id}?usuarioId=${usuarioId}`).subscribe((resp: Partido) => {
       this.partidoSeleccionado = resp;
       this.listaPartidos();
     });

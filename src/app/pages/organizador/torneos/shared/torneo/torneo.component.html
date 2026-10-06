@@ -17,9 +17,16 @@
     <div class="action-grid">
       <ion-button (click)="tablaEquipos()"><ion-icon size="large" slot="start" name="podium-outline"></ion-icon>Tabla</ion-button>
       <ion-button (click)="listaPartidos()"><ion-icon size="large" slot="start" name="football-outline"></ion-icon>Partidos</ion-button>
+      <ion-button *ngIf="puedeRegistrarEquipos && (torneo.estadoTorneo == 'INSCRIPCIONES' || torneo.estadoTorneo == 'INSCRIPCIONES_ACTIVO')" (click)="registrarEquipoPlanilla()">
+        <ion-icon size="large" slot="start" name="clipboard-outline"></ion-icon>Registrar equipo con planilla
+      </ion-button>
       @if (esPropietario) {
         <ion-button (click)="agregarEquipo()"><ion-icon size="large" slot="start" name="people-outline"></ion-icon>Agregar equipo</ion-button>
-        <ion-button (click)="agregarPartido()"><ion-icon size="large" slot="start" name="calendar-number-outline"></ion-icon>Agregar partido</ion-button>
+        <ion-button [disabled]="generandoPartidos" (click)="generarPartidos()">
+          <ion-spinner *ngIf="generandoPartidos" slot="start" name="crescent"></ion-spinner>
+          <ion-icon *ngIf="!generandoPartidos" size="large" slot="start" name="calendar-number-outline"></ion-icon>
+          {{ generandoPartidos ? 'Generando partidos...' : 'Generar partidos' }}
+        </ion-button>
         <ion-button *ngIf="torneo.estadoTorneo == 'INSCRIPCIONES' || torneo.estadoTorneo == 'INSCRIPCIONES_ACTIVO'" (click)="verSolicitudes()">
           <ion-icon size="large" slot="start" name="mail-unread-outline"></ion-icon>Solicitudes
         </ion-button>
@@ -29,6 +36,23 @@
         <ion-button (click)="solicitarEquipo()">Solicitar participación</ion-button>
       }
     </div>
+  </ion-card>
+  <ion-card class="tournament-actions" *ngIf="esPropietario">
+    <div class="section-heading"><div><strong>Ayudantes para gestionar partidos</strong><small>Podrán gestionar encuentros, excepto aquellos en los que participen.</small></div></div>
+    <ion-item lines="none">
+      <ion-input label="Identificación del perfil" labelPlacement="stacked" [(ngModel)]="identificacionAyudante"></ion-input>
+      <ion-button slot="end" [disabled]="!identificacionAyudante.trim()" (click)="agregarAyudante()">
+        <ion-icon slot="start" name="person-add-outline"></ion-icon>Agregar
+      </ion-button>
+    </ion-item>
+    <ion-item *ngIf="cargandoAyudantes" lines="none"><ion-spinner slot="start"></ion-spinner><ion-label>Cargando ayudantes...</ion-label></ion-item>
+    <ion-item *ngFor="let ayudante of ayudantes" lines="none">
+      <ion-label>{{ ayudante.nombre }}<small>{{ ayudante.identificacion }}</small></ion-label>
+      <ion-button fill="clear" color="danger" aria-label="Quitar ayudante" (click)="eliminarAyudante(ayudante.usuarioId)">
+        <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+      </ion-button>
+    </ion-item>
+    <p class="empty-state" *ngIf="!cargandoAyudantes && ayudantes.length === 0">Aún no hay ayudantes asignados.</p>
   </ion-card>
   <ion-card class="venues-panel">
     <div class="section-heading">

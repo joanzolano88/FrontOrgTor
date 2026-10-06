@@ -93,6 +93,9 @@ export class CrudService {
   obtenerEquipoEnTorneo(idEquipo: number, idTorneo: number) {
     return this.http.get<any>(`${this.url}equipo/${idEquipo}/torneo/${idTorneo}`);
   }
+  registrarseComoJugador(idEquipo: number, idTorneo: number, usuarioId: number) {
+    return this.http.post<any>(`${this.url}equipo/torneo/${idTorneo}/jugador/${idEquipo}?usuarioId=${usuarioId}`, {});
+  }
 
   obtenerTorneosEquipo(idEquipo: number) {
     return this.http.get<any[]>(`${this.url}equipo/${idEquipo}/torneos`);
@@ -130,8 +133,8 @@ export class CrudService {
     return this.http.post(`${this.url}equipo/${idEquipo}/solicitud-jugador?usuarioId=${usuarioId}`, {});
   }
 
-  buscarJugadorEquipo(idEquipo: number, cedula: string, usuarioId: number) {
-    return this.http.get<any>(`${this.url}equipo/${idEquipo}/jugadores/buscar?cedula=${encodeURIComponent(cedula)}&usuarioId=${usuarioId}`);
+  buscarJugadorEquipo(idEquipo: number, identificacion: string, usuarioId: number) {
+    return this.http.get<any>(`${this.url}equipo/${idEquipo}/jugadores/buscar?identificacion=${encodeURIComponent(identificacion)}&usuarioId=${usuarioId}`);
   }
 
   eliminarJugadorEquipo(idEquipo: number, idJugador: number, usuarioId: number) {
@@ -150,8 +153,8 @@ export class CrudService {
     return this.http.delete(`${this.url}equipo/solicitudes-jugador/${idSolicitud}/rechazar?usuarioId=${usuarioId}`);
   }
 
-  invitarJugadorAEquipo(idEquipo: number, cedula: string, usuarioId: number) {
-    return this.http.post<any>(`${this.url}equipo/${idEquipo}/invitaciones-jugador?cedula=${encodeURIComponent(cedula)}&usuarioId=${usuarioId}`, {});
+  invitarJugadorAEquipo(idEquipo: number, identificacion: string, usuarioId: number) {
+    return this.http.post<any>(`${this.url}equipo/${idEquipo}/invitaciones-jugador?identificacion=${encodeURIComponent(identificacion)}&usuarioId=${usuarioId}`, {});
   }
 
   obtenerInvitacionesEquipoJugador(usuarioId: number) {
@@ -261,6 +264,18 @@ export class CrudService {
   obtenerTorneosPorCiudad(ciudadId: number) {
     return this.http.get<{ label: string; value: number }[]>(`${this.url}torneo/ciudad/${ciudadId}`);
   }
+  obtenerAyudantesTorneo(torneoId: number, usuarioId: number) {
+    return this.http.get<any[]>(`${this.url}torneo/${torneoId}/ayudantes?usuarioId=${usuarioId}`);
+  }
+  agregarAyudanteTorneo(torneoId: number, usuarioId: number, identificacion: string) {
+    return this.http.post<any>(`${this.url}torneo/${torneoId}/ayudantes?usuarioId=${usuarioId}&identificacion=${encodeURIComponent(identificacion)}`, {});
+  }
+  eliminarAyudanteTorneo(torneoId: number, ayudanteUsuarioId: number, usuarioId: number) {
+    return this.http.delete(`${this.url}torneo/${torneoId}/ayudantes/${ayudanteUsuarioId}?usuarioId=${usuarioId}`);
+  }
+  puedeGestionarPartido(partidoId: number, usuarioId: number) {
+    return this.http.get<boolean>(`${this.url}partido/${partidoId}/puede-gestionar?usuarioId=${usuarioId}`);
+  }
   obtenerToken() {
     return localStorage.getItem('token');
   }
@@ -268,12 +283,28 @@ export class CrudService {
     const usuario = localStorage.getItem('usuario');
     return usuario ? JSON.parse(usuario) : new Usuario();
   }
+  obtenerUsuarioActualId(): number | null {
+    const usuario = this.obtenerUsuario();
+    const id = Number(usuario?.id);
+    return Number.isFinite(id) && id > 0 ? id : null;
+  }
+  validarUsuarioActual(usuarioId?: number | null): number | null {
+    const usuarioActualId = this.obtenerUsuarioActualId();
+    if (!usuarioActualId) {
+      return null;
+    }
+    if (usuarioId === undefined || usuarioId === null) {
+      return usuarioActualId;
+    }
+    return Number(usuarioId) === usuarioActualId ? usuarioActualId : null;
+  }
   obtenerTipo() {
     return localStorage.getItem('tipo');
   }
   verSesion() {
     const usuario = localStorage.getItem('usuario');
-    return !(usuario === null);
+    const token = localStorage.getItem('token');
+    return !!usuario && !!token;
   }
   cerrarSesion() {
     localStorage.removeItem('usuario');

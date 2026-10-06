@@ -19,6 +19,7 @@ const routes: Routes = [
       },
       {
         path: 'torneos',
+        canActivate: [SesionService],
         loadChildren: () => import('../pages/organizador/torneos/torneos.module').then(m => m.TorneosPageModule)
       },
       {

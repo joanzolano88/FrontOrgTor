@@ -217,3 +217,17 @@ ion-item.item-has-focus:has(> ion-input, > ion-select, > ion-textarea) {
 ion-item.error-input:has(> ion-input, > ion-select, > ion-textarea) {
     border-color: var(--ion-color-danger);
 }
+
+.search-panel {
+    margin: 12px 14px 18px;
+    padding: 0 14px 14px;
+    border: 1px solid var(--app-border, #34444a);
+    border-radius: 16px;
+    background: var(--app-surface, #1a272c);
+    overflow: hidden;
+}
+
+.filters-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.filters-grid ion-select {
+    margin: 0;
+}

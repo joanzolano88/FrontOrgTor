@@ -15,7 +15,7 @@ export class VerEquipoPage {
   esDelegado = false;
   idTorneo = '';
   mensajeJugadores = '';
-  cedulaJugador = '';
+  identificacionJugador = '';
   esJugador = false;
   solicitandoUnirse = false;
   solicitudesJugadores: any[] = [];
@@ -136,15 +136,15 @@ export class VerEquipoPage {
 
   buscarYAgregarJugador() {
     const usuarioId = this.crud.obtenerUsuario().id;
-    if (!this.equipo.id || !usuarioId || !this.cedulaJugador.trim()) {
-      this.mensajeJugadores = 'Ingresa la cédula del jugador.';
+    if (!this.equipo.id || !usuarioId || !this.identificacionJugador.trim()) {
+      this.mensajeJugadores = 'Ingresa la identificación del jugador.';
       return;
     }
-    this.crud.buscarJugadorEquipo(this.equipo.id, this.cedulaJugador.trim(), usuarioId).subscribe({
+    this.crud.buscarJugadorEquipo(this.equipo.id, this.identificacionJugador.trim(), usuarioId).subscribe({
       next: async (jugador: any) => {
         const alerta = await this.alertController.create({
           header: 'Confirmar jugador',
-          message: `Nombre: ${jugador.nombre || '-'}<br>Cédula: ${jugador.cedula || this.cedulaJugador}<br>Equipo actual: ${jugador.equipo?.nombre || '-'}`,
+          message: `Nombre: ${jugador.nombre || '-'}<br>Identificación: ${jugador.identificacion || this.identificacionJugador}<br>Equipo actual: ${jugador.equipo?.nombre || '-'}`,
           buttons: [
             { text: 'Cancelar', role: 'cancel' },
             { text: 'Enviar invitación', role: 'confirm', handler: () => this.invitarJugador(jugador) }
@@ -158,10 +158,10 @@ export class VerEquipoPage {
 
   invitarJugador(jugador: any) {
     const usuarioId = this.crud.obtenerUsuario().id;
-    if (!this.equipo.id || !usuarioId || !jugador?.cedula) return;
-    this.crud.invitarJugadorAEquipo(this.equipo.id, jugador.cedula, usuarioId).subscribe({
+    if (!this.equipo.id || !usuarioId || !jugador?.identificacion) return;
+    this.crud.invitarJugadorAEquipo(this.equipo.id, jugador.identificacion, usuarioId).subscribe({
       next: () => {
-        this.cedulaJugador = '';
+        this.identificacionJugador = '';
         this.mensajeJugadores = 'Invitación enviada al jugador.';
       },
       error: err => this.mensajeJugadores = err?.error?.message || 'No se pudo invitar al jugador.'

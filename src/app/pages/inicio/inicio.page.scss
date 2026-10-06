@@ -2,14 +2,7 @@
 	--muted: var(--app-muted, #a4b3b4);
 }
 
-.search-panel {
-    margin: 12px 14px 18px;
-    padding: 0 14px 14px;
-    border: 1px solid var(--app-border, #34444a);
-    border-radius: 16px;
-    background: var(--app-surface, #1a272c);
-    overflow: hidden;
-}
+
 .date-picker {
     display: grid;
     grid-template-columns: 36px minmax(0, 1fr) 36px;
@@ -45,10 +38,6 @@
     background: var(--app-surface, #1a272c);
     color: var(--app-ink, #edf3f1);
     box-shadow: 0 2px 7px rgba(0, 0, 0, .18);
-}
-.filters-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
-.filters-grid ion-select {
-    margin: 0;
 }
 .search-actions { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 12px; }
 .location-hint { color: var(--muted); font-size: 12px; }

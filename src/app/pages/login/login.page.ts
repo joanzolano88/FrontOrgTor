@@ -29,6 +29,7 @@ export class LoginPage {
       sessionStorage.removeItem('tipo');
       localStorage.setItem('usuario', JSON.stringify(resp));
       localStorage.setItem('tipo', resp.tipoUsuario || '');
+      localStorage.setItem('token', resp.token || '');
       this.router.navigateByUrl('/auth/partidos');
     },async err => {
       const alert = await  this.alertController.create({

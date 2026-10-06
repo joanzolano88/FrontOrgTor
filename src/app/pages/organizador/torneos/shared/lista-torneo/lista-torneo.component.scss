@@ -1,13 +1,9 @@
-.filtros-torneos {
-  background: transparent;
-  padding: 0 12px 8px;
-}
-
 .filtro-busqueda {
   --background: var(--app-surface);
   border: 1px solid var(--app-border);
   border-radius: var(--app-radius);
   margin-bottom: 10px;
+  margin-top: 10px;
 }
 
 .filtro-busqueda ion-searchbar {

@@ -3,7 +3,6 @@ import { Router } from '@angular/router';
 import { Equipo } from 'src/models/Equipo';
 import { Torneo } from 'src/models/Torneo';
 import { TorneoService } from '../torneo.service';
-import { IonImg, IonList, IonCardSubtitle } from "@ionic/angular/standalone";
 import { CrudService } from 'src/app/services/crud.service';
 import { TipoUsuario } from 'src/enums/TipoUsuario';
 import { EstadoTorneo } from 'src/enums/EstadoTorneo';

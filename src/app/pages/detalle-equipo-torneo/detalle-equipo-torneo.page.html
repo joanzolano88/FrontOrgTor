@@ -23,9 +23,13 @@
 
     <section class="content-section">
       <div class="section-heading"><div><span class="eyebrow">Lista del torneo</span><h2>Jugadores inscritos</h2></div></div>
+      <ion-button *ngIf="usuarioId && participacion.estado == 'ACEPTADO' && !yaEstoyInscrito()" expand="block" fill="outline" (click)="unirmeComoJugador()">
+        <ion-icon slot="start" name="person-add-outline"></ion-icon>Unirme como jugador
+      </ion-button>
+      <ion-note color="success" *ngIf="yaEstoyInscrito()">Ya estás inscrito como jugador de este equipo en el torneo.</ion-note>
       <ion-list>
         <ion-item *ngFor="let item of jugadores">
-          <ion-label>{{ item.jugador?.nombre }}<small>{{ item.jugador?.cedula }}</small></ion-label>
+          <ion-label>{{ item.jugador?.nombre }}<small>{{ item.jugador?.identificacion }}</small></ion-label>
           <ion-badge slot="end" [color]="item.participando ? 'success' : 'medium'">{{ item.participando ? 'Participó' : 'Inscrito' }}</ion-badge>
           <ion-button *ngIf="esDelegado && !item.jugoPartido" slot="end" fill="clear" color="danger" aria-label="Retirar jugador" (click)="quitarJugador(item)"><ion-icon slot="icon-only" name="close-circle-outline"></ion-icon></ion-button>
         </ion-item>

@@ -72,7 +72,7 @@ export class PartidoPage implements OnInit {
   convocatorias: ConvocatoriaPartido[] = [];
   jugadoresDisponibles: Jugador[] = [];
   equipoConvocatoria?: Equipo;
-  cedulaJugador = '';
+  identificacionJugador = '';
   enlaceInvitacion = '';
   convocatoriaModalOpen = false;
   eventos: EventoPartido[] = [];
@@ -100,7 +100,11 @@ export class PartidoPage implements OnInit {
     let idPartido = this.route.snapshot.paramMap.get('idPartido');
     this.crud.obtenerParametro(idPartido,"partido").subscribe((resp: Partido) =>{
       this.partido = resp;
-      this.validarOrganizador = this.esOrganizadorDelTorneo();
+      const usuarioId = this.crud.obtenerUsuario().id;
+      this.validarOrganizador = false;
+      if (usuarioId && resp.id) {
+        this.crud.puedeGestionarPartido(resp.id, usuarioId).subscribe(permitido => this.validarOrganizador = permitido);
+      }
       this.cargarConvocatorias();
       this.cambiarEquipoConvocatoria();
       this.cargarEventos();
@@ -230,16 +234,16 @@ export class PartidoPage implements OnInit {
   estaConvocado(jugador?: Jugador): boolean {
     return !!jugador?.id && this.convocatorias.some(convocatoria => convocatoria.jugador?.id === jugador.id);
   }
-  async agregarPorCedula() {
+  async agregarPorIdentificacion() {
     const usuarioId = this.crud.obtenerUsuario().id;
-    if (!usuarioId || !this.partido.id || !this.cedulaJugador.trim()) {
-      this.mostrarError({ error: { message: 'Ingresa la cédula del jugador.' } });
+    if (!usuarioId || !this.partido.id || !this.identificacionJugador.trim()) {
+      this.mostrarError({ error: { message: 'Ingresa la identificación del jugador.' } });
       return;
     }
-    this.crud.obtener(`partido/${this.partido.id}/jugador/cedula/${encodeURIComponent(this.cedulaJugador.trim())}?usuarioId=${usuarioId}`).subscribe(async (jugador: any) => {
+    this.crud.obtener(`partido/${this.partido.id}/jugador/identificacion/${encodeURIComponent(this.identificacionJugador.trim())}?usuarioId=${usuarioId}`).subscribe(async (jugador: any) => {
       const alerta = await this.alertController.create({
         header: 'Confirmar jugador',
-        message: `Nombre: ${jugador.nombre || '-'}<br>Cédula: ${jugador.cedula || this.cedulaJugador}<br>Equipo: ${jugador.equipo?.nombre || '-'}`,
+        message: `Nombre: ${jugador.nombre || '-'}<br>Identificación: ${jugador.identificacion || this.identificacionJugador}<br>Equipo: ${jugador.equipo?.nombre || '-'}`,
         buttons: [{ text: 'Cancelar', role: 'cancel' }, { text: 'Agregar', role: 'confirm', handler: () => this.agregarJugador(jugador) }]
       });
       await alerta.present();
@@ -297,7 +301,8 @@ export class PartidoPage implements OnInit {
       return;
     }
     if (this.partido?.estadoPartido == EstadoPartido.PROGRAMADO) {
-      this.crud.actualizar(this.partido, 'partido/iniciar/' + this.partido.id).subscribe((resp: Partido) =>{
+      const usuarioId = this.crud.obtenerUsuario().id;
+      this.crud.actualizar(this.partido, `partido/iniciar/${this.partido.id}?usuarioId=${usuarioId}`).subscribe((resp: Partido) =>{
         this.partido = resp;
       }, error => this.mostrarError(error));
     } else if (this.partido?.estadoPartido == EstadoPartido.EN_PROCESO) {
@@ -364,7 +369,8 @@ export class PartidoPage implements OnInit {
     }
   }
   actualizarPartido() {
-    this.crud.actualizar(this.partido, 'partido/sumar_gol').subscribe((resp: Partido) =>{
+    const usuarioId = this.crud.obtenerUsuario().id;
+    this.crud.actualizar(this.partido, `partido/sumar_gol?usuarioId=${usuarioId}`).subscribe((resp: Partido) =>{
       this.partido = resp;
     }, error => this.mostrarError(error));
   }
@@ -372,12 +378,14 @@ export class PartidoPage implements OnInit {
     btn['el'].click();
   }
   terminarPartido() {
-    this.crud.actualizar(this.partido, 'partido/terminar/' + this.partido!.id).subscribe((resp: Partido) =>{
+    const usuarioId = this.crud.obtenerUsuario().id;
+    this.crud.actualizar(this.partido, `partido/terminar/${this.partido!.id}?usuarioId=${usuarioId}`).subscribe((resp: Partido) =>{
       this.partido = resp;
     }, error => this.mostrarError(error));
   }
   terminarPartidoPenaltis(ganador: string) {
-    this.crud.actualizar(this.partido, 'partido/terminar-penaltis/' + this.partido!.id + '/' + ganador).subscribe((resp: Partido) =>{
+    const usuarioId = this.crud.obtenerUsuario().id;
+    this.crud.actualizar(this.partido, `partido/terminar-penaltis/${this.partido!.id}/${ganador}?usuarioId=${usuarioId}`).subscribe((resp: Partido) =>{
       this.partido = resp;
     }, error => this.mostrarError(error));
   }
@@ -395,7 +403,8 @@ export class PartidoPage implements OnInit {
     if (ev.detail.role == 'confirm') {
       this.partido!.anotacionesEquipoLocal = ev.detail.data.values[0];
       this.partido!.anotacionesEquipoVisitante = ev.detail.data.values[1];
-      this.crud.actualizar(this.partido, 'partido/modificar-marcador').subscribe((resp: Partido) =>{
+      const usuarioId = this.crud.obtenerUsuario().id;
+      this.crud.actualizar(this.partido, `partido/modificar-marcador?usuarioId=${usuarioId}`).subscribe((resp: Partido) =>{
         this.partido = resp;
       }, error => this.mostrarError(error));
     }

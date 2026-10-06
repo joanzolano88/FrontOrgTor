@@ -30,6 +30,9 @@ const routes: Routes = [
     canActivate: [PropietarioTorneoGuard],
     loadChildren: () => import('../../../equipo-configurar/equipo-configurar.module').then( m => m.EquipoConfigurarPageModule)
   },{
+    path: 'registro-planilla',
+    loadChildren: () => import('../../../registro-planilla/registro-planilla.module').then(m => m.RegistroPlanillaPageModule)
+  },{
     path: 'tabla-equipos',
     loadChildren: () => import('../../../tabla-equipos/tabla-equipos.module').then( m => m.TablaEquiposPageModule)
   },{
@@ -42,10 +45,6 @@ const routes: Routes = [
     path: 'solicitudes',
     canActivate: [PropietarioTorneoGuard],
     loadChildren: () => import('../../../solicitudes-equipo/solicitudes-equipo.module').then(m => m.SolicitudesEquipoPageModule)
-  },{
-    path: 'agregar-partido',
-    canActivate: [PropietarioTorneoGuard],
-    loadChildren: () => import('../../../agregar-partido/agregar-partido.module').then( m => m.AgregarPartidoPageModule)
   },{
     path: 'lista-partidos',
     loadChildren: () => import('../../../lista-partidos/lista-partidos.module').then( m => m.ListaPartidosPageModule)

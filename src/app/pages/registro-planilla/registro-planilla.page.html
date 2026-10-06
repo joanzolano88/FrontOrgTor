@@ -1,0 +1,84 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button text="" [defaultHref]="'/auth/torneos/torneo/' + idTorneo"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Registro de planilla</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <main class="roster-shell">
+    <div *ngIf="cargando" class="loading-state">
+      <ion-spinner name="crescent"></ion-spinner>
+      <span>Verificando torneo y permisos...</span>
+    </div>
+
+    <ion-note *ngIf="!cargando && !puedeRegistrar" color="danger" class="status-message">
+      {{ mensajeEstado }}
+    </ion-note>
+
+    <ng-container *ngIf="!cargando && puedeRegistrar">
+      <header class="page-heading">
+        <p class="eyebrow">{{ torneo.nombre }}</p>
+        <h1>Registrar equipo y plantel</h1>
+        <p>Ingresa el delegado y los jugadores directamente desde la planilla del equipo.</p>
+      </header>
+
+      <form #planillaForm="ngForm" (ngSubmit)="registrar(planillaForm)">
+        <section class="form-section">
+          <h2>Equipo</h2>
+          <ion-item lines="none" class="form-field">
+            <ion-input [(ngModel)]="nombreEquipo" name="nombreEquipo" label="Nombre del equipo" labelPlacement="stacked" required minlength="2" maxlength="100"></ion-input>
+          </ion-item>
+        </section>
+
+        <section class="form-section">
+          <h2>Delegado</h2>
+          <div class="profile-fields">
+            <ion-item lines="none" class="form-field">
+              <ion-input [(ngModel)]="delegado.nombre" name="delegadoNombre" label="Nombre completo" labelPlacement="stacked" required maxlength="120"></ion-input>
+            </ion-item>
+            <ion-item lines="none" class="form-field">
+              <ion-input [(ngModel)]="delegado.identificacion" name="delegadoIdentificacion" label="Identificación" labelPlacement="stacked" required maxlength="80"></ion-input>
+            </ion-item>
+          </div>
+        </section>
+
+        <section class="form-section roster-section">
+          <div class="section-heading">
+            <div>
+              <h2>Jugadores</h2>
+              <span>{{ jugadores.length }} en la planilla</span>
+            </div>
+            <ion-button type="button" fill="outline" size="small" (click)="agregarJugador()">
+              <ion-icon slot="start" name="person-add-outline"></ion-icon>
+              Añadir jugador
+            </ion-button>
+          </div>
+
+          <div class="player-row" *ngFor="let jugador of jugadores; let i = index">
+            <span class="player-index">{{ i + 1 }}</span>
+            <ion-item lines="none" class="form-field">
+              <ion-input [(ngModel)]="jugador.nombre" [name]="'jugadorNombre' + i" label="Nombre completo" labelPlacement="stacked" required maxlength="120"></ion-input>
+            </ion-item>
+            <ion-item lines="none" class="form-field">
+              <ion-input [(ngModel)]="jugador.identificacion" [name]="'jugadorIdentificacion' + i" label="Identificación" labelPlacement="stacked" required maxlength="80"></ion-input>
+            </ion-item>
+            <ion-button *ngIf="jugadores.length > 1" type="button" fill="clear" color="danger" [attr.aria-label]="'Quitar jugador ' + (i + 1)" (click)="quitarJugador(i)">
+              <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+            </ion-button>
+          </div>
+        </section>
+
+        <p class="credential-note">La contraseña inicial de los perfiles nuevos será su identificación.</p>
+
+        <ion-button expand="block" type="submit" [disabled]="planillaForm.invalid || enviando">
+          <ion-spinner *ngIf="enviando" slot="start" name="crescent"></ion-spinner>
+          <ion-icon *ngIf="!enviando" slot="start" name="save-outline"></ion-icon>
+          {{ enviando ? 'Registrando equipo...' : 'Registrar equipo en el torneo' }}
+        </ion-button>
+      </form>
+    </ng-container>
+  </main>
+</ion-content>

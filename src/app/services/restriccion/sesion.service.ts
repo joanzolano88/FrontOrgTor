@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
-import { CanActivate, Router } from '@angular/router';
+import { ActivatedRouteSnapshot, CanActivate, Router, RouterStateSnapshot, UrlTree } from '@angular/router';
 import { CrudService } from '../crud.service';
-import { Usuario } from 'src/models/Usuario';
 import { TipoUsuario } from 'src/enums/TipoUsuario';
 
 @Injectable({
@@ -11,13 +10,14 @@ export class SesionService implements CanActivate {
 
   constructor(private crud: CrudService, private router: Router) { }
 
-  canActivate() {
-    const sesion = this.crud.verSesion();
-    if (sesion) {
+  canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean | UrlTree {
+    if (this.crud.verSesion()) {
       return true;
     }
-    this.router.navigateByUrl('/auth/login');
-    return false;
+
+    return this.router.createUrlTree(['/auth/login'], {
+      queryParams: { returnUrl: state.url }
+    });
   }
 
   login() {
@@ -28,11 +28,19 @@ export class SesionService implements CanActivate {
     this.crud.cerrarSesion();
     this.router.navigateByUrl('/auth/login');
   }
-  validacionOrganizador() {
-    const usuario = this.crud.obtenerUsuario();
-    if (!usuario.id) {
+
+  validacionOrganizador(): boolean {
+    if (!this.crud.verSesion()) {
       return false;
     }
-    return usuario.tipoUsuario == TipoUsuario.ORGANIZADOR;
+    const usuario = this.crud.obtenerUsuario();
+    return !!usuario?.id && usuario.tipoUsuario === TipoUsuario.ORGANIZADOR;
+  }
+
+  obtenerUsuarioAutenticadoId(): number | null {
+    if (!this.crud.verSesion()) {
+      return null;
+    }
+    return this.crud.obtenerUsuarioActualId();
   }
 }

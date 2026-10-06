@@ -9,17 +9,25 @@ export class PropietarioTorneoGuard implements CanActivate {
   constructor(private crud: CrudService, private router: Router) {}
 
   canActivate(route: ActivatedRouteSnapshot): Observable<boolean | UrlTree> {
+    if (!this.crud.verSesion()) {
+      return of(this.router.createUrlTree(['/auth/login']));
+    }
+
     const usuario = this.crud.obtenerUsuario();
-    const idTorneo = route.pathFromRoot
-      .map(snapshot => snapshot.paramMap.get('idTorneo'))
-      .find(id => id !== null);
+    const idTorneo = route.paramMap.get('idTorneo')
+      ?? route.parent?.paramMap.get('idTorneo')
+      ?? route.pathFromRoot
+        .map(snapshot => snapshot.paramMap.get('idTorneo'))
+        .find(id => id !== null);
+
     if (!usuario?.id || !idTorneo) {
       return of(this.router.createUrlTree(['/auth/torneos']));
     }
+
     return this.crud.obtenerParametro(idTorneo, 'torneo').pipe(
-      map((torneo: Torneo) => torneo.encargadoTorneo?.id === usuario.id
+      map((torneo: Torneo) => torneo?.encargadoTorneo?.id === usuario.id
         ? true
-        : this.router.createUrlTree(['/auth/torneos'])),
+        : this.router.createUrlTree(['/auth/torneos'])) ,
       catchError(() => of(this.router.createUrlTree(['/auth/torneos'])))
     );
   }

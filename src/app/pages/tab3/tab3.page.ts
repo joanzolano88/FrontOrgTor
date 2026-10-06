@@ -31,6 +31,8 @@ export class Tab3Page implements OnInit {
   equiposDelegado: Equipo[] = [];
   equiposJugador: Equipo[] = [];
   participacionesJugador: any[] = [];
+  cargandoActividadPerfil = false;
+  errorActividadPerfil = '';
   invitacionesEquipoJugador: any[] = [];
   cargandoInvitacionesEquipo = false;
   errorInvitacionesEquipo = '';
@@ -63,7 +65,7 @@ export class Tab3Page implements OnInit {
             localStorage.setItem('usuario', JSON.stringify(usuarioActual));
             this.cargarPerfilRol(usuarioActual.id);
             if (usuarioActual.id) this.cargarContadorNotificaciones(usuarioActual.id);
-            if (usuarioActual.tipoUsuario === 'JUGADOR' && usuarioActual.id) this.cargarInvitacionesEquipo(usuarioActual.id);
+            if (usuarioActual.id) this.cargarInvitacionesEquipo(usuarioActual.id);
             this.cargarPaises();
           },
           error: () => this.cargarPaises()
@@ -89,11 +91,20 @@ export class Tab3Page implements OnInit {
 
   private cargarPerfilRol(id?: number) {
     if (!id) return;
-    this.crud.obtenerPerfilCompleto(id).subscribe(perfil => {
-      this.torneosCreados = perfil.torneosCreados || [];
-      this.equiposDelegado = perfil.equiposDelegado || [];
-      this.equiposJugador = perfil.equiposJugador || [];
-      this.participacionesJugador = perfil.participaciones || [];
+    this.cargandoActividadPerfil = true;
+    this.errorActividadPerfil = '';
+    this.crud.obtenerPerfilCompleto(id).subscribe({
+      next: perfil => {
+        this.torneosCreados = perfil.torneosCreados || [];
+        this.equiposDelegado = perfil.equiposDelegado || [];
+        this.equiposJugador = perfil.equiposJugador || [];
+        this.participacionesJugador = perfil.participaciones || [];
+        this.cargandoActividadPerfil = false;
+      },
+      error: err => {
+        this.errorActividadPerfil = err?.error?.message || 'No se pudo cargar la actividad del perfil.';
+        this.cargandoActividadPerfil = false;
+      }
     });
   }
 
@@ -119,9 +130,7 @@ export class Tab3Page implements OnInit {
     this.crud.responderInvitacionEquipo(invitacion.id, usuarioId, aceptar).subscribe({
       next: () => {
         this.invitacionesEquipoJugador = this.invitacionesEquipoJugador.filter(item => item.id !== invitacion.id);
-        if (aceptar && invitacion.equipoId && !this.equiposJugador.some(equipo => equipo.id === invitacion.equipoId)) {
-          this.equiposJugador = [...this.equiposJugador, { id: invitacion.equipoId, nombre: invitacion.equipoNombre } as Equipo];
-        }
+        if (aceptar && usuarioId) this.cargarPerfilRol(usuarioId);
       },
       error: err => this.errorInvitacionesEquipo = err?.error?.message || 'No se pudo responder la invitación.'
     });
@@ -129,6 +138,12 @@ export class Tab3Page implements OnInit {
 
   participacionDeEquipo(equipo?: Equipo): any {
     return this.participacionesJugador.find(item => item.equipo?.id === equipo?.id);
+  }
+
+  cantidadEquiposPerfil(): number {
+    return new Set([...this.equiposDelegado, ...this.equiposJugador]
+      .map(equipo => equipo.id)
+      .filter((id): id is number => id !== undefined)).size;
   }
 
   abrirEquipo(equipo?: Equipo) {
@@ -317,8 +332,20 @@ export class Tab3Page implements OnInit {
       this.imagenDef = URL.createObjectURL(this.foto);
     }
   }
-  cerrarSesion() {
+  async cerrarSesion(): Promise<void> {
+    const confirmacion = await this.alertController.create({
+      header: 'Cerrar sesión',
+      message: '¿Deseas cerrar tu sesión?',
+      buttons: [
+        { text: 'Cancelar', role: 'cancel' },
+        { text: 'Cerrar sesión', role: 'confirm' }
+      ]
+    });
+    await confirmacion.present();
+    const { role } = await confirmacion.onDidDismiss();
+    if (role !== 'confirm') return;
+
     this.crud.cerrarSesion();
-    this.router.navigateByUrl('/auth/login');
+    await this.router.navigateByUrl('/auth/login');
   }
 }
