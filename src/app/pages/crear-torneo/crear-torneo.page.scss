@@ -1,0 +1,145 @@
+:host {
+  --tourney-ink: var(--app-ink);
+  --tourney-muted: var(--app-muted);
+  --tourney-line: var(--app-border);
+  --tourney-surface: var(--app-surface);
+  --tourney-primary: var(--ion-color-primary);
+}
+
+.torneo-page {
+  --background: var(--ion-background-color);
+}
+
+.torneo-shell {
+  width: min(980px, calc(100% - 24px));
+  margin: 0 auto;
+  padding: 20px 0 32px;
+}
+
+.page-hero {
+  margin-bottom: 18px;
+  padding: 22px 18px;
+  border: 1px solid var(--tourney-line);
+  border-radius: 18px;
+  background: linear-gradient(135deg, rgba(var(--ion-color-primary-rgb), 0.12), rgba(255,255,255,0));
+}
+
+.eyebrow {
+  display: block;
+  color: var(--tourney-primary);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+.page-hero h1 {
+  margin: 8px 0 6px;
+  color: var(--tourney-ink);
+  font-size: clamp(1.9rem, 3vw, 2.6rem);
+  line-height: 1.1;
+}
+
+.page-hero p {
+  margin: 0;
+  color: var(--tourney-muted);
+  font-size: 0.97rem;
+}
+
+.torneo-form {
+  display: grid;
+  gap: 18px;
+}
+
+.form-card {
+  padding: 18px 18px 8px;
+  border: 1px solid var(--tourney-line);
+  border-radius: 18px;
+  background: var(--ion-card-background);
+  box-shadow: 0 12px 28px rgba(17, 31, 39, 0.04);
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.section-header h2 {
+  margin: 6px 0 0;
+  color: var(--tourney-ink);
+  font-size: 1.1rem;
+}
+
+.field-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.form-field {
+  --background: transparent;
+  --border-color: var(--tourney-line);
+  --border-radius: 12px;
+  --inner-border-width: 0;
+  --padding-start: 14px;
+  --padding-end: 14px;
+  min-height: 64px;
+  border: 1px solid var(--tourney-line);
+  border-radius: 12px;
+  background: rgba(var(--ion-color-step-50-rgb, 245, 247, 249), 0.8);
+}
+
+.form-field.full-span {
+  grid-column: 1 / -1;
+}
+
+.form-field ion-input,
+.form-field ion-select,
+.form-field ion-checkbox {
+  --background: transparent;
+  --color: var(--tourney-ink);
+}
+
+.checkbox-field {
+  display: flex;
+  align-items: center;
+  min-height: 56px;
+}
+
+.checkbox-field ion-checkbox {
+  --size: 18px;
+  margin-inline-end: 10px;
+}
+
+.form-actions {
+  padding-top: 4px;
+}
+
+.form-actions ion-button {
+  --border-radius: 12px;
+  --padding-top: 18px;
+  --padding-bottom: 18px;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+@media (max-width: 720px) {
+  .torneo-shell {
+    width: min(100%, calc(100% - 16px));
+    padding-top: 12px;
+  }
+
+  .page-hero {
+    padding: 18px 14px;
+  }
+
+  .field-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .form-card {
+    padding: 14px 12px 8px;
+  }
+}

@@ -6,132 +6,183 @@
     <ion-title>{{tituloTab()}} Torneo</ion-title>
   </ion-toolbar>
 </ion-header>
-<ion-content [fullscreen]="true">
-  <form (ngSubmit)="onSubmit(f)" #f="ngForm">
-    <ion-list>
-      <ion-item class="ion-padding-horizontal" [ngClass]="{'error-input': tieneError(f, 'nombre')}"
-        [ngStyle]="{'--border-color': tieneError(f, 'nombre') ? '#f44336' : '#404040'}">
-        <ion-input [(ngModel)]="torneo.nombre" label="Nombre" labelPlacement="floating" name="nombre"
-            required minlength="6" [counter]="true"></ion-input>
-      </ion-item>
-      <ion-item class="ion-padding-horizontal">
-        <ion-select interface="popover" [value]="paisSeleccionado" (ionChange)="seleccionarPais($event.detail.value)" label="País" labelPlacement="floating" name="pais">
-          <ion-select-option *ngFor="let pais of paises" [value]="pais.id">{{ pais.nombre }}</ion-select-option>
-        </ion-select>
-      </ion-item>
-      <ion-item class="ion-padding-horizontal">
-        <ion-select interface="popover" [value]="departamentoSeleccionado" (ionChange)="seleccionarDepartamento($event.detail.value)" label="Departamento" labelPlacement="floating" name="departamento">
-          <ion-select-option *ngFor="let departamento of departamentos" [value]="departamento.id">{{ departamento.nombre }}</ion-select-option>
-        </ion-select>
-      </ion-item>
-      <ion-item class="ion-padding-horizontal" [ngClass]="{'error-input': tieneError(f, 'ciudad')}"
-        [ngStyle]="{'--border-color': tieneError(f, 'ciudad') ? '#f44336' : '#404040'}">
-        <ion-select interface="popover" [value]="ciudadSeleccionada" (ionChange)="seleccionarCiudad($event.detail.value)" label="Ciudad" labelPlacement="floating" name="ciudad" required>
-          <ion-select-option *ngFor="let ciudad of ciudades" [value]="ciudad.id">{{ ciudad.nombre }}</ion-select-option>
-        </ion-select>
-      </ion-item>
-      <ion-item class="ion-padding-horizontal" [ngClass]="{'error-input': tieneError(f, 'ubicacion')}"
-        [ngStyle]="{'--border-color': tieneError(f, 'ubicacion') ? '#f44336' : '#404040'}">
-        <ion-input [(ngModel)]="torneo.ubicacion" label="Ubicación del torneo" labelPlacement="floating" name="ubicacion"
-          required minlength="2" [counter]="true" readonly></ion-input>
-      </ion-item>
-      <ion-item class="ion-padding-horizontal" [ngClass]="{'error-input': tieneError(f, 'valor-ins')}"
-        [ngStyle]="{'--border-color': tieneError(f, 'valor-ins') ? '#f44336' : '#404040'}">
-        <ion-input [(ngModel)]="torneo.valorInscripcion" type="number" label="Valor Inscripcion" labelPlacement="floating" 
-        name="valor-ins" required ></ion-input>
-      </ion-item>
-      <ion-item class="ion-padding-horizontal" [ngClass]="{'error-input': tieneError(f, 'duracion')}"
-        [ngStyle]="{'--border-color': tieneError(f, 'duracion') ? '#f44336' : '#404040'}">
-        <ion-input [(ngModel)]="torneo.duracionMinutos" type="number" label="Duración de cada partido (minutos)" labelPlacement="floating"
-          name="duracion" min="1" required></ion-input>
-      </ion-item>
-      <ion-item class="ion-padding-horizontal" [ngClass]="{'error-input': tieneError(f, 'deporte')}"
-        [ngStyle]="{'--border-color': tieneError(f, 'deporte') ? '#f44336' : '#404040'}">
-        <ion-select interface="popover" [(ngModel)]="torneo.deporte" label="Deporte" labelPlacement="floating" name="deporte" required>
-          <ion-select-option [value]="deporte" *ngFor="let deporte of deportes">{{ deporte.nombre }} ({{ deporte.minimoTitulares }}-{{ deporte.maximoTitulares }})</ion-select-option>
-        </ion-select>
-      </ion-item>
-      <ion-item class="ion-padding-horizontal">
-        <ion-select interface="action-sheet" [(ngModel)]="torneo.modoCambioJugador" label="Cambios de jugadores" labelPlacement="floating" name="modoCambios" required>
-          <ion-select-option value="LIBRES">Libres</ion-select-option>
-          <ion-select-option value="SALIR_ENTRAR">Salir y entrar</ion-select-option>
-          <ion-select-option value="LIMITADOS">Limitados</ion-select-option>
-        </ion-select>
-      </ion-item>
-      <ion-item class="ion-padding-horizontal" *ngIf="torneo.modoCambioJugador == 'LIMITADOS'">
-        <ion-input [(ngModel)]="torneo.maximoCambios" type="number" min="1" label="Cantidad máxima de cambios" labelPlacement="floating" name="maximoCambios" required></ion-input>
-      </ion-item>
-      <ion-item class="ion-padding-horizontal" *ngIf="torneo.modalidadTorneo != 'LIGA'">
-        <ion-select [(ngModel)]="torneo.faseInicioEliminatorias" label="Fase inicial de eliminatorias" labelPlacement="floating" name="faseInicioEliminatorias" required>
-          <ion-select-option value="TREINTAIDOSAVOS">Treintaidosavos</ion-select-option>
-          <ion-select-option value="DIECISEISAVOS">Dieciseisavos</ion-select-option>
-          <ion-select-option value="OCTAVOS">Octavos</ion-select-option>
-          <ion-select-option value="CUARTOS">Cuartos</ion-select-option>
-          <ion-select-option value="SEMIFINAL">Semifinal</ion-select-option>
-          <ion-select-option value="FINAL">Final</ion-select-option>
-        </ion-select>
-      </ion-item>
-      <ion-item class="ion-padding-horizontal">
-        <ion-input [(ngModel)]="torneo.amarillasParaSuspension" type="number" min="1" label="Amarillas para suspensión" labelPlacement="floating" name="amarillasParaSuspension"></ion-input>
-      </ion-item>
-      <ion-item class="ion-padding-horizontal">
-        <ion-input [(ngModel)]="torneo.partidosSuspensionRoja" type="number" min="1" label="Partidos de suspensión por roja o doble amarilla" labelPlacement="floating" name="partidosSuspensionRoja"></ion-input>
-      </ion-item>
-      <ion-item class="ion-padding-horizontal">
-        <ion-checkbox [(ngModel)]="torneo.expulsionPermanenteTorneo" name="expulsionPermanenteTorneo">Sanción permanente por expulsión o acumulación</ion-checkbox>
-      </ion-item>
-      <ion-item class="ion-padding-horizontal" [ngClass]="{'error-input': tieneError(f, 'modalidad')}"
-        [ngStyle]="{'--border-color': tieneError(f, 'modalidad') ? '#f44336' : '#404040'}">
-        <ion-select interface="action-sheet" [(ngModel)]="torneo.modalidadTorneo" label="Modalidad Torneo" labelPlacement="floating" name="modalidad" 
-          required>
-          <ion-select-option *ngFor="let item of listaModalidadToreno" value="{{item}}">{{ item.replace('_', ' ') | titlecase}}</ion-select-option>
-        </ion-select>
-      </ion-item>
-      <ion-item class="ion-padding-horizontal" [ngClass]="{'error-input': tieneError(f, 'modalidadG')}"
-        [ngStyle]="{'--border-color': tieneError(f, 'modalidadG') ? '#f44336' : '#404040'}"  *ngIf="torneo.modalidadTorneo == 'GRUPOS' || torneo.modalidadTorneo == 'LIGA' || torneo.modalidadTorneo == 'ELIMINATORIAS_GRUPOS'">
-        <ion-select interface="action-sheet" [(ngModel)]="torneo.modalidadGrupos" label="Modalidad Grupos" labelPlacement="floating" 
-            name="modalidadG" required>
-          <ion-select-option *ngFor="let item of listaModalidadFase" value="{{item}}">{{ item.replace('_', ' ') | titlecase}}</ion-select-option>
-        </ion-select>
-      </ion-item>
-      <ion-item class="ion-padding-horizontal" [ngClass]="{'error-input': tieneError(f, 'modalidadF')}"
-        [ngStyle]="{'--border-color': tieneError(f, 'modalidadF') ? '#f44336' : '#404040'}">
-        <ion-select interface="action-sheet" [(ngModel)]="torneo.modalidadEliminatorias" label="Modalidad Eliminatorias" labelPlacement="floating"
-            name="modalidadF" required>
-          <ion-select-option *ngFor="let item of listaModalidadFase" value="{{item}}">{{ item.replace('_', ' ') | titlecase}}</ion-select-option>
-        </ion-select>
-      </ion-item>
-      <ion-item *ngIf="torneo.modalidadTorneo == 'GRUPOS' || torneo.modalidadTorneo == 'ELIMINATORIAS_GRUPOS'" class="ion-padding-horizontal" [ngClass]="{'error-input': tieneError(f, 'grupos')}"
-        [ngStyle]="{'--border-color': tieneError(f, 'grupos') ? '#f44336' : '#404040'}">
-        <ion-input type="number" [(ngModel)]="torneo.cantidadGrupos" label="Cantidad de Grupos" labelPlacement="floating" name="grupos"
-           required></ion-input>
-      </ion-item>
-      <ion-item class="ion-padding-horizontal" [ngClass]="{'error-input': tieneError(f, 'cantidad-equi')}"
-        [ngStyle]="{'--border-color': tieneError(f, 'cantidad-equi') ? '#f44336' : '#404040'}">
-        <ion-input type="number" [(ngModel)]="torneo.cantidadEquipos" label="Cantidad de Equipos {{textoCantidadEquipos()}}" labelPlacement="floating"
-          name="cantidad-equi" required></ion-input>
-      </ion-item>
-      <ng-container *ngIf="torneo.modalidadTorneo == 'ELIMINATORIAS_GRUPOS'">
-        <ion-item class="ion-padding-horizontal">
-          <ion-input type="number" min="1" [(ngModel)]="torneo.cantidadGruposEliminatoriaGrupos" label="Grupos en fase previa a eliminatorias" labelPlacement="floating" name="cantidadGruposEliminatoriaGrupos" required></ion-input>
-        </ion-item>
-        <ion-item class="ion-padding-horizontal">
-          <ion-input type="number" min="1" [(ngModel)]="torneo.cantidadEquiposEliminatoriaGrupos" label="Equipos por grupo en fase previa" labelPlacement="floating" name="cantidadEquiposEliminatoriaGrupos" required></ion-input>
-        </ion-item>
-      </ng-container>
-      <!--
-      <ion-item class="ion-padding-horizontal" [ngClass]="{'error-input': f.submitted && archivo == null}"
-        [ngStyle]="{'--border-color': f.submitted && archivo == null ? '#f44336' : '#404040'}">
-        <ion-label position="floating">Cargar Reglamento</ion-label>
-        <ion-input type="file" class="ion-hide" #file (change)="cargarArchivo($event)" accept="application/pdf" required></ion-input>
-        <ion-input (click)="activarSubirArchivo(file)" [disabled]="true" [(ngModel)]="nombreArchivo" class="flex-reverse" labelPlacement="floating" name="reglamento">
-          <ion-icon name="document" size="large" class="ion-margin-bottom"></ion-icon>
-        </ion-input>
-      </ion-item>
-      -->
-    </ion-list>
-    <ion-button expand="block" class="ion-margin-top ion-margin-horizontal" type="submit">Guardar</ion-button>
-  </form>
+
+<ion-content [fullscreen]="true" class="torneo-page">
+  <div class="torneo-shell">
+    <header class="page-hero">
+      <span class="eyebrow">Configuración</span>
+      <h1>{{tituloTab()}} torneo</h1>
+      <p>Completa los datos generales y la estructura del torneo para dejarlo listo para inscripción.</p>
+    </header>
+
+    <form (ngSubmit)="onSubmit(f)" #f="ngForm" class="torneo-form">
+      <section class="form-card">
+        <div class="section-header">
+          <div>
+            <span class="eyebrow">Datos generales</span>
+            <h2>Información básica</h2>
+          </div>
+        </div>
+
+        <div class="field-grid">
+          <ion-item class="form-field" [ngClass]="{'error-input': tieneError(f, 'nombre')}"
+            [ngStyle]="{'--border-color': tieneError(f, 'nombre') ? '#f44336' : '#404040'}">
+            <ion-input [(ngModel)]="torneo.nombre" label="Nombre del torneo" labelPlacement="floating" name="nombre"
+                required minlength="6" [counter]="true"></ion-input>
+          </ion-item>
+
+          <ion-item class="form-field">
+            <ion-select interface="popover" [value]="paisSeleccionado" (ionChange)="seleccionarPais($event.detail.value)" label="País" labelPlacement="floating" name="pais">
+              <ion-select-option *ngFor="let pais of paises" [value]="pais.id">{{ pais.nombre }}</ion-select-option>
+            </ion-select>
+          </ion-item>
+
+          <ion-item class="form-field">
+            <ion-select interface="popover" [value]="departamentoSeleccionado" (ionChange)="seleccionarDepartamento($event.detail.value)" label="Departamento" labelPlacement="floating" name="departamento">
+              <ion-select-option *ngFor="let departamento of departamentos" [value]="departamento.id">{{ departamento.nombre }}</ion-select-option>
+            </ion-select>
+          </ion-item>
+
+          <ion-item class="form-field" [ngClass]="{'error-input': tieneError(f, 'ciudad')}"
+            [ngStyle]="{'--border-color': tieneError(f, 'ciudad') ? '#f44336' : '#404040'}">
+            <ion-select interface="popover" [value]="ciudadSeleccionada" (ionChange)="seleccionarCiudad($event.detail.value)" label="Ciudad" labelPlacement="floating" name="ciudad" required>
+              <ion-select-option *ngFor="let ciudad of ciudades" [value]="ciudad.id">{{ ciudad.nombre }}</ion-select-option>
+            </ion-select>
+          </ion-item>
+
+          <ion-item class="form-field full-span" [ngClass]="{'error-input': tieneError(f, 'ubicacion')}"
+            [ngStyle]="{'--border-color': tieneError(f, 'ubicacion') ? '#f44336' : '#404040'}">
+            <ion-input [(ngModel)]="torneo.ubicacion" label="Ubicación del torneo" labelPlacement="floating" name="ubicacion"
+              required minlength="2" [counter]="true" readonly></ion-input>
+          </ion-item>
+        </div>
+      </section>
+
+      <section class="form-card">
+        <div class="section-header">
+          <div>
+            <span class="eyebrow">Reglas</span>
+            <h2>Detalles del campeonato</h2>
+          </div>
+        </div>
+
+        <div class="field-grid">
+          <ion-item class="form-field" [ngClass]="{'error-input': tieneError(f, 'valor-ins')}"
+            [ngStyle]="{'--border-color': tieneError(f, 'valor-ins') ? '#f44336' : '#404040'}">
+            <ion-input [(ngModel)]="torneo.valorInscripcion" type="number" label="Valor inscripción" labelPlacement="floating" 
+            name="valor-ins" required ></ion-input>
+          </ion-item>
+
+          <ion-item class="form-field" [ngClass]="{'error-input': tieneError(f, 'duracion')}"
+            [ngStyle]="{'--border-color': tieneError(f, 'duracion') ? '#f44336' : '#404040'}">
+            <ion-input [(ngModel)]="torneo.duracionMinutos" type="number" label="Duración partido (min)" labelPlacement="floating"
+              name="duracion" min="1" required></ion-input>
+          </ion-item>
+
+          <ion-item class="form-field" [ngClass]="{'error-input': tieneError(f, 'deporte')}"
+            [ngStyle]="{'--border-color': tieneError(f, 'deporte') ? '#f44336' : '#404040'}">
+            <ion-select interface="popover" [(ngModel)]="torneo.deporte" label="Deporte" labelPlacement="floating" name="deporte" required>
+              <ion-select-option [value]="deporte" *ngFor="let deporte of deportes">{{ deporte.nombre }}</ion-select-option>
+            </ion-select>
+          </ion-item>
+
+          <ion-item class="form-field">
+            <ion-select interface="action-sheet" [(ngModel)]="torneo.modoCambioJugador" label="Cambios de jugadores" labelPlacement="floating" name="modoCambios" required>
+              <ion-select-option value="LIBRES">Libres</ion-select-option>
+              <ion-select-option value="SALIR_ENTRAR">Salir y entrar</ion-select-option>
+              <ion-select-option value="LIMITADOS">Limitados</ion-select-option>
+            </ion-select>
+          </ion-item>
+
+          <ion-item class="form-field" *ngIf="torneo.modoCambioJugador == 'LIMITADOS'">
+            <ion-input [(ngModel)]="torneo.maximoCambios" type="number" min="1" label="Máximo de cambios" labelPlacement="floating" name="maximoCambios" required></ion-input>
+          </ion-item>
+
+          <ion-item class="form-field" *ngIf="torneo.modalidadTorneo != 'LIGA'">
+            <ion-select [(ngModel)]="torneo.faseInicioEliminatorias" label="Fase inicial eliminatorias" labelPlacement="floating" name="faseInicioEliminatorias" required>
+              <ion-select-option value="TREINTAIDOSAVOS">Treintaidosavos</ion-select-option>
+              <ion-select-option value="DIECISEISAVOS">Dieciseisavos</ion-select-option>
+              <ion-select-option value="OCTAVOS">Octavos</ion-select-option>
+              <ion-select-option value="CUARTOS">Cuartos</ion-select-option>
+              <ion-select-option value="SEMIFINAL">Semifinal</ion-select-option>
+              <ion-select-option value="FINAL">Final</ion-select-option>
+            </ion-select>
+          </ion-item>
+
+          <ion-item class="form-field">
+            <ion-input [(ngModel)]="torneo.amarillasParaSuspension" type="number" min="1" label="Amarillas para suspensión" labelPlacement="floating" name="amarillasParaSuspension"></ion-input>
+          </ion-item>
+
+          <ion-item class="form-field">
+            <ion-input [(ngModel)]="torneo.partidosSuspensionRoja" type="number" min="1" label="Partidos de suspensión por roja" labelPlacement="floating" name="partidosSuspensionRoja"></ion-input>
+          </ion-item>
+
+          <ion-item class="form-field full-span checkbox-field">
+            <ion-checkbox [(ngModel)]="torneo.expulsionPermanenteTorneo" name="expulsionPermanenteTorneo">Sanción permanente por expulsión o acumulación</ion-checkbox>
+          </ion-item>
+        </div>
+      </section>
+
+      <section class="form-card">
+        <div class="section-header">
+          <div>
+            <span class="eyebrow">Formato</span>
+            <h2>Modalidad y grupos</h2>
+          </div>
+        </div>
+
+        <div class="field-grid">
+          <ion-item class="form-field" [ngClass]="{'error-input': tieneError(f, 'modalidad')}"
+            [ngStyle]="{'--border-color': tieneError(f, 'modalidad') ? '#f44336' : '#404040'}">
+            <ion-select interface="action-sheet" [(ngModel)]="torneo.modalidadTorneo" label="Modalidad Torneo" labelPlacement="floating" name="modalidad" required>
+              <ion-select-option *ngFor="let item of listaModalidadToreno" value="{{item}}">{{ item.replace('_', ' ') | titlecase}}</ion-select-option>
+            </ion-select>
+          </ion-item>
+
+          <ion-item class="form-field" [ngClass]="{'error-input': tieneError(f, 'modalidadG')}"
+            [ngStyle]="{'--border-color': tieneError(f, 'modalidadG') ? '#f44336' : '#404040'}"  *ngIf="torneo.modalidadTorneo == 'GRUPOS' || torneo.modalidadTorneo == 'LIGA' || torneo.modalidadTorneo == 'ELIMINATORIAS_GRUPOS'">
+            <ion-select interface="action-sheet" [(ngModel)]="torneo.modalidadGrupos" label="Modalidad Grupos" labelPlacement="floating" 
+                name="modalidadG" required>
+              <ion-select-option *ngFor="let item of listaModalidadFase" value="{{item}}">{{ item.replace('_', ' ') | titlecase}}</ion-select-option>
+            </ion-select>
+          </ion-item>
+
+          <ion-item class="form-field" [ngClass]="{'error-input': tieneError(f, 'modalidadF')}"
+            [ngStyle]="{'--border-color': tieneError(f, 'modalidadF') ? '#f44336' : '#404040'}">
+            <ion-select interface="action-sheet" [(ngModel)]="torneo.modalidadEliminatorias" label="Modalidad Eliminatorias" labelPlacement="floating"
+                name="modalidadF" required>
+              <ion-select-option *ngFor="let item of listaModalidadFase" value="{{item}}">{{ item.replace('_', ' ') | titlecase}}</ion-select-option>
+            </ion-select>
+          </ion-item>
+
+          <ion-item *ngIf="torneo.modalidadTorneo == 'GRUPOS' || torneo.modalidadTorneo == 'ELIMINATORIAS_GRUPOS'" class="form-field" [ngClass]="{'error-input': tieneError(f, 'grupos')}"
+            [ngStyle]="{'--border-color': tieneError(f, 'grupos') ? '#f44336' : '#404040'}">
+            <ion-input type="number" [(ngModel)]="torneo.cantidadGrupos" label="Cantidad de grupos" labelPlacement="floating" name="grupos" required></ion-input>
+          </ion-item>
+
+          <ion-item class="form-field" [ngClass]="{'error-input': tieneError(f, 'cantidad-equi')}"
+            [ngStyle]="{'--border-color': tieneError(f, 'cantidad-equi') ? '#f44336' : '#404040'}">
+            <ion-input type="number" [(ngModel)]="torneo.cantidadEquipos" label="Cantidad de equipos {{textoCantidadEquipos()}}" labelPlacement="floating"
+              name="cantidad-equi" required></ion-input>
+          </ion-item>
+
+          <ng-container *ngIf="torneo.modalidadTorneo == 'ELIMINATORIAS_GRUPOS'">
+            <ion-item class="form-field">
+              <ion-input type="number" min="1" [(ngModel)]="torneo.cantidadGruposEliminatoriaGrupos" label="Grupos en fase previa" labelPlacement="floating" name="cantidadGruposEliminatoriaGrupos" required></ion-input>
+            </ion-item>
+            <ion-item class="form-field">
+              <ion-input type="number" min="1" [(ngModel)]="torneo.cantidadEquiposEliminatoriaGrupos" label="Equipos por grupo en fase previa" labelPlacement="floating" name="cantidadEquiposEliminatoriaGrupos" required></ion-input>
+            </ion-item>
+          </ng-container>
+        </div>
+      </section>
+
+      <div class="form-actions">
+        <ion-button expand="block" type="submit">Guardar torneo</ion-button>
+      </div>
+    </form>
+  </div>
+
   <ion-alert
     [isOpen]="isAlertOpen" [header]="tituloAlert" [message]="mensajeAlert"
     [buttons]="['Aceptar']" (didDismiss)="cerrarAlerta()"></ion-alert>
