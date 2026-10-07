@@ -88,7 +88,7 @@
   min-height: 64px;
   border: 1px solid var(--tourney-line);
   border-radius: 12px;
-  background: rgba(var(--ion-color-step-50-rgb, 245, 247, 249), 0.8);
+  background: var(--app-surface);
 }
 
 .form-field.full-span {
