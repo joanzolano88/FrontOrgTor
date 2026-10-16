@@ -181,6 +181,37 @@
     border-radius: 14px;
 }
 
+.player-item {
+    cursor: pointer;
+    transition: background-color 120ms ease, border-color 120ms ease;
+}
+
+.player-item:hover,
+.player-item:focus-visible {
+    border-color: var(--ion-color-primary);
+    background: var(--ion-color-light);
+    outline: none;
+}
+
+.roster-accordion-header {
+    --background: transparent;
+    --padding-start: 0;
+    --inner-padding-end: 0;
+}
+
+.roster-accordion-header h2 {
+    margin: 6px 0 0;
+    font-size: 22px;
+}
+
+.roster-accordion-content {
+    padding-top: 12px;
+}
+
+.player-open-icon {
+    color: var(--ion-color-medium);
+}
+
 .player-avatar {
     display: grid;
     place-items: center;
