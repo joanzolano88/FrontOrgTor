@@ -1,68 +1,363 @@
-.example-container {
-    width: 400px;
-    max-width: 100%;
-    margin: 0 25px 25px 0;
-    display: inline-block;
-    vertical-align: top;
+:host {
+  --organization-panel: #1b282d;
+  --organization-border: #405157;
+  --organization-muted: #aab8ba;
+  --organization-text: #edf3f1;
+}
+
+.organization-page {
+  --background: #10191d;
+}
+
+.organization-layout {
+  width: min(100%, 1100px);
+  margin: 0 auto;
+  padding: 16px;
+}
+
+.overview-card,
+.selected-container {
+  border: 1px solid var(--organization-border);
+  border-radius: 18px;
+  background: linear-gradient(145deg, #1c2a30, #172328);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.16);
+}
+
+.overview-card {
+  padding: 20px;
+  border-left: 5px solid #54c982;
+}
+
+.overview-heading,
+.overview-meta,
+.section-heading,
+.selected-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.overview-heading {
+  align-items: flex-start;
+}
+
+.eyebrow {
+  margin: 0 0 6px;
+  color: #9bb0b2;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+}
+
+h1,
+h2 {
+  margin: 0;
+  color: var(--organization-text);
+}
+
+h1 {
+  font-size: clamp(1.25rem, 4vw, 1.65rem);
+}
+
+h2 {
+  font-size: 1.05rem;
+}
+
+.progress-status {
+  flex: 0 0 auto;
+  padding: 7px 12px;
+  border: 1px solid rgba(249, 188, 77, 0.36);
+  border-radius: 999px;
+  background: rgba(249, 188, 77, 0.12);
+  color: #ffd27c;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.progress-status.complete {
+  border-color: rgba(84, 201, 130, 0.4);
+  background: rgba(84, 201, 130, 0.13);
+  color: #83e6a8;
+}
+
+.overview-meta {
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  margin-top: 12px;
+  color: var(--organization-muted);
+  font-size: 0.9rem;
+}
+
+.overview-meta strong {
+  color: var(--organization-text);
+}
+
+.overview-hint {
+  margin: 12px 0 18px;
+  color: var(--organization-muted);
+  line-height: 1.45;
+}
+
+.save-button {
+  margin: 0;
+  --border-radius: 11px;
+  --background: #38ad68;
+  --background-hover: #43bf76;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.error-message {
+  display: block;
+  margin: 0 0 12px;
+}
+
+.distribution-section,
+.available-section {
+  margin-top: 24px;
+}
+
+.distribution-section > h2 {
+  margin-bottom: 12px;
+}
+
+.container-tabs {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding: 2px 2px 12px;
+  scrollbar-width: thin;
+}
+
+.container-tab {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 0 13px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  color: #fff;
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  opacity: 0.78;
+  transition: opacity 150ms ease, transform 150ms ease, box-shadow 150ms ease;
+}
+
+.container-tab.selected {
+  opacity: 1;
+  transform: translateY(-1px);
+  box-shadow: 0 5px 14px rgba(0, 0, 0, 0.25);
+}
+
+.container-tab.color-0 { background: #39a879; }
+.container-tab.color-1 { background: #e19b33; }
+.container-tab.color-2 { background: #388bd2; }
+.container-tab.color-3 { background: #d95158; }
+.container-tab.color-4 { background: #8a61bf; }
+.container-tab.color-5 { background: #258f9c; }
+
+.tab-count {
+  padding: 3px 7px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.18);
+  font-size: 0.77rem;
+  white-space: nowrap;
+}
+
+.selected-container {
+  padding: 16px;
+  border: 2px solid #9bc0cb;
+  background: #1d2c31;
+}
+
+.selected-heading {
+  margin-bottom: 14px;
+}
+
+.selected-heading h2 span,
+.section-heading h2 span {
+  color: var(--organization-muted);
+  font-size: 0.85em;
+  font-weight: 500;
+}
+
+.selected-heading > ion-icon {
+  color: #afc5c9;
+  font-size: 1.4rem;
+}
+
+.team-grid,
+.available-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(145px, 1fr));
+  gap: 12px;
+  min-height: 112px;
+  align-content: start;
+  padding: 2px;
+}
+
+.team-card {
+  position: relative;
+  display: flex;
+  min-height: 154px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid #d2e0e3;
+  border-radius: 14px;
+  background: #e4eef0;
+  color: #172327;
+  text-align: center;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
+}
+
+.team-card strong {
+  display: -webkit-box;
+  overflow: hidden;
+  max-width: 100%;
+  font-size: 0.94rem;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.team-crest {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  color: #71888e;
+  font-size: 1.65rem;
+}
+
+.drag-caption {
+  color: #718085;
+  font-size: 0.7rem;
+}
+
+.team-drag-icon {
+  position: absolute;
+  right: 8px;
+  bottom: 4px;
+  color: #778b90;
+  font-size: 1.2rem;
+}
+
+.assigned-team,
+.available-team {
+  cursor: grab;
+  touch-action: none;
+}
+
+.assigned-team:active,
+.available-team:active {
+  cursor: grabbing;
+}
+
+.empty-slot {
+  border: 2px dashed #829ca2;
+  background: rgba(225, 239, 242, 0.06);
+  color: #bfd0d3;
+  box-shadow: none;
+}
+
+.empty-slot ion-icon {
+  color: #abc0c4;
+  font-size: 2.2rem;
+}
+
+.empty-slot span {
+  font-size: 0.86rem;
+}
+
+.section-heading {
+  align-items: flex-end;
+  margin-bottom: 12px;
+}
+
+.section-heading h2 {
+  font-size: 1.2rem;
+}
+
+.drag-instruction {
+  color: var(--organization-muted);
+  font-size: 0.8rem;
+  text-align: right;
+}
+
+.available-grid {
+  grid-template-columns: repeat(auto-fill, minmax(145px, 1fr));
+}
+
+.empty-state,
+.empty-available {
+  grid-column: 1 / -1;
+  padding: 24px 12px;
+  color: var(--organization-muted);
+  text-align: center;
+}
+
+.cdk-drag-preview {
+  box-sizing: border-box;
+  border-radius: 14px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+.cdk-drag-placeholder {
+  opacity: 0.25;
+}
+
+.cdk-drag-animating {
+  transition: transform 180ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.team-grid.cdk-drop-list-dragging .team-card:not(.cdk-drag-placeholder),
+.available-grid.cdk-drop-list-dragging .team-card:not(.cdk-drag-placeholder) {
+  transition: transform 180ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+@media (max-width: 560px) {
+  .organization-layout {
+    padding: 12px;
   }
 
-  .builder-intro {
-    margin: 16px;
-    border-left: 4px solid var(--app-coral);
+  .overview-card {
+    padding: 16px;
   }
 
-  .builder-intro ion-card-content {
-    color: var(--ion-color-medium-shade);
+  .overview-heading {
+    flex-direction: column;
   }
 
-  .example-list {
-    min-height: 88px;
-    padding: 8px;
+  .progress-status {
+    align-self: flex-start;
   }
-  
-  .example-list {
-    border: solid 1px var(--app-border);
-    min-height: 60px;
-    background:var(--app-surface-muted);
-    border-radius: var(--app-radius);
-    overflow: hidden;
-    display: block;
+
+  .team-grid,
+  .available-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 9px;
   }
-  
-  .example-box {
-    padding: 5px 10px;
-    border-bottom: solid 1px var(--app-border);
-    color: var(--app-ink);
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    box-sizing: border-box;
-    cursor: move;
-    background: var(--app-surface);
-    font-size: 14px;
+
+  .team-card {
+    min-height: 132px;
+    padding: 10px 8px;
   }
-  
-  .cdk-drag-preview {
-    box-sizing: border-box;
-    border-radius: 4px;
-    box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2),
-                0 8px 10px 1px rgba(0, 0, 0, 0.14),
-                0 3px 14px 2px rgba(0, 0, 0, 0.12);
+
+  .section-heading {
+    align-items: flex-start;
+    flex-direction: column;
   }
-  
-  .cdk-drag-placeholder {
-    opacity: 0;
+
+  .drag-instruction {
+    text-align: left;
   }
-  
-  .cdk-drag-animating {
-    transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
-  }
-  
-  .example-box:last-child {
-    border: none;
-  }
-  
-  .example-list.cdk-drop-list-dragging .example-box:not(.cdk-drag-placeholder) {
-    transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
-  }
+}

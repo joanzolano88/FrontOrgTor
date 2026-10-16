@@ -32,6 +32,8 @@ export class CambiarFaseTorneoPage implements OnInit {
   mensajeError = '';
   isAlertOpen = false;
   alertButtons = ['Aceptar'];
+  tipoContenedorSeleccionado: 'grupo' | 'llave' = 'grupo';
+  indiceContenedorSeleccionado = 0;
 
   constructor(private crud: CrudService,  private route: ActivatedRoute, private _location: Location, private router: Router) {}
 
@@ -145,6 +147,12 @@ export class CambiarFaseTorneoPage implements OnInit {
     } else {
       this.listaEuiposGrupos[0] = this.organizacionInicial ? [] : resp;
     }
+    const contenedores = this.contenedoresOrganizacion();
+    if (contenedores.length > 0 && !contenedores.some(contenedor =>
+      contenedor.tipo === this.tipoContenedorSeleccionado && contenedor.indice === this.indiceContenedorSeleccionado)) {
+      this.tipoContenedorSeleccionado = contenedores[0].tipo;
+      this.indiceContenedorSeleccionado = contenedores[0].indice;
+    }
   }
   noReturnPredicate() {
     return false;
@@ -246,6 +254,74 @@ export class CambiarFaseTorneoPage implements OnInit {
   }
 
   totalEquiposOrganizados(): number {
-    return this.listaEuiposGrupos.reduce((total, grupo) => total + grupo.length, 0);
+    return this.contenedoresOrganizacion().reduce((total, contenedor) => total + contenedor.equipos.length, 0);
+  }
+
+  totalEquiposParaOrganizar(): number {
+    return this.totalEquiposOrganizados() + this.equiposSinAsignar.length;
+  }
+
+  equiposDisponiblesRestantes(): number {
+    return this.equiposSinAsignar.length;
+  }
+
+  esOrganizacionPorGrupos(): boolean {
+    return (this.torneo.faseTorneo === FaseActual.FASE_GRUPOS && !this.organizacionInicial) ||
+      (this.organizacionInicial && this.torneo.modalidadTorneo !== ModalidadTorneo.ELIMINATORIAS);
+  }
+
+  tituloOrganizacion(): string {
+    return this.esOrganizacionPorGrupos()
+      ? 'Fase de grupos: asignación de equipos'
+      : 'Llaves: distribución de equipos';
+  }
+
+  contenedoresOrganizacion(): {
+    tipo: 'grupo' | 'llave';
+    indice: number;
+    nombre: string;
+    equipos: DistribucionEquipo[];
+    capacidad: number;
+  }[] {
+    const tipo = this.esOrganizacionPorGrupos() ? 'grupo' : 'llave';
+    const listas = tipo === 'grupo' ? this.listaEuiposGrupos : this.listaLlaves;
+    const capacidad = tipo === 'grupo' ? this.torneo.cantidadEquipos || 0 : 2;
+    return listas.map((equipos, indice) => ({
+      tipo,
+      indice,
+      nombre: tipo === 'grupo' ? this.nombreGrupo(indice) : `Llave ${indice + 1}`,
+      equipos,
+      capacidad
+    }));
+  }
+
+  get contenedorSeleccionado() {
+    return this.contenedoresOrganizacion().find(contenedor =>
+      contenedor.tipo === this.tipoContenedorSeleccionado && contenedor.indice === this.indiceContenedorSeleccionado);
+  }
+
+  espaciosDisponibles(contenedor: { equipos: DistribucionEquipo[]; capacidad: number }): number[] {
+    return Array.from({ length: Math.max(0, contenedor.capacidad - contenedor.equipos.length) }, (_, indice) => indice);
+  }
+
+  seleccionarContenedor(tipo: 'grupo' | 'llave', indice: number): void {
+    this.tipoContenedorSeleccionado = tipo;
+    this.indiceContenedorSeleccionado = indice;
+  }
+
+  esContenedorSeleccionado(tipo: 'grupo' | 'llave', indice: number): boolean {
+    return this.tipoContenedorSeleccionado === tipo && this.indiceContenedorSeleccionado === indice;
+  }
+
+  idContenedor(tipo: 'grupo' | 'llave', indice: number): string {
+    return `${tipo === 'grupo' ? 'grupoE' : 'grupoG'}${indice}`;
+  }
+
+  trackContenedor(_indice: number, contenedor: { tipo: string; indice: number }): string {
+    return `${contenedor.tipo}-${contenedor.indice}`;
+  }
+
+  private nombreGrupo(indice: number): string {
+    return indice < 26 ? `Grupo ${String.fromCharCode(65 + indice)}` : `Grupo ${indice + 1}`;
   }
 }
