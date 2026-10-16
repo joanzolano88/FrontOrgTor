@@ -65,6 +65,25 @@ export class TablaEquiposPage implements OnInit {
   calcularDG(equipo: GrupoLlave){
     return (equipo.golesFavor || 0) - (equipo.golesContra || 0);
   }
+  formatoDiferencia(diferencia: number) {
+    return diferencia > 0 ? `+${diferencia}` : `${diferencia}`;
+  }
+  nombreRonda(indice: number) {
+    const rondas = ['Final', 'Semifinales', 'Cuartos de final', 'Octavos de final', 'Dieciseisavos', 'Treintaidosavos'];
+    return rondas[indice] || `Ronda ${indice + 1}`;
+  }
+  abreviaturaRonda(indice: number) {
+    const rondas = ['F', 'SF', 'QF', 'OF', 'D16', 'D32'];
+    return rondas[indice] || `R${indice + 1}`;
+  }
+  esGanador(partido: Partido, tipoEquipo: 'L' | 'V'): boolean {
+    const golesLocal = partido.anotacionesEquipoLocal;
+    const golesVisitante = partido.anotacionesEquipoVisitante;
+    if (golesLocal == null || golesVisitante == null || golesLocal === golesVisitante) {
+      return false;
+    }
+    return tipoEquipo === 'L' ? golesLocal > golesVisitante : golesVisitante > golesLocal;
+  }
   setOpen(isOpen: boolean, grupoLlave?: GrupoLlave) {
     if (grupoLlave?.equipo != undefined) this.equipoS = grupoLlave.equipo;
     this.isActionSheetOpen = isOpen;
@@ -97,7 +116,18 @@ export class TablaEquiposPage implements OnInit {
     }
   }
   textoFases(texto: string) {
-    return texto.replace('ATORIAS_', '. ');
+    switch (texto) {
+      case ModalidadTorneo.ELIMINATORIAS_GRUPOS:
+        return 'Grupos';
+      case ModalidadTorneo.ELIMINATORIAS:
+        return 'Eliminatorias';
+      case ModalidadTorneo.GRUPOS:
+        return 'Grupos';
+      case ModalidadTorneo.LIGA:
+        return 'Liga';
+      default:
+        return texto;
+    }
   }
   listarEquiposFase() {
     if (this.tipoTabla != ModalidadTorneo.ELIMINATORIAS) {
