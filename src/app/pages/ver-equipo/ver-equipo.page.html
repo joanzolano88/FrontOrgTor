@@ -151,13 +151,19 @@
           </div>
         </div>
 
-        <div class="tournament-list">
-          <button class="tournament-pill" *ngFor="let participacion of torneosConParticipacion()" type="button" (click)="abrirDetalleTorneo(participacion)">
-            <span>{{ participacion.torneo?.nombre }}</span>
-            <ion-badge color="success">{{ participacion.estado }}</ion-badge>
-            <ion-icon name="chevron-forward-outline"></ion-icon>
+        <div *ngIf="cargandoTorneos" class="tournament-feedback">
+          <ion-spinner name="crescent"></ion-spinner>
+          <span>Cargando torneos del equipo...</span>
+        </div>
+        <ion-note color="danger" *ngIf="errorTorneos" class="tournament-error">{{ errorTorneos }}</ion-note>
+        <div class="tournament-list" *ngIf="!cargandoTorneos && !errorTorneos">
+          <button class="tournament-pill" *ngFor="let participacion of torneosConParticipacion()" type="button"
+            [disabled]="!esParticipacionAceptada(participacion)" (click)="abrirDetalleTorneo(participacion)">
+            <span class="tournament-name">{{ participacion.torneo?.nombre || 'Torneo' }}</span>
+            <ion-badge [color]="colorEstadoParticipacion(participacion)">{{ etiquetaEstadoParticipacion(participacion) }}</ion-badge>
+            <ion-icon *ngIf="esParticipacionAceptada(participacion)" name="chevron-forward-outline"></ion-icon>
           </button>
-          <p class="empty-tournament" *ngIf="!torneosConParticipacion().length">Este equipo todavía no participa en torneos.</p>
+          <p class="empty-tournament" *ngIf="!torneosConParticipacion().length">Este equipo todavía no tiene torneos registrados.</p>
         </div>
       </div>
     </section>

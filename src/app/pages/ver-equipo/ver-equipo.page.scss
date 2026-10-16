@@ -273,18 +273,51 @@
 }
 
 .tournament-list {
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr))
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr))
 }
 
 .tournament-pill {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    width: 100%;
     gap: 10px;
     padding: 10px 14px;
     border: 1px solid var(--line);
-    border-radius: 999px;
+    border-radius: 14px;
+    color: inherit;
+    background: transparent;
     font-weight: 700
+}
+
+.tournament-pill:not(:disabled) {
+    cursor: pointer;
+}
+
+.tournament-pill:not(:disabled):hover {
+    border-color: var(--ion-color-primary);
+    background: var(--ion-color-light);
+}
+
+.tournament-pill:disabled {
+    opacity: .8;
+}
+
+.tournament-name {
+    flex: 1;
+    min-width: 0;
+    overflow-wrap: anywhere;
+    text-align: left;
+}
+
+.tournament-feedback {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--ion-color-medium);
+}
+
+.tournament-error {
+    display: block;
 }
 
 .tournament-detail {

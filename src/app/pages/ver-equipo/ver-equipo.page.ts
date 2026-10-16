@@ -20,6 +20,8 @@ export class VerEquipoPage {
   solicitandoUnirse = false;
   solicitudesJugadores: any[] = [];
   participacionesTorneos: any[] = [];
+  cargandoTorneos = false;
+  errorTorneos = '';
   torneoSeleccionadoId?: number;
 
   constructor(private crud: CrudService, private route: ActivatedRoute,
@@ -33,13 +35,7 @@ export class VerEquipoPage {
       this.esJugador = usuario.tipoUsuario === 'JUGADOR';
       if (this.esDelegado && equipo.id && usuario.id) this.cargarSolicitudesJugadores(equipo.id, usuario.id);
       if (equipo.id) {
-        this.crud.obtenerTorneosEquipo(equipo.id).subscribe(resp => {
-          this.participacionesTorneos = resp || [];
-          const participacionAceptada = this.participacionesTorneos.find(item =>
-            item.estado === 'ACEPTADO' && item.torneo?.id === Number(this.idTorneo)) ||
-            this.participacionesTorneos.find(item => item.estado === 'ACEPTADO');
-          this.torneoSeleccionadoId = participacionAceptada?.torneo?.id;
-        });
+        this.cargarTorneosEquipo(equipo);
       }
     };
     if (idEquipo && Number(this.idTorneo) > 0) {
@@ -50,22 +46,75 @@ export class VerEquipoPage {
   }
 
   torneosConParticipacion(): any[] {
-    return this.participacionesTorneos.filter(participacion => participacion.estado === 'ACEPTADO');
+    return this.participacionesTorneos.filter(participacion => !!participacion?.torneo?.id);
+  }
+
+  esParticipacionAceptada(participacion: any): boolean {
+    return String(participacion?.estado || '').trim().toLocaleUpperCase() === 'ACEPTADO';
+  }
+
+  colorEstadoParticipacion(participacion: any): string {
+    if (this.esParticipacionAceptada(participacion)) return 'success';
+    if (String(participacion?.estado || '').trim().toLocaleUpperCase() === 'PENDIENTE') return 'warning';
+    return 'medium';
+  }
+
+  etiquetaEstadoParticipacion(participacion: any): string {
+    const estado = String(participacion?.estado || '').trim().toLocaleUpperCase();
+    return estado || 'REGISTRADO';
   }
 
   torneoSeleccionado(): any {
-    return this.torneosConParticipacion().find(participacion => participacion.torneo?.id === this.torneoSeleccionadoId)?.torneo;
+    return this.torneosConParticipacion().find(participacion =>
+      this.esParticipacionAceptada(participacion) &&
+      participacion.torneo?.id === this.torneoSeleccionadoId)?.torneo;
   }
 
   participacionSeleccionada(): any {
-    return this.torneosConParticipacion().find(participacion => participacion.torneo?.id === this.torneoSeleccionadoId);
+    return this.torneosConParticipacion().find(participacion =>
+      this.esParticipacionAceptada(participacion) &&
+      participacion.torneo?.id === this.torneoSeleccionadoId);
   }
 
   abrirDetalleTorneo(participacion: any) {
     const equipoId = this.equipo.id;
     const torneoId = participacion?.torneo?.id;
-    if (!equipoId || !torneoId || participacion.estado !== 'ACEPTADO') return;
+    if (!equipoId || !torneoId || !this.esParticipacionAceptada(participacion)) return;
     this.router.navigateByUrl(`/auth/torneos/torneo/${torneoId}/equipo/${equipoId}/participacion/${equipoId}/${torneoId}`);
+  }
+
+  private cargarTorneosEquipo(equipo: Equipo): void {
+    if (!equipo.id) return;
+    this.cargandoTorneos = true;
+    this.errorTorneos = '';
+    this.crud.obtenerTorneosEquipo(equipo.id).subscribe({
+      next: respuesta => {
+        const participaciones = Array.isArray(respuesta) ? respuesta : [];
+        const participacionDelEquipo = equipo.participacionTorneo;
+        if (participacionDelEquipo?.torneo?.id &&
+            !participaciones.some(item => item.torneo?.id === participacionDelEquipo.torneo?.id)) {
+          participaciones.push(participacionDelEquipo);
+        }
+        if (!participaciones.length && equipo.torneo?.id) {
+          participaciones.push({
+            torneo: equipo.torneo,
+            estado: equipo.faseActual ? 'ACEPTADO' : 'PENDIENTE'
+          });
+        }
+        this.participacionesTorneos = participaciones;
+        const torneoActual = Number(this.idTorneo);
+        const participacionSeleccionada = participaciones.find(item =>
+          this.esParticipacionAceptada(item) && item.torneo?.id === torneoActual) ||
+          participaciones.find(item => this.esParticipacionAceptada(item));
+        this.torneoSeleccionadoId = participacionSeleccionada?.torneo?.id;
+        this.cargandoTorneos = false;
+      },
+      error: error => {
+        this.participacionesTorneos = [];
+        this.cargandoTorneos = false;
+        this.errorTorneos = error?.error?.message || 'No se pudieron cargar los torneos del equipo.';
+      }
+    });
   }
 
   abrirPerfilJugador(jugador: any) {
