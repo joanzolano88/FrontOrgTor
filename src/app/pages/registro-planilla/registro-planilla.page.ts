@@ -8,6 +8,7 @@ import { Torneo } from 'src/models/Torneo';
 interface PerfilPlanilla {
   nombre: string;
   identificacion: string;
+  numeroCelular?: string;
 }
 
 @Component({
@@ -126,6 +127,10 @@ export class RegistroPlanillaPage implements OnInit {
   }
 
   private limpiarPerfil(perfil: PerfilPlanilla): PerfilPlanilla {
-    return { nombre: perfil.nombre.trim(), identificacion: perfil.identificacion.trim() };
+    return {
+      nombre: perfil.nombre.trim(),
+      identificacion: perfil.identificacion.trim(),
+      numeroCelular: perfil.numeroCelular?.trim()
+    };
   }
 }

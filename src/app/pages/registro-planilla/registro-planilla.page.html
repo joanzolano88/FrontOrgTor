@@ -42,6 +42,9 @@
             <ion-item lines="none" class="form-field">
               <ion-input [(ngModel)]="delegado.identificacion" name="delegadoIdentificacion" label="Identificación" labelPlacement="stacked" required maxlength="80"></ion-input>
             </ion-item>
+            <ion-item lines="none" class="form-field">
+              <ion-input [(ngModel)]="delegado.numeroCelular" name="delegadoNumeroCelular" type="tel" label="Número de celular" labelPlacement="stacked" required maxlength="20"></ion-input>
+            </ion-item>
           </div>
         </section>
 
