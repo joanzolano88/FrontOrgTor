@@ -52,6 +52,11 @@ const routes: Routes = [
         loadChildren: () => import('../pages/ver-equipo/ver-equipo.module').then(m => m.VerEquipoPageModule)
       },
       {
+        path: 'jugador/:idJugador/perfil',
+        canActivate: [SesionService],
+        loadChildren: () => import('../pages/perfil-jugador/perfil-jugador.module').then(m => m.PerfilJugadorPageModule)
+      },
+      {
         path: '',
         redirectTo: '/auth/partidos',
         pathMatch: 'full'

@@ -21,9 +21,6 @@ export class VerEquipoPage {
   solicitudesJugadores: any[] = [];
   participacionesTorneos: any[] = [];
   torneoSeleccionadoId?: number;
-  perfilJugadorData: any;
-  perfilJugadorModalOpen = false;
-  cargandoPerfilJugador = false;
 
   constructor(private crud: CrudService, private route: ActivatedRoute,
     private router: Router, private alertController: AlertController) {
@@ -71,22 +68,9 @@ export class VerEquipoPage {
     this.router.navigateByUrl(`/auth/torneos/torneo/${torneoId}/equipo/${equipoId}/participacion/${equipoId}/${torneoId}`);
   }
 
-  abrirPerfilJugador(jugador: any, idTorneo = this.torneoSeleccionadoId) {
+  abrirPerfilJugador(jugador: any) {
     if (!jugador?.id) return;
-    this.perfilJugadorModalOpen = true;
-    this.perfilJugadorData = undefined;
-    this.cargandoPerfilJugador = true;
-    this.crud.obtenerPerfilJugador(jugador.id, idTorneo).subscribe({
-      next: perfil => {
-        this.perfilJugadorData = perfil;
-        this.cargandoPerfilJugador = false;
-      },
-      error: err => {
-        this.perfilJugadorModalOpen = false;
-        this.cargandoPerfilJugador = false;
-        this.mensajeJugadores = err?.error?.message || 'No se pudo cargar el perfil del jugador.';
-      }
-    });
+    this.router.navigateByUrl(`/auth/jugador/${jugador.id}/perfil`);
   }
 
   cargarSolicitudesJugadores(idEquipo: number, usuarioId: number) {

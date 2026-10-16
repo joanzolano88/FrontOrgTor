@@ -162,31 +162,4 @@
       </div>
     </section>
   </div>
-  <ion-modal [isOpen]="perfilJugadorModalOpen" (didDismiss)="perfilJugadorModalOpen = false">
-    <ng-template>
-      <ion-header><ion-toolbar><ion-title>Perfil del jugador</ion-title><ion-buttons slot="end"><ion-button (click)="perfilJugadorModalOpen = false">Cerrar</ion-button></ion-buttons></ion-toolbar></ion-header>
-      <ion-content class="ion-padding">
-        <div *ngIf="cargandoPerfilJugador" class="empty-state">
-          <ion-spinner name="crescent"></ion-spinner>
-          <p>Cargando información del jugador...</p>
-        </div>
-        <ng-container *ngIf="!cargandoPerfilJugador && perfilJugadorData as perfil">
-        <h2>{{ perfil.jugador?.nombre }}</h2>
-        <p>Identificación: {{ perfil.jugador?.identificacion || 'No registrada' }}</p>
-        <p>Celular: {{ perfil.jugador?.numeroCelular || 'No registrado' }}</p>
-        <ng-container *ngIf="perfil.participacionTorneo as participacion">
-          <h3>{{ participacion.torneo?.nombre }}</h3>
-          <p>Equipo: {{ participacion.equipo?.nombre }}</p>
-          <p>Estado: {{ participacion.participando ? 'Participó en el torneo' : (participacion.jugoPartido ? 'Jugó un partido' : 'Inscrito en el plantel') }}</p>
-          <p *ngIf="participacion.cambioEquipo">Cambio de equipo realizado durante el torneo.</p>
-          <ion-list *ngIf="perfil.eventosTorneo?.length">
-            <ion-list-header>Eventos del torneo</ion-list-header>
-            <ion-item *ngFor="let evento of perfil.eventosTorneo"><ion-label>{{ evento.tipo }} · minuto {{ evento.minuto }}</ion-label></ion-item>
-          </ion-list>
-        </ng-container>
-        <p *ngIf="!perfil.participacionTorneo">El jugador no tiene inscripción registrada en este torneo.</p>
-        </ng-container>
-      </ion-content>
-    </ng-template>
-  </ion-modal>
 </ion-content>

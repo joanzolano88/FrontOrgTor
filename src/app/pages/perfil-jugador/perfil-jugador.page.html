@@ -1,0 +1,145 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button text="" defaultHref="/auth/partidos"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Perfil del jugador</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="player-profile-page">
+  <main class="profile-shell">
+    <div class="feedback-card" *ngIf="cargando">
+      <ion-spinner name="crescent"></ion-spinner>
+      <span>Cargando perfil...</span>
+    </div>
+
+    <ion-card class="feedback-card error-card" *ngIf="!cargando && error">
+      <ion-card-content>{{ error }}</ion-card-content>
+    </ion-card>
+
+    <ng-container *ngIf="!cargando && perfil?.jugador as jugador">
+      <section class="profile-hero">
+        <div class="player-avatar">
+          <img appImageFallback="assets/images/avatar-placeholder.svg"
+            [src]="jugador.foto ? 'data:image/png;base64,' + jugador.foto : ''"
+            [alt]="'Foto de ' + jugador.nombre">
+        </div>
+        <div class="hero-copy">
+          <span class="eyebrow">Perfil deportivo</span>
+          <h1>{{ jugador.nombre || 'Jugador' }}</h1>
+          <p>{{ jugador.estadoJugador || 'Perfil de jugador' }}</p>
+        </div>
+      </section>
+
+      <section class="profile-grid">
+        <ion-card class="profile-card">
+          <ion-card-header>
+            <ion-card-subtitle>Información personal</ion-card-subtitle>
+            <ion-card-title>Datos del jugador</ion-card-title>
+          </ion-card-header>
+          <ion-card-content class="personal-details">
+            <div><span>Identificación</span><strong>{{ jugador.identificacion || 'No registrada' }}</strong></div>
+            <div><span>Celular</span><strong>{{ jugador.numeroCelular || 'No registrado' }}</strong></div>
+            <div><span>Número de camiseta</span><strong>{{ jugador.numeroCamiseta || 'Sin asignar' }}</strong></div>
+          </ion-card-content>
+        </ion-card>
+
+        <ion-card class="profile-card tournaments-card">
+          <ion-card-header>
+            <ion-card-subtitle>Historial deportivo</ion-card-subtitle>
+            <ion-card-title>Torneos en los que participa</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <div class="empty-state" *ngIf="!participaciones().length">
+              <ion-icon name="trophy-outline"></ion-icon>
+              <strong>Sin torneos registrados</strong>
+              <span>Cuando el jugador se inscriba, sus torneos aparecerán aquí.</span>
+            </div>
+            <button class="tournament-item" type="button"
+              *ngFor="let participacion of participaciones()"
+              [class.selected]="torneoSeleccionadoId === participacion.torneo?.id"
+              (click)="seleccionarTorneo(participacion)">
+              <span class="tournament-icon"><ion-icon name="trophy-outline"></ion-icon></span>
+              <span class="tournament-copy">
+                <strong>{{ participacion.torneo?.nombre || 'Torneo' }}</strong>
+                <small>{{ participacion.equipo?.nombre || 'Equipo no registrado' }}</small>
+              </span>
+              <ion-badge color="primary">{{ nombreEstado(participacion) }}</ion-badge>
+              <ion-icon class="item-chevron" name="chevron-forward-outline"></ion-icon>
+            </button>
+          </ion-card-content>
+        </ion-card>
+      </section>
+
+      <section class="tournament-detail" *ngIf="torneoSeleccionadoId">
+        <div class="detail-heading">
+          <div>
+            <span class="eyebrow">Detalle de participación</span>
+            <h2>{{ perfilTorneo?.participacionTorneo?.torneo?.nombre || 'Información en el torneo' }}</h2>
+          </div>
+          <ion-badge *ngIf="perfilTorneo?.participacionTorneo" color="success">
+            {{ nombreEstado(perfilTorneo!.participacionTorneo!) }}
+          </ion-badge>
+        </div>
+
+        <div class="feedback-card" *ngIf="cargandoTorneo">
+          <ion-spinner name="crescent"></ion-spinner>
+          <span>Cargando información del torneo...</span>
+        </div>
+        <ion-note color="danger" *ngIf="errorTorneo">{{ errorTorneo }}</ion-note>
+
+        <ng-container *ngIf="!cargandoTorneo && perfilTorneo?.participacionTorneo as participacion">
+          <ion-card class="participation-card">
+            <ion-card-content class="participation-summary">
+              <div><span>Equipo</span><strong>{{ participacion.equipo?.nombre || 'No disponible' }}</strong></div>
+              <div><span>Estado</span><strong>{{ nombreEstado(participacion) }}</strong></div>
+              <div><span>Participación</span><strong>{{ participacion.participando ? 'Registrada' : (participacion.jugoPartido ? 'Con partidos jugados' : 'En plantilla') }}</strong></div>
+            </ion-card-content>
+            <ion-note *ngIf="participacion.cambioEquipo" color="warning" class="change-note">
+              El jugador tuvo un cambio de equipo durante este torneo.
+            </ion-note>
+          </ion-card>
+
+          <div class="stat-grid">
+            <div class="stat-card goals"><ion-icon name="football-outline"></ion-icon><span>Goles</span><strong>{{ contarEventos('GOL') }}</strong></div>
+            <div class="stat-card yellow"><ion-icon name="square"></ion-icon><span>Amarillas</span><strong>{{ contarEventos('TARJETA_AMARILLA') }}</strong></div>
+            <div class="stat-card red"><ion-icon name="square"></ion-icon><span>Rojas</span><strong>{{ contarEventos('TARJETA_ROJA') }}</strong></div>
+          </div>
+
+          <ion-card class="sanction-card" color="danger" *ngIf="perfilTorneo?.sancionTorneo as sancion">
+            <ion-card-content>
+              <ion-icon name="alert-circle-outline"></ion-icon>
+              <div><strong>Sanción activa</strong><span>{{ sancion.permanente ? 'Permanente durante el torneo' : sancion.partidosPendientes + ' partido(s) pendiente(s)' }}</span></div>
+            </ion-card-content>
+          </ion-card>
+
+          <ion-card class="events-card">
+            <ion-card-header>
+              <ion-card-subtitle>Actividad</ion-card-subtitle>
+              <ion-card-title>Eventos del torneo</ion-card-title>
+            </ion-card-header>
+            <ion-card-content>
+              <div class="event-row" *ngFor="let evento of perfilTorneo?.eventosTorneo">
+                <span class="event-marker" [class]="evento.tipo?.toLowerCase()"></span>
+                <div class="event-copy">
+                  <strong>{{ nombreEvento(evento.tipo) }}</strong>
+                  <small>{{ evento.partido?.equipoLocal?.nombre || 'Partido' }} vs {{ evento.partido?.equipoVisitante?.nombre || 'rival' }}</small>
+                </div>
+                <ion-badge color="medium">{{ evento.minuto ?? 0 }}′</ion-badge>
+              </div>
+              <div class="empty-state" *ngIf="!perfilTorneo?.eventosTorneo?.length">
+                <ion-icon name="time-outline"></ion-icon>
+                <span>Aún no hay eventos registrados para este jugador en el torneo.</span>
+              </div>
+            </ion-card-content>
+          </ion-card>
+        </ng-container>
+
+        <ion-card class="feedback-card" *ngIf="!cargandoTorneo && !errorTorneo && !perfilTorneo?.participacionTorneo">
+          <ion-card-content>El jugador no tiene una participación registrada en este torneo.</ion-card-content>
+        </ion-card>
+      </section>
+    </ng-container>
+  </main>
+</ion-content>
