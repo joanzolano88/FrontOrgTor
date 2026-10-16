@@ -41,6 +41,10 @@ export class ListaPartidosPage implements OnInit{
   isAlertOpen = false;
   alertButtons = ['Aceptar'];
   mensajeError: string = "";
+  programacionAutomaticaOpen = false;
+  horaProgramacionAutomatica = '18:00';
+  cantidadPartidosDia = 1;
+  diasSemanaProgramacion: number[] = [2, 3, 4, 5, 6, 7, 1];
 
   constructor(private crud: CrudService, private route: ActivatedRoute, private router: Router,
     private sesionService: SesionService) { }
@@ -197,6 +201,57 @@ export class ListaPartidosPage implements OnInit{
   }
   compararBuscador(partido: Partido) {    
     return true;
+  }
+  abrirProgramacionAutomatica() {
+    this.horaProgramacionAutomatica = '18:00';
+    this.cantidadPartidosDia = 1;
+    this.diasSemanaProgramacion = [2, 3, 4, 5, 6, 7, 1];
+    this.programacionAutomaticaOpen = true;
+  }
+  cerrarProgramacionAutomatica() {
+    this.programacionAutomaticaOpen = false;
+  }
+  generarProgramacionAutomatica() {
+    if (!this.idTorneo) {
+      this.mensajeError = 'No se pudo identificar el torneo.';
+      this.setOpen(true);
+      return;
+    }
+    if (!this.diasSemanaProgramacion.length) {
+      this.mensajeError = 'Selecciona al menos un día de la semana para generar la programación.';
+      this.setOpen(true);
+      return;
+    }
+    const fecha = this.obtenerProximaSemanaMartes();
+    const payload = {
+      fechaInicio: fecha.toISOString().split('T')[0],
+      horaInicio: this.horaProgramacionAutomatica,
+      partidosPorDia: Number(this.cantidadPartidosDia),
+      diasSemana: this.diasSemanaProgramacion
+    };
+    this.crud.crear(payload, `partido/programacion/automatica/${this.idTorneo}`).subscribe(
+      (respuesta: any) => {
+        const partidosProgramados = Array.isArray(respuesta) ? respuesta : [];
+        this.programacionAutomaticaOpen = false;
+        this.mensajeError = partidosProgramados.length > 0
+          ? `Se programaron ${partidosProgramados.length} partidos automáticamente.`
+          : 'No hubo partidos pendientes para programar en ese rango.';
+        this.setOpen(true);
+        this.listaPartidos();
+      },
+      (error) => {
+        this.mensajeError = error?.error?.message || 'No se pudo generar la programación automática.';
+        this.setOpen(true);
+      }
+    );
+  }
+  obtenerProximaSemanaMartes(): Date {
+    const fecha = new Date();
+    const diaActual = fecha.getDay();
+    const delta = ((2 - diaActual + 7) % 7) || 7;
+    fecha.setDate(fecha.getDate() + delta);
+    fecha.setHours(0, 0, 0, 0);
+    return fecha;
   }
   setOpen(isOpen: boolean) {
     this.isAlertOpen = isOpen;

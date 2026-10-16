@@ -151,7 +151,6 @@ export class CrearTorneoPage {
       return;
     }
     localStorage.setItem('usuario', JSON.stringify(usuario));
-    this.torneo.encargadoTorneo = usuario;
     if (!this.torneo.ubicacion || !this.torneo.ubicacion.trim()) {
       this.torneo.ubicacion = usuario.ubicacion;
     }

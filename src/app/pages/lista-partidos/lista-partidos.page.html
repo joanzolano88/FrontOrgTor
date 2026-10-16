@@ -21,6 +21,7 @@
       </ion-select>
     </div>
     <ion-button class="filter-button" (click)="listaPartidos()" expand="block" fill="solid">Actualizar partidos</ion-button>
+    <ion-button class="filter-button" (click)="abrirProgramacionAutomatica()" expand="block" fill="outline">Programación automática</ion-button>
   </section>
   <ion-list  *ngFor="let listaPartidos of listaGruposPartidos; let i = index">
     <ion-accordion-group *ngIf="listaPartidos.length > 0 && validacionEstadoPartido(listaPartidos)">
@@ -97,6 +98,46 @@
       </ion-content>
     </ng-template>
   </ion-modal>
+
+  <ion-modal [isOpen]="programacionAutomaticaOpen" (didDismiss)="cerrarProgramacionAutomatica()">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-buttons slot="start">
+            <ion-button (click)="cerrarProgramacionAutomatica()">Cancelar</ion-button>
+          </ion-buttons>
+          <ion-title>Programación automática</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="generarProgramacionAutomatica()" [strong]="true">Generar</ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="ion-padding">
+        <ion-item>
+          <ion-label position="stacked">Hora de inicio</ion-label>
+          <ion-input type="time" [(ngModel)]="horaProgramacionAutomatica" name="horaProgramacionAutomatica"></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-label position="stacked">Partidos por día</ion-label>
+          <ion-input type="number" min="1" max="8" [(ngModel)]="cantidadPartidosDia" name="cantidadPartidosDia"></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-label position="stacked">Días de la semana</ion-label>
+          <ion-select [(ngModel)]="diasSemanaProgramacion" name="diasSemanaProgramacion" multiple="true" interface="action-sheet">
+            <ion-select-option [value]="2">Martes</ion-select-option>
+            <ion-select-option [value]="3">Miércoles</ion-select-option>
+            <ion-select-option [value]="4">Jueves</ion-select-option>
+            <ion-select-option [value]="5">Viernes</ion-select-option>
+            <ion-select-option [value]="6">Sábado</ion-select-option>
+            <ion-select-option [value]="7">Domingo</ion-select-option>
+            <ion-select-option [value]="1">Lunes</ion-select-option>
+          </ion-select>
+        </ion-item>
+        <ion-note class="ion-padding-horizontal">Se genera una semana completa de martes a lunes. El sistema evita programar dos partidos del mismo torneo para un equipo en la misma semana y respeta las validaciones de cancha y horario.</ion-note>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+
   <ion-alert
     [isOpen]="isAlertOpen"
     header="{{mensajeError}}"

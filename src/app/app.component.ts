@@ -1,4 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { ToastController } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { Subscription, interval } from 'rxjs';
@@ -28,23 +29,37 @@ export class AppComponent implements OnInit, OnDestroy {
 
   private consultarNotificaciones() {
     const usuarioId = this.crud.obtenerUsuario().id;
-    if (!usuarioId) return;
+    if (!usuarioId || !this.crud.obtenerToken()) return;
     if (this.usuarioNotificacionesId !== usuarioId) {
       this.usuarioNotificacionesId = usuarioId;
       this.notificandoIds.clear();
     }
-    this.crud.obtenerNotificacionesPendientes(usuarioId).subscribe(notificaciones => {
-      notificaciones.forEach(notificacion => {
-        if (!notificacion.id || this.notificandoIds.has(notificacion.id)) return;
-        this.notificandoIds.add(notificacion.id);
+    this.crud.obtenerNotificacionesPendientes(usuarioId).subscribe({
+      next: notificaciones => {
+        notificaciones.forEach(notificacion => {
+          if (!notificacion.id || this.notificandoIds.has(notificacion.id)) return;
+          this.notificandoIds.add(notificacion.id);
+          this.toastController.create({
+            header: notificacion.titulo,
+            message: notificacion.mensaje,
+            duration: 7000,
+            position: 'top',
+            buttons: [{ text: 'Abrir', handler: () => this.abrirNotificacion(notificacion, usuarioId) }]
+          }).then(toast => toast.present());
+        });
+      },
+      error: (error: HttpErrorResponse) => {
+        if (error.status !== 401) return;
+        this.crud.cerrarSesion();
+        this.usuarioNotificacionesId = undefined;
+        this.notificandoIds.clear();
+        this.router.navigateByUrl('/auth/login');
         this.toastController.create({
-          header: notificacion.titulo,
-          message: notificacion.mensaje,
-          duration: 7000,
-          position: 'top',
-          buttons: [{ text: 'Abrir', handler: () => this.abrirNotificacion(notificacion, usuarioId) }]
+          message: 'Tu sesión venció o dejó de ser válida. Inicia sesión nuevamente.',
+          duration: 5000,
+          position: 'top'
         }).then(toast => toast.present());
-      });
+      }
     });
   }
 
