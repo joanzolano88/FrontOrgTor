@@ -52,6 +52,8 @@
 .event-panel { margin-top: 18px; border-top: 1px solid #e5eaec; padding-top: 10px; }
 .goal-actions { margin: 14px; width: calc(100% - 28px);  border-radius: 12px; }
 .goal-actions ion-col { display: grid; justify-items: center; gap: 8px; font-size: 12px; font-weight: 700; }
-.goal-actions img { cursor: pointer; }
+.goal-actions img { cursor: default; }
+.goal-submit { margin-top: 20px; }
+.goal-player-hint { display: block; padding: 8px 16px; }
 .score-dash { align-self: center; color: var(--accent); font-size: 13px; }
 .legacy-score { display: none; }

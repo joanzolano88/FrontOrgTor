@@ -102,6 +102,8 @@ export class PerfilJugadorPage implements OnInit {
   nombreEvento(tipo?: string): string {
     switch (tipo) {
       case 'GOL': return 'Gol';
+      case 'AUTOGOL': return 'Autogol';
+      case 'ASISTENCIA': return 'Asistencia';
       case 'TARJETA_AMARILLA': return 'Tarjeta amarilla';
       case 'TARJETA_ROJA': return 'Tarjeta roja';
       case 'ENTRA_TITULAR': return 'Ingreso al partido';

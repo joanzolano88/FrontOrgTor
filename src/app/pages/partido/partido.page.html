@@ -88,8 +88,8 @@
           {{ sancionActual.exencionPartidoId === partido.id ? 'Restaurar sanción' : 'Levantar sanción para este partido' }}
         </ion-button>
         <ion-item><ion-input type="number" label="Minuto" [(ngModel)]="minutoEvento"></ion-input></ion-item>
-        <div class="lineup-actions"><ion-button (click)="registrarEvento('GOL')">Gol</ion-button><ion-button color="warning" (click)="registrarEvento('TARJETA_AMARILLA')">Amarilla</ion-button><ion-button color="danger" (click)="registrarEvento('TARJETA_ROJA')">Roja</ion-button></div>
-        <ion-list><ion-item *ngFor="let evento of eventosJugadorSeleccionado()"><ion-label>{{ evento.tipo }}<small>Minuto {{ evento.minuto }}</small></ion-label></ion-item></ion-list>
+        <div class="lineup-actions"><ion-button color="warning" (click)="registrarEvento('TARJETA_AMARILLA')">Amarilla</ion-button><ion-button color="danger" (click)="registrarEvento('TARJETA_ROJA')">Roja</ion-button></div>
+        <ion-list><ion-item *ngFor="let evento of eventosJugadorSeleccionado()"><ion-label>{{ nombreEvento(evento.tipo) }}<small>Minuto {{ evento.minuto }}</small></ion-label></ion-item></ion-list>
       </ion-content>
     </ng-template>
   </ion-modal>
@@ -97,25 +97,81 @@
     <ng-template>
       <ion-header><ion-toolbar><ion-title>Perfil del jugador</ion-title><ion-buttons slot="end"><ion-button (click)="cerrarPerfilJugador()">Cerrar</ion-button></ion-buttons></ion-toolbar></ion-header>
       <ion-content class="ion-padding">
-        <ion-card><ion-card-header><ion-card-title>{{ perfilJugador?.nombre }}</ion-card-title><ion-card-subtitle>{{ perfilJugador?.identificacion }}</ion-card-subtitle></ion-card-header><ion-card-content><ion-grid><ion-row><ion-col>Goles<strong>{{ estadisticaJugador('GOL') }}</strong></ion-col><ion-col>Asistencias<strong>{{ estadisticaJugador('ASISTENCIA') }}</strong></ion-col><ion-col>Amarillas<strong>{{ estadisticaJugador('TARJETA_AMARILLA') }}</strong></ion-col><ion-col>Expulsiones<strong>{{ estadisticaJugador('TARJETA_ROJA') }}</strong></ion-col></ion-row></ion-grid></ion-card-content></ion-card>
+        <ion-card><ion-card-header><ion-card-title>{{ perfilJugador?.nombre }}</ion-card-title><ion-card-subtitle>{{ perfilJugador?.identificacion }}</ion-card-subtitle></ion-card-header><ion-card-content><ion-grid><ion-row><ion-col>Goles<strong>{{ estadisticaJugador('GOL') }}</strong></ion-col><ion-col>Autogoles<strong>{{ estadisticaJugador('AUTOGOL') }}</strong></ion-col><ion-col>Asistencias<strong>{{ estadisticaJugador('ASISTENCIA') }}</strong></ion-col><ion-col>Amarillas<strong>{{ estadisticaJugador('TARJETA_AMARILLA') }}</strong></ion-col><ion-col>Expulsiones<strong>{{ estadisticaJugador('TARJETA_ROJA') }}</strong></ion-col></ion-row></ion-grid></ion-card-content></ion-card>
         <ion-note color="danger" *ngIf="perfilJugadorData?.sancionTorneo as sancion">Sanción: {{ sancion.permanente ? 'resto del torneo' : sancion.partidosPendientes + ' partido(s) pendiente(s)' }}</ion-note>
         <ion-list><ion-list-header>Equipos y torneos</ion-list-header><ion-item *ngFor="let participacion of perfilJugadorData?.participaciones"><ion-label>{{ participacion.equipo?.nombre }}<small>{{ participacion.torneo?.nombre }}<span *ngIf="participacion.cambioEquipo"> · Cambio realizado</span></small></ion-label></ion-item></ion-list>
       </ion-content>
     </ng-template>
   </ion-modal>
-  <ion-grid class="goal-actions">
+  <ion-grid class="goal-actions" *ngIf="validarOrganizador && partido.estadoPartido == 'EN_PROCESO'">
     <ion-row>
       <ion-col class="ion-text-center">
-        <img appImageFallback="assets/images/shield-placeholder.svg" [src]="mostrarEscudo(partido.equipoLocal?.escudo)" [alt]="'Escudo de ' + (partido.equipoLocal?.nombre || 'equipo local')" (click)="sumarGol('anotacionesEquipoLocal', btnModalGol, partido.equipoLocal?.nombre)">
+        <img appImageFallback="assets/images/shield-placeholder.svg" [src]="mostrarEscudo(partido.equipoLocal?.escudo)" [alt]="'Escudo de ' + (partido.equipoLocal?.nombre || 'equipo local')">
         <span>{{ partido.equipoLocal?.nombre }}</span>
+        <ion-button size="small" (click)="sumarGol(partido.equipoLocal)">Anotar gol</ion-button>
       </ion-col>
       <ion-col class="ion-text-center score-dash">VS</ion-col>
       <ion-col class="ion-text-center">
-        <img appImageFallback="assets/images/shield-placeholder.svg" [src]="mostrarEscudo(partido.equipoVisitante?.escudo)" [alt]="'Escudo de ' + (partido.equipoVisitante?.nombre || 'equipo visitante')" (click)="sumarGol('anotacionesEquipoVisitante', btnModalGol, partido.equipoVisitante?.nombre)">
+        <img appImageFallback="assets/images/shield-placeholder.svg" [src]="mostrarEscudo(partido.equipoVisitante?.escudo)" [alt]="'Escudo de ' + (partido.equipoVisitante?.nombre || 'equipo visitante')">
         <span>{{ partido.equipoVisitante?.nombre }}</span>
+        <ion-button size="small" (click)="sumarGol(partido.equipoVisitante)">Anotar gol</ion-button>
       </ion-col>
     </ion-row>
   </ion-grid>
+  <ion-modal [isOpen]="registroGolModalOpen" (didDismiss)="cerrarRegistroGol()">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>Anotar gol para {{ equipoObjetivoGol?.nombre }}</ion-title>
+          <ion-buttons slot="end"><ion-button (click)="cerrarRegistroGol()">Cerrar</ion-button></ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="ion-padding">
+        <ion-radio-group [value]="tipoGol" (ionChange)="cambiarTipoGol($event.detail.value)">
+          <ion-item>
+            <ion-radio value="GOL">Gol del equipo</ion-radio>
+          </ion-item>
+          <ion-item>
+            <ion-radio value="AUTOGOL">Autogol del equipo contrario</ion-radio>
+          </ion-item>
+        </ion-radio-group>
+        <ion-item>
+          <ion-select
+            label="Jugador que marcó"
+            labelPlacement="stacked"
+            [(ngModel)]="jugadorGolId"
+            (ionChange)="asistenciaGolId = undefined"
+            placeholder="Selecciona un jugador">
+            <ion-select-option *ngFor="let convocatoria of jugadoresParaGol()" [value]="convocatoria.jugador?.id">
+              {{ convocatoria.jugador?.nombre }}
+            </ion-select-option>
+          </ion-select>
+        </ion-item>
+        <ion-note class="goal-player-hint" color="medium" *ngIf="jugadoresParaGol().length === 0">
+          No hay jugadores convocados del equipo que debe registrar el gol. Agrégalos a la lista del partido primero.
+        </ion-note>
+        <ion-note class="goal-player-hint" *ngIf="tipoGol === 'AUTOGOL'">
+          Selecciona al jugador convocado del equipo contrario que anotó en su propia portería.
+        </ion-note>
+        <ion-item *ngIf="tipoGol === 'GOL'">
+          <ion-select
+            label="Asistencia (opcional)"
+            labelPlacement="stacked"
+            [(ngModel)]="asistenciaGolId"
+            placeholder="Sin asistencia">
+            <ion-select-option [value]="undefined">Sin asistencia</ion-select-option>
+            <ion-select-option *ngFor="let convocatoria of jugadoresParaAsistencia()" [value]="convocatoria.jugador?.id">
+              {{ convocatoria.jugador?.nombre }}
+            </ion-select-option>
+          </ion-select>
+        </ion-item>
+        <ion-item>
+          <ion-input type="number" label="Minuto" labelPlacement="stacked" min="0" [(ngModel)]="minutoEvento"></ion-input>
+        </ion-item>
+        <ion-button expand="block" class="goal-submit" [disabled]="!jugadorGolId" (click)="registrarGol()">Guardar gol</ion-button>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
   <!-- Modals and alerts -->
   <div class="legacy-score" aria-hidden="true">
     <ion-grid>
@@ -126,13 +182,6 @@
       </ion-row>
     </ion-grid>
   </div>
-  <ion-button id="gol-alert" #btnModalGol class="ion-hide"></ion-button>
-  <ion-alert
-    trigger="gol-alert"
-    header="Anotar gol a {{nombreEquipoAnotacion}}!"
-    [buttons]="alertButtons"
-    (didDismiss)="anotarGol($event)"
-  ></ion-alert>
   <ion-button id="cancha-modal" #btnModalUbicacion class="ion-hide"></ion-button>
   <ion-alert
     trigger="cancha-modal"

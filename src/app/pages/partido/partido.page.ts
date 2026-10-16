@@ -22,10 +22,12 @@ import { EventoPartido, TipoEventoPartido } from 'src/models/EventoPartido';
 })
 export class PartidoPage implements OnInit {
   partido: Partido = new Partido();
-  equipoAnotacion: string = "";
   ubucacionCancha: string = "";
   estadoTiempoPArtido: string = "";
-  nombreEquipoAnotacion?: string;
+  equipoObjetivoGol?: Equipo;
+  tipoGol: 'GOL' | 'AUTOGOL' = 'GOL';
+  jugadorGolId?: number;
+  asistenciaGolId?: number;
   validarOrganizador: boolean = false;
   public alertButtons = [
     {
@@ -80,6 +82,7 @@ export class PartidoPage implements OnInit {
   jugadorEvento?: Jugador;
   minutoEvento = 0;
   eventoModalOpen = false;
+  registroGolModalOpen = false;
   perfilJugadorModalOpen = false;
   perfilJugador?: Jugador;
   perfilJugadorData: any;
@@ -279,18 +282,24 @@ export class PartidoPage implements OnInit {
   eventosJugadorSeleccionado(): EventoPartido[] {
     return this.eventos.filter(evento => evento.jugador?.id === this.jugadorEvento?.id);
   }
-  registrarEvento(tipo: TipoEventoPartido) {
+  registrarEvento(tipo: 'TARJETA_AMARILLA' | 'TARJETA_ROJA') {
     const usuarioId = this.crud.obtenerUsuario().id;
     if (!usuarioId || !this.partido.id || !this.jugadorEvento?.id) return;
     this.crud.crear({}, `partido/${this.partido.id}/eventos?jugadorId=${this.jugadorEvento.id}&tipo=${tipo}&minuto=${this.minutoEvento}&usuarioId=${usuarioId}`).subscribe(() => {
-      if (tipo === 'GOL') {
-        const esLocal = this.jugadorEvento?.equipo?.id === this.partido.equipoLocal?.id;
-        if (esLocal) this.partido.anotacionesEquipoLocal = (this.partido.anotacionesEquipoLocal || 0) + 1;
-        else this.partido.anotacionesEquipoVisitante = (this.partido.anotacionesEquipoVisitante || 0) + 1;
-        this.actualizarPartido();
-      }
       this.cargarEventos();
     }, error => this.mostrarError(error));
+  }
+  nombreEvento(tipo?: TipoEventoPartido): string {
+    switch (tipo) {
+      case 'GOL': return 'Gol';
+      case 'AUTOGOL': return 'Autogol';
+      case 'ASISTENCIA': return 'Asistencia';
+      case 'TARJETA_AMARILLA': return 'Tarjeta amarilla';
+      case 'TARJETA_ROJA': return 'Tarjeta roja';
+      case 'ENTRA_TITULAR': return 'Entra al partido';
+      case 'SALE_TITULAR': return 'Sale del partido';
+      default: return tipo || 'Evento';
+    }
   }
   mostrarEscudo(imagen: any) {
     return imagen ? 'data:image/png;base64,' + imagen : '';
@@ -345,21 +354,56 @@ export class PartidoPage implements OnInit {
     }
     return color;
   }
-  sumarGol(equipo: string, btn: IonButton, nombreEquipo: string | undefined) {
-    if (this.partido?.estadoPartido == EstadoPartido.EN_PROCESO && this.validarOrganizador) {
-      this.nombreEquipoAnotacion = nombreEquipo;
-      this.equipoAnotacion = equipo;
-      btn['el'].click();
-    }
+  sumarGol(equipo?: Equipo) {
+    if (this.partido.estadoPartido !== EstadoPartido.EN_PROCESO || !this.validarOrganizador || !equipo?.id) return;
+    this.equipoObjetivoGol = equipo;
+    this.tipoGol = 'GOL';
+    this.jugadorGolId = undefined;
+    this.asistenciaGolId = undefined;
+    this.minutoEvento = 0;
+    this.registroGolModalOpen = true;
   }
-  anotarGol(ev: any) {
-    if (ev.detail.role == 'confirm' && this.equipoAnotacion == "anotacionesEquipoLocal") {
-      this.partido!.anotacionesEquipoLocal! += 1;
-      this.actualizarPartido();
-    } else if (ev.detail.role == 'confirm' && this.equipoAnotacion == "anotacionesEquipoVisitante") {
-      this.partido!.anotacionesEquipoVisitante! += 1;
-      this.actualizarPartido();
+  cerrarRegistroGol() {
+    this.registroGolModalOpen = false;
+  }
+  cambiarTipoGol(tipo: 'GOL' | 'AUTOGOL') {
+    this.tipoGol = tipo;
+    this.jugadorGolId = undefined;
+    this.asistenciaGolId = undefined;
+  }
+  jugadoresParaGol(): ConvocatoriaPartido[] {
+    const equipoId = this.tipoGol === 'AUTOGOL'
+      ? this.equiposDelPartido().find(equipo => equipo.id !== this.equipoObjetivoGol?.id)?.id
+      : this.equipoObjetivoGol?.id;
+    return this.convocatoriasEquipo(this.equiposDelPartido().find(equipo => equipo.id === equipoId));
+  }
+  jugadoresParaAsistencia(): ConvocatoriaPartido[] {
+    return this.convocatoriasEquipo(this.equipoObjetivoGol)
+      .filter(convocatoria => convocatoria.jugador?.id !== this.jugadorGolId);
+  }
+  registrarGol() {
+    const usuarioId = this.crud.obtenerUsuario().id;
+    if (!usuarioId || !this.partido.id || !this.equipoObjetivoGol?.id || !this.jugadorGolId) {
+      this.mostrarError({ error: { message: 'Selecciona el jugador que realizó el gol.' } });
+      return;
     }
+    if (this.tipoGol === 'AUTOGOL' && this.asistenciaGolId) {
+      this.mostrarError({ error: { message: 'Un autogol no puede tener asistencia.' } });
+      return;
+    }
+    const solicitud = {
+      equipoAnotadorId: this.equipoObjetivoGol.id,
+      jugadorId: this.jugadorGolId,
+      asistenciaId: this.tipoGol === 'GOL' ? this.asistenciaGolId || null : null,
+      autogol: this.tipoGol === 'AUTOGOL',
+      minuto: this.minutoEvento
+    };
+    this.crud.crear(solicitud, `partido/${this.partido.id}/goles`).subscribe((resp: Partido) => {
+      this.partido = resp;
+      this.registroGolModalOpen = false;
+      this.jugadorEvento = undefined;
+      this.cargarEventos();
+    }, error => this.mostrarError(error));
   }
   gandorPenaltis(ev: any) {
     if (ev.detail.role == 'local') {
@@ -367,12 +411,6 @@ export class PartidoPage implements OnInit {
     } else if (ev.detail.role == 'visitante') {
       this.terminarPartidoPenaltis('V');
     }
-  }
-  actualizarPartido() {
-    const usuarioId = this.crud.obtenerUsuario().id;
-    this.crud.actualizar(this.partido, `partido/sumar_gol?usuarioId=${usuarioId}`).subscribe((resp: Partido) =>{
-      this.partido = resp;
-    }, error => this.mostrarError(error));
   }
   modalModificarMarcador(btn: IonButton) {
     btn['el'].click();
