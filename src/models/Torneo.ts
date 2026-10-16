@@ -9,6 +9,8 @@ import { Deporte } from "./Deporte";
 export class Torneo {
     id?: number;
     nombre?: string;
+    logoTorneo?: string;
+    logoTipoContenido?: string;
     ciudad?: Ciudad;
     ubicacion?: string;
     encargadoTorneo?: Usuario;

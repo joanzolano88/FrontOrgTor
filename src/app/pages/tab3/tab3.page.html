@@ -37,7 +37,7 @@
         <ion-grid>
           <ion-row class="ion-justify-content-center">
             <ion-col size="4">
-              <ion-input type="file" class="ion-hide" #file accept="image/png, image/jpeg" (change)="cargarImg($event)" required></ion-input>
+              <ion-input type="file" class="ion-hide" #file accept="image/png, image/jpeg" (change)="cargarImg($event)" [required]="url != '/auth/usuario'"></ion-input>
               <ion-avatar style="width: 100px; height: 100px; margin: auto;" (click)="activarSubirArchivo(file)">
                 <img appImageFallback="assets/images/avatar-placeholder.svg" alt="Imagen de perfil" [src]="imagenDef"/>
               </ion-avatar>
@@ -79,13 +79,13 @@
           <ion-select-option *ngFor="let ciudad of ciudades" [value]="ciudad.id">{{ ciudad.nombre }}</ion-select-option>
         </ion-select>
       </ion-item>
-      <ion-item [ngClass]="{'error-input': f.submitted && f.controls['contrasena'].errors}" title="{{extraer.erroresForm(f.controls['contrasena'])}}">
+      <ion-item *ngIf="url != '/auth/usuario'" [ngClass]="{'error-input': f.submitted && f.controls['contrasena'].errors}" title="{{extraer.erroresForm(f.controls['contrasena'])}}">
         <ion-input label="Contraseña" labelPlacement="floating" required name="contrasena" type="password" [(ngModel)]="usuario.contrasena" minlength="6"></ion-input>
       </ion-item>
-      <ion-item [ngClass]="{'error-input': f.submitted && f.controls['conf-contrasena'].errors}" title="{{extraer.erroresForm(f.controls['conf-contrasena'])}}">
+      <ion-item *ngIf="url != '/auth/usuario'" [ngClass]="{'error-input': f.submitted && f.controls['conf-contrasena'].errors}" title="{{extraer.erroresForm(f.controls['conf-contrasena'])}}">
         <ion-input label="Confirmar Contraseña" labelPlacement="floating" required name="conf-contrasena" type="password" [(ngModel)]="confirmarContrasena" minlength="6"></ion-input>
       </ion-item>
-      <ion-item class="role-item" [ngClass]="{'error-input': f.submitted && f.controls['tipo-usuario'].errors}" title="{{extraer.erroresForm(f.controls['tipo-usuario'])}}">
+      <ion-item *ngIf="url != '/auth/usuario'" class="role-item" [ngClass]="{'error-input': f.submitted && f.controls['tipo-usuario'].errors}" title="{{extraer.erroresForm(f.controls['tipo-usuario'])}}">
         <ion-select label="Selecionar tipo de usuario" labelPlacement="floating" required name="tipo-usuario" [(ngModel)]="usuario.tipoUsuario" >
           <ion-select-option value="ORGANIZADOR">ORGANIZADOR</ion-select-option>
           <ion-select-option value="DELEGADO">DELEGADO</ion-select-option>

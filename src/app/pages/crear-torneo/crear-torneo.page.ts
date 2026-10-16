@@ -23,7 +23,8 @@ export class CrearTorneoPage {
   listaModalidadToreno: string[] = [];
   listaModalidadFase: string[] = [];
   nombreArchivo: string = "";
-  archivo: any;
+  archivo?: File;
+  vistaPreviaLogo?: string;
   torneo: Torneo = new Torneo();
   paises: any[] = [];
   departamentos: any[] = [];
@@ -118,9 +119,16 @@ export class CrearTorneoPage {
   }
 
   cargarArchivo(input: Event) {
-    this.archivo = input.target;
-    this.archivo = this.archivo.files[0];
-    this.nombreArchivo = this.archivo == undefined? null: this.archivo.name;
+    const archivo = (input.target as HTMLInputElement).files?.[0];
+    if (!archivo) return;
+    if (!archivo.type.startsWith('image/')) {
+      this.mostrarAlerta('Imagen no válida', 'Selecciona un archivo de imagen para el escudo o logo del torneo.');
+      return;
+    }
+    if (this.vistaPreviaLogo) URL.revokeObjectURL(this.vistaPreviaLogo);
+    this.archivo = archivo;
+    this.vistaPreviaLogo = URL.createObjectURL(archivo);
+    this.nombreArchivo = archivo.name;
   }
 
   tieneError(form: NgForm, control: string): boolean {

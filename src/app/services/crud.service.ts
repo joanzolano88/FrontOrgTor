@@ -51,7 +51,7 @@ export class CrudService {
     };
     const formData = new FormData();
     formData.append('objeto', JSON.stringify(authData));
-    formData.append('archivo', imagen);
+    if (imagen) formData.append('archivo', imagen);
     return this.http.put(this.url + tipo, formData);
   }
 
@@ -61,7 +61,7 @@ export class CrudService {
     };
     const formData = new FormData();
     formData.append('objeto', JSON.stringify(authData));
-    formData.append('archivo', imagen);
+    if (imagen) formData.append('archivo', imagen);
     return this.http.post(this.url + tipo, formData);
   }
 

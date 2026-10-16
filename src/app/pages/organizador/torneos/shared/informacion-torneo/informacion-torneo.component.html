@@ -1,7 +1,10 @@
 <section class="tournament-hero">
   <div class="hero-topline"><span>{{ torneo.estadoTorneo }}</span><ion-badge color="success">{{ torneo.faseTorneo }}</ion-badge></div>
   <div class="hero-content">
-    <div class="tournament-mark"><ion-icon name="trophy-outline"></ion-icon></div>
+    <div class="tournament-mark">
+      <img *ngIf="torneo.logoTorneo; else logoTorneoDefault" [src]="'data:' + (torneo.logoTipoContenido || 'image/png') + ';base64,' + torneo.logoTorneo" [alt]="'Logo de ' + torneo.nombre">
+      <ng-template #logoTorneoDefault><ion-icon name="trophy-outline"></ion-icon></ng-template>
+    </div>
     <div><h1>{{ torneo.nombre }}</h1><p>{{ torneo.ciudad && torneo.ciudad.nombre }}<span *ngIf="torneo.ciudad && torneo.ciudad.departamento"> · {{ torneo.ciudad.departamento.nombre }}</span></p></div>
   </div>
   <div class="hero-actions">

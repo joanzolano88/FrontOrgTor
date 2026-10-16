@@ -281,7 +281,7 @@ export class Tab3Page implements OnInit {
     if (form.invalid) {
       return;
     }
-    if (this.usuario.contrasena != this.confirmarContrasena) {
+    if (this.url !== '/auth/usuario' && this.usuario.contrasena != this.confirmarContrasena) {
       const alert = await  this.alertController.create({
         header: 'Las contraseñas no son iguales',
         buttons: ['Aceptar'],
@@ -290,17 +290,27 @@ export class Tab3Page implements OnInit {
       return;
     }
     if (this.url == '/auth/usuario') {
-      this.crud.actualizarArchivo(this.usuario,'usuario', this.foto).subscribe(async (resp: Usuario) =>{
-        this.usuario = resp;
-        localStorage.setItem('usuario', JSON.stringify(resp));
-        this.imagenDef = resp.foto ? 'data:image/png;base64,' + resp.foto : this.imagenDef;
-        this.editarPerfilOpen = false;
-        const alert = await  this.alertController.create({
-          header: 'Informacion usuario actulizada',
-          buttons: ['Aceptar'],
+      this.crud.actualizarArchivo(this.usuario, 'usuario', this.foto).subscribe({
+        next: async (resp: Usuario) => {
+          this.usuario = resp;
+          localStorage.setItem('usuario', JSON.stringify(resp));
+          this.imagenDef = resp.foto ? 'data:image/png;base64,' + resp.foto : this.imagenDef;
+          this.editarPerfilOpen = false;
+          const alert = await this.alertController.create({
+            header: 'Información de usuario actualizada',
+            buttons: ['Aceptar'],
+          });
+          await alert.present();
+        },
+        error: async err => {
+          const alert = await this.alertController.create({
+            header: 'No se pudo actualizar el perfil',
+            message: err?.error?.message || 'Verifica los datos e inténtalo nuevamente.',
+            buttons: ['Aceptar'],
+          });
+          await alert.present();
+        }
         });
-        await alert.present();
-      });
     } else if (this.url == '/auth/login/registrar') {
       this.crud.crearUsuario(this.usuario,'usuario', this.foto, this.identificacion).subscribe(async (resp) =>{
         this.usuario = resp;

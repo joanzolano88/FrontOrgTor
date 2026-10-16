@@ -27,7 +27,10 @@
   <ng-container *ngFor="let torneo of listaTorneosFiltrados">
     <ion-card class="tarjeta-torneo" (click)="verTorneo(torneo.id)" mode="ios">
       <div class="tarjeta-main">
-        <div class="escudo-torneo"><ion-icon name="trophy-outline"></ion-icon></div>
+        <div class="escudo-torneo">
+          <img *ngIf="torneo.logoTorneo; else escudoTorneoDefault" [src]="'data:' + (torneo.logoTipoContenido || 'image/png') + ';base64,' + torneo.logoTorneo" [alt]="'Logo de ' + torneo.nombre">
+          <ng-template #escudoTorneoDefault><ion-icon name="trophy-outline"></ion-icon></ng-template>
+        </div>
         <div class="tarjeta-info">
           <div class="tarjeta-heading"><h3>{{ torneo.nombre }}</h3><ion-badge [color]="colorEstado(torneo)">{{ etiquetaEstado(torneo) }}</ion-badge></div>
           <p>{{ torneo.modalidadTorneo?.replace('_', ' ') | titlecase }}</p>

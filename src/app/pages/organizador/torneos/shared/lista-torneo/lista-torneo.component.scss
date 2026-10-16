@@ -59,6 +59,7 @@
   padding: 14px 14px 14px 16px;
 }
 .escudo-torneo { display: grid; place-items: center; flex: 0 0 74px; width: 74px; height: 74px; border-radius: var(--app-radius); background: var(--app-surface-muted); color: var(--app-teal); font-size: 37px; box-shadow: inset 0 0 0 1px var(--app-border); }
+.escudo-torneo img { width: 100%; height: 100%; border-radius: inherit; object-fit: contain; }
 
 .tarjeta-info {
   flex: 1;

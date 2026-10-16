@@ -56,6 +56,20 @@
               required minlength="2" [counter]="true" readonly></ion-input>
           </ion-item>
         </div>
+        <div class="logo-upload">
+          <div class="logo-preview" *ngIf="vistaPreviaLogo; else logoDefault">
+            <img [src]="vistaPreviaLogo" alt="Vista previa del logo del torneo">
+          </div>
+          <ng-template #logoDefault>
+            <div class="logo-preview logo-placeholder"><ion-icon name="trophy-outline"></ion-icon></div>
+          </ng-template>
+          <div class="logo-copy">
+            <strong>Escudo o logo del torneo</strong>
+            <span>{{ nombreArchivo || 'Opcional · PNG, JPG o WEBP' }}</span>
+            <input #archivoLogo type="file" accept="image/png,image/jpeg,image/webp" class="ion-hide" (change)="cargarArchivo($event)">
+            <ion-button type="button" fill="outline" size="small" (click)="archivoLogo.click()">Seleccionar imagen</ion-button>
+          </div>
+        </div>
       </section>
 
       <section class="form-card">

@@ -95,6 +95,47 @@
   grid-column: 1 / -1;
 }
 
+.logo-upload {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 14px;
+}
+
+.logo-preview {
+  display: grid;
+  place-items: center;
+  width: 88px;
+  height: 88px;
+  overflow: hidden;
+  border: 1px solid var(--tourney-line);
+  border-radius: 14px;
+  background: var(--app-surface);
+}
+
+.logo-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.logo-placeholder {
+  color: var(--tourney-primary);
+  font-size: 36px;
+}
+
+.logo-copy {
+  display: grid;
+  justify-items: start;
+  gap: 6px;
+  color: var(--tourney-ink);
+}
+
+.logo-copy span {
+  color: var(--tourney-muted);
+  font-size: 0.85rem;
+}
+
 .form-field ion-input,
 .form-field ion-select,
 .form-field ion-checkbox {
