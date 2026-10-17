@@ -102,6 +102,8 @@ export class PartidoPage implements OnInit {
   cambioModalOpen = false;
   accionesJugadorModalOpen = false;
   abrirCambioDespuesDeAcciones = false;
+  cargandoSuplentesCambio = false;
+  jugadoresInscritosEquipoCambio: JugadorDisponiblePartido[] = [];
   eventos: EventoPartido[] = [];
   sancionesTorneo: SancionPartido[] = [];
   jugadorEvento?: Jugador;
@@ -111,7 +113,7 @@ export class PartidoPage implements OnInit {
   perfilJugador?: Jugador;
   perfilJugadorData: any;
   titularCambio?: ConvocatoriaPartido;
-  suplenteCambio?: ConvocatoriaPartido;
+  suplenteCambio?: JugadorDisponiblePartido;
   convocatoriaAcciones?: ConvocatoriaPartido;
   formacionesPorEquipo: Record<number, string> = {};
   readonly formacionesDisponibles = ['4-4-2', '4-3-3', '3-5-2', '4-2-3-1', '4-1-4-1', '4-5-1'];
@@ -223,8 +225,22 @@ export class PartidoPage implements OnInit {
   abrirCambio(convocatoria: ConvocatoriaPartido) {
     if (this.partido.estadoPartido !== 'EN_PROCESO' || !this.validarOrganizador || !convocatoria.titular) return;
     this.equipoConvocatoria = this.equipoDeConvocatoria(convocatoria);
+    if (!this.equipoConvocatoria?.id || !this.partido.id) return;
     this.titularCambio = convocatoria;
     this.suplenteCambio = undefined;
+    this.cargandoSuplentesCambio = true;
+    this.jugadoresInscritosEquipoCambio = [];
+    this.crud.obtener(`partido/${this.partido.id}/jugadores-disponibles/${this.equipoConvocatoria.id}`)
+      .subscribe({
+        next: (jugadores: JugadorDisponiblePartido[]) => {
+          this.jugadoresInscritosEquipoCambio = jugadores || [];
+          this.cargandoSuplentesCambio = false;
+        },
+        error: error => {
+          this.cargandoSuplentesCambio = false;
+          this.mostrarError(error);
+        }
+      });
     if (this.accionesJugadorModalOpen) {
       this.abrirCambioDespuesDeAcciones = true;
       this.accionesJugadorModalOpen = false;
@@ -277,9 +293,27 @@ export class PartidoPage implements OnInit {
     this.cambioModalOpen = false;
     this.titularCambio = undefined;
     this.suplenteCambio = undefined;
+    this.jugadoresInscritosEquipoCambio = [];
   }
-  seleccionarSuplenteCambio(convocatoria: ConvocatoriaPartido) {
-    this.suplenteCambio = convocatoria;
+  suplentesDisponiblesCambio(): JugadorDisponiblePartido[] {
+    const titularesIds = new Set(this.titularesEquipo(this.equipoConvocatoria)
+      .map(convocatoria => Number(convocatoria.jugador?.id)));
+    const sancionadosIds = new Set(this.sancionesTorneo
+      .filter(sancion => sancion.activa &&
+        sancion.exencionPartidoId !== this.partido.id &&
+        (sancion.permanente || sancion.partidosPendientes > 0))
+      .map(sancion => Number(sancion.jugador?.id)));
+    const expulsadosIds = new Set(this.eventos
+      .filter(evento => evento.tipo === 'TARJETA_ROJA')
+      .map(evento => Number(evento.jugadorId)));
+    return this.jugadoresInscritosEquipoCambio.filter(jugador =>
+      !!jugador.id &&
+      !titularesIds.has(Number(jugador.id)) &&
+      !sancionadosIds.has(Number(jugador.id)) &&
+      !expulsadosIds.has(Number(jugador.id)));
+  }
+  seleccionarSuplenteCambio(jugador: JugadorDisponiblePartido) {
+    this.suplenteCambio = jugador;
   }
   realizarCambio() {
     const usuarioId = this.crud.obtenerUsuario().id;
@@ -287,7 +321,7 @@ export class PartidoPage implements OnInit {
       this.mostrarError({ error: { message: 'Selecciona un titular y un suplente del mismo equipo.' } });
       return;
     }
-    this.crud.sustituirJugador(this.partido.id, this.titularCambio.id, this.suplenteCambio.id, usuarioId).subscribe({
+    this.crud.sustituirJugadorInscrito(this.partido.id, this.titularCambio.id, this.suplenteCambio.id, usuarioId).subscribe({
       next: () => { this.cerrarCambio(); this.cargarConvocatorias(); this.cargarEventos(); },
       error: error => this.mostrarError(error)
     });

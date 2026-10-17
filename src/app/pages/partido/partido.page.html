@@ -271,19 +271,23 @@
             <span class="player-number">{{ titularCambio.numeroUniforme || titularCambio.jugador?.numeroCamiseta || '–' }}</span>
             <strong>{{ titularCambio.jugador?.nombre }}</strong>
           </div>
-          <p class="substitution-label">Suplentes disponibles de {{ equipoConvocatoria?.nombre }} ({{ suplentesEquipo(equipoConvocatoria).length }})</p>
-          <div class="substitution-options" *ngIf="suplentesEquipo(equipoConvocatoria).length > 0; else noSubstitutes">
-            <button type="button" class="substitution-option" *ngFor="let suplente of suplentesEquipo(equipoConvocatoria)"
+          <p class="substitution-label">Jugadores inscritos disponibles de {{ equipoConvocatoria?.nombre }} ({{ suplentesDisponiblesCambio().length }})</p>
+          <ion-note class="substitution-hint">Se muestran los jugadores inscritos del equipo que no están actualmente en la cancha. El suplente se agrega a este partido al confirmar el cambio.</ion-note>
+          <div class="substitution-loading" *ngIf="cargandoSuplentesCambio">
+            <ion-spinner name="crescent"></ion-spinner><span>Cargando jugadores inscritos...</span>
+          </div>
+          <div class="substitution-options" *ngIf="!cargandoSuplentesCambio && suplentesDisponiblesCambio().length > 0; else noSubstitutes">
+            <button type="button" class="substitution-option" *ngFor="let suplente of suplentesDisponiblesCambio()"
               [class.selected]="suplenteCambio?.id === suplente.id"
               (click)="seleccionarSuplenteCambio(suplente)">
-              <span class="player-number">{{ suplente.numeroUniforme || suplente.jugador?.numeroCamiseta || '–' }}</span>
-              <span><strong>{{ suplente.jugador?.nombre }}</strong><small>{{ suplente.jugador?.identificacion }}</small></span>
+              <span class="player-number">{{ suplente.numeroCamiseta || '–' }}</span>
+              <span><strong>{{ suplente.nombre }}</strong><small>{{ suplente.identificacion }}</small></span>
               <ion-icon [name]="suplenteCambio?.id === suplente.id ? 'radio-button-on' : 'radio-button-off'"></ion-icon>
             </button>
           </div>
           <ng-template #noSubstitutes>
-            <ion-note class="no-substitutes-note">
-              No hay suplentes convocados para {{ equipoConvocatoria?.nombre }}. Revisa la lista de jugadores de este partido.
+            <ion-note class="no-substitutes-note" *ngIf="!cargandoSuplentesCambio">
+              No hay otros jugadores inscritos disponibles para {{ equipoConvocatoria?.nombre }}.
             </ion-note>
           </ng-template>
           <ion-button class="confirm-substitution" expand="block" [disabled]="!suplenteCambio" (click)="realizarCambio()">Hacer cambio</ion-button>

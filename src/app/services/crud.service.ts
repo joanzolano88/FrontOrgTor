@@ -195,6 +195,10 @@ export class CrudService {
     return this.http.post(`${this.url}partido/${idPartido}/sustituciones?titularId=${titularId}&suplenteId=${suplenteId}&usuarioId=${usuarioId}`, {});
   }
 
+  sustituirJugadorInscrito(idPartido: number, titularId: number, jugadorId: number, usuarioId: number) {
+    return this.http.post(`${this.url}partido/${idPartido}/sustituciones/jugador-inscrito?titularId=${titularId}&jugadorId=${jugadorId}&usuarioId=${usuarioId}`, {});
+  }
+
   obtenerPerfilJugador(idJugador: number, idTorneo?: number) {
     const torneoQuery = idTorneo ? `?torneoId=${idTorneo}` : '';
     return this.http.get<any>(`${this.url}jugador/${idJugador}/perfil${torneoQuery}`);
