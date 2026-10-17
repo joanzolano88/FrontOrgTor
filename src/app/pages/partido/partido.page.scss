@@ -71,13 +71,18 @@ ion-modal.lineup-modal::part(content) {
 }
 
 .match-summary,
-.roster-picker,
 .lineup-formation {
   min-width: 0;
   border: 1px solid #075e7e;
   border-radius: 13px;
   background: rgba(0, 34, 56, .88);
 }
+
+ion-modal.rosters-modal { --width: min(100%, 900px); --height: 100%; --border-radius: 0; }
+ion-modal.rosters-modal::part(content) { border: 1px solid #075e7e; background: #001b2e; }
+.rosters-shell { display: grid; gap: 12px; width: min(100%, 860px); margin: 0 auto; padding: 12px 14px calc(20px + env(safe-area-inset-bottom)); }
+.roster-picker { padding: 12px; border: 1px solid #075e7e; border-radius: 13px; background: rgba(0,34,56,.88); }
+.roster-columns { margin-top: 0; }
 
 .match-summary {
   display: grid;
@@ -117,10 +122,6 @@ ion-modal.lineup-modal::part(content) {
   justify-items: center;
   gap: 5px;
   text-align: center;
-}
-
-.roster-picker {
-  padding: 12px;
 }
 
 .team-picker,
@@ -203,9 +204,10 @@ ion-modal.lineup-modal::part(content) {
   color: #eaf4ff;
 }
 
+.formation-controls { display: flex; align-items: center; gap: 8px; }
+.formation-controls > span { color: #bed3e4; font-size: .77rem; }
+.formation-controls ion-button { margin: 0; --border-radius: 9px; }
 .formation-heading ion-icon { color: #66baff; font-size: 1.3rem; }
-
-.formation-heading > span { color: #bed3e4; font-size: .77rem; }
 
 .lineup-progress {
   height: 8px;
@@ -218,7 +220,7 @@ ion-modal.lineup-modal::part(content) {
 
 .lineup-columns {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, .9fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
   margin-top: 12px;
 }
@@ -304,16 +306,11 @@ ion-modal.substitution-modal { --width: min(100%, 480px); --height: min(88%, 700
 .confirm-substitution { margin: 4px 0 0; --border-radius: 10px; }
 
 @media (min-width: 760px) {
-  ion-modal.lineup-modal {
+  ion-modal.lineup-modal,
+  ion-modal.rosters-modal {
     --height: min(94%, 940px);
     --border-radius: 16px;
   }
-}
-
-@media (max-width: 700px) {
-  .lineup-columns { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .pitch-column { grid-column: 1 / -1; }
-  .pitch { width: min(100%, 360px); margin: 0 auto; }
 }
 
 @media (max-width: 520px) {
@@ -331,23 +328,12 @@ ion-modal.substitution-modal { --width: min(100%, 480px); --height: min(88%, 700
   .summary-team { gap: 4px; }
   .summary-team img { width: 27px; height: 27px; flex-basis: 27px; }
   .summary-team strong { font-size: .66rem; }
-  .roster-picker { padding: 9px 7px; }
-  .team-picker { width: 100%; }
-  .team-picker label { font-size: .76rem; }
-  .team-picker ion-select { font-size: .82rem; }
-  .lineup-search { gap: 5px; padding: 0 6px; }
-  .lineup-search ion-input { font-size: .76rem; }
-  .lineup-search ion-button { font-size: .65rem; }
-
-  .player-number { width: 30px; height: 30px; font-size: .78rem; }
-
-  .lineup-formation { padding: 0 7px 8px; }
-  .formation-heading { padding: 10px 0 8px; }
-  .formation-heading > div { font-size: .95rem; }
-  .formation-heading > span { font-size: .68rem; }
+  .formation-controls { gap: 3px; }
+  .formation-controls > span { font-size: .65rem; }
+  .formation-controls ion-button { font-size: .68rem; }
   .lineup-columns { grid-template-columns: minmax(0, 1fr); gap: 8px; }
-  .pitch-column { grid-column: auto; }
-  .roster-player-row { grid-template-columns: 30px minmax(0, 1fr) auto; }
+  .roster-player-row { display: flex; flex-wrap: wrap; gap: 5px; }
+  .roster-player-row .player-info { flex: 1 1 calc(100% - 40px); }
   .roster-player-row ion-button { --padding-start: 3px; --padding-end: 3px; font-size: .6rem; }
   .uniform-input { max-width: 40px; }
 }

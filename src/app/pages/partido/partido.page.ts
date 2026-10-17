@@ -78,6 +78,7 @@ export class PartidoPage implements OnInit {
   busquedaAlineacion = '';
   enlaceInvitacion = '';
   convocatoriaModalOpen = false;
+  listasTitularesModalOpen = false;
   cambioModalOpen = false;
   eventos: EventoPartido[] = [];
   sancionesTorneo: any[] = [];
@@ -149,6 +150,14 @@ export class PartidoPage implements OnInit {
   }
   cerrarConvocatoria() {
     this.convocatoriaModalOpen = false;
+    this.listasTitularesModalOpen = false;
+  }
+  abrirListasTitulares() {
+    this.listasTitularesModalOpen = true;
+    this.cambiarEquipoConvocatoria();
+  }
+  cerrarListasTitulares() {
+    this.listasTitularesModalOpen = false;
   }
   abrirCambio(convocatoria: ConvocatoriaPartido) {
     if (this.partido.estadoPartido !== 'EN_PROCESO' || !this.validarOrganizador || !convocatoria.titular) return;
