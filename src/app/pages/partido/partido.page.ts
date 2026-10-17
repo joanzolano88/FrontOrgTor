@@ -107,6 +107,8 @@ export class PartidoPage implements OnInit {
   posicionVaciaIndice?: number;
   cargandoJugadoresPosicionVacia = false;
   jugadoresPosicionVacia: JugadorDisponiblePartido[] = [];
+  jugadorPosicionVaciaSeleccionado?: JugadorDisponiblePartido;
+  numeroUniformePosicionVacia: number | null = null;
   cargandoSuplentesCambio = false;
   jugadoresInscritosEquipoCambio: JugadorDisponiblePartido[] = [];
   eventos: EventoPartido[] = [];
@@ -119,6 +121,8 @@ export class PartidoPage implements OnInit {
   perfilJugadorData: any;
   titularCambio?: ConvocatoriaPartido;
   suplenteCambio?: JugadorDisponiblePartido;
+  numeroUniformeCambio: number | null = null;
+  numerosUniformeDisponibles: Record<number, number | null> = {};
   convocatoriaAcciones?: ConvocatoriaPartido;
   formacionesPorEquipo: Record<number, string> = {};
   readonly formacionesDisponibles = ['4-4-2', '4-3-3', '3-5-2', '4-2-3-1', '4-1-4-1', '4-5-1'];
@@ -174,11 +178,14 @@ export class PartidoPage implements OnInit {
     const equipoId = this.idRelacion(equipo);
     return equipoId ? this.formacionesPorEquipo[equipoId] || '4-4-2' : '4-4-2';
   }
+  esDelegado(): boolean {
+    return this.crud.obtenerUsuario().tipoUsuario === TipoUsuario.DELEGADO;
+  }
   seleccionarFormacion(equipo: Equipo | undefined, formacion: string) {
     const usuarioId = this.crud.obtenerUsuario().id;
     const equipoId = this.idRelacion(equipo);
     if (!usuarioId || !this.partido.id || !equipoId || !this.puedeGestionarEquipo(equipo) ||
-        this.partido.estadoPartido !== 'PROGRAMADO' || !this.formacionesDisponibles.includes(formacion)) return;
+        this.partido.estadoPartido === 'TERMINADO' || !this.formacionesDisponibles.includes(formacion)) return;
     this.crud.actualizar(null, `partido/${this.partido.id}/equipos/${equipoId}/formacion?formacion=${encodeURIComponent(formacion)}&usuarioId=${usuarioId}`).subscribe({
       next: () => {
         this.formacionesPorEquipo[equipoId] = formacion;
@@ -233,6 +240,7 @@ export class PartidoPage implements OnInit {
     if (!this.equipoConvocatoria?.id || !this.partido.id) return;
     this.titularCambio = convocatoria;
     this.suplenteCambio = undefined;
+    this.numeroUniformeCambio = null;
     this.cargandoSuplentesCambio = true;
     this.jugadoresInscritosEquipoCambio = [];
     this.crud.obtener(`partido/${this.partido.id}/jugadores-disponibles/${this.equipoConvocatoria.id}`)
@@ -273,7 +281,8 @@ export class PartidoPage implements OnInit {
     }
   }
   clickJugadorAlineacion(convocatoria: ConvocatoriaPartido) {
-    if (this.partido.estadoPartido === 'PROGRAMADO') {
+    if (this.partido.estadoPartido === 'PROGRAMADO' ||
+        (this.partido.estadoPartido === 'EN_PROCESO' && this.crud.obtenerUsuario().tipoUsuario === TipoUsuario.DELEGADO)) {
       this.seleccionarPosicion(convocatoria);
     } else if (this.partido.estadoPartido === 'EN_PROCESO') {
       this.abrirAccionesAlineacion(convocatoria);
@@ -298,6 +307,7 @@ export class PartidoPage implements OnInit {
     this.cambioModalOpen = false;
     this.titularCambio = undefined;
     this.suplenteCambio = undefined;
+    this.numeroUniformeCambio = null;
     this.jugadoresInscritosEquipoCambio = [];
   }
   suplentesDisponiblesCambio(): JugadorDisponiblePartido[] {
@@ -319,14 +329,22 @@ export class PartidoPage implements OnInit {
   }
   seleccionarSuplenteCambio(jugador: JugadorDisponiblePartido) {
     this.suplenteCambio = jugador;
+    const convocatoria = this.convocatorias.find(item => Number(item.jugador?.id) === Number(jugador.id));
+    this.numeroUniformeCambio = convocatoria?.numeroUniforme ?? jugador.numeroCamiseta ?? null;
+  }
+  numeroUniformeCambioValido(): boolean {
+    const numero = this.numeroUniformeCambio;
+    return numero !== null && Number.isInteger(Number(numero)) && Number(numero) >= 0 && Number(numero) <= 99;
   }
   realizarCambio() {
     const usuarioId = this.crud.obtenerUsuario().id;
-    if (!usuarioId || !this.partido.id || !this.titularCambio?.id || !this.suplenteCambio?.id) {
-      this.mostrarError({ error: { message: 'Selecciona un titular y un suplente del mismo equipo.' } });
+    const numeroUniforme = this.numeroUniformeCambio === null ? null : Number(this.numeroUniformeCambio);
+    if (!usuarioId || !this.partido.id || !this.titularCambio?.id || !this.suplenteCambio?.id ||
+        !this.numeroUniformeCambioValido() || numeroUniforme === null) {
+      this.mostrarError({ error: { message: 'Selecciona un suplente y asigna un número de uniforme único entre 0 y 99.' } });
       return;
     }
-    this.crud.sustituirJugadorInscrito(this.partido.id, this.titularCambio.id, this.suplenteCambio.id, usuarioId).subscribe({
+    this.crud.sustituirJugadorInscrito(this.partido.id, this.titularCambio.id, this.suplenteCambio.id, numeroUniforme, usuarioId).subscribe({
       next: () => { this.cerrarCambio(); this.cargarConvocatorias(); this.cargarEventos(); },
       error: error => this.mostrarError(error)
     });
@@ -387,14 +405,36 @@ export class PartidoPage implements OnInit {
     const idNumerico = Number(id);
     return Number.isFinite(idNumerico) && idNumerico > 0 ? idNumerico : undefined;
   }
+  numeroUniformeDisponible(jugador: { id?: number; numeroCamiseta?: number }): number | null {
+    if (jugador.id === undefined) return null;
+    return Object.prototype.hasOwnProperty.call(this.numerosUniformeDisponibles, jugador.id)
+      ? this.numerosUniformeDisponibles[jugador.id]
+      : jugador.numeroCamiseta ?? null;
+  }
+  actualizarNumeroUniformeDisponible(jugador: JugadorDisponiblePartido, numero: number | null) {
+    if (jugador.id !== undefined) this.numerosUniformeDisponibles[jugador.id] = numero === null ? null : Number(numero);
+  }
+  numeroUniformeValido(numero: number | null | undefined): boolean {
+    return numero !== null && numero !== undefined &&
+      Number.isInteger(Number(numero)) && Number(numero) >= 0 && Number(numero) <= 99;
+  }
+  numeroUniformeConvocatoria(convocatoria: ConvocatoriaPartido): number | undefined {
+    const numero = convocatoria.numeroUniforme ?? convocatoria.jugador?.numeroCamiseta;
+    return this.numeroUniformeValido(numero) ? Number(numero) : undefined;
+  }
   pasarATitular(jugador?: Jugador) {
     if (!jugador?.id || !this.validarOrganizador || this.partido.estadoPartido !== 'PROGRAMADO') return;
-    const convocatoria = this.convocatorias.find(item => this.idRelacion(item.jugador) === Number(jugador.id));
-    if (convocatoria) {
-      this.cambiarTitular(convocatoria, true);
+    const numeroUniforme = this.numeroUniformeDisponible(jugador);
+    if (!this.numeroUniformeValido(numeroUniforme) || numeroUniforme === null) {
+      this.mostrarError({ error: { message: 'Asigna un número de uniforme entero entre 0 y 99 antes de titularizar al jugador.' } });
       return;
     }
-    this.agregarJugador(jugador, true);
+    const convocatoria = this.convocatorias.find(item => this.idRelacion(item.jugador) === Number(jugador.id));
+    if (convocatoria) {
+      this.cambiarTitular(convocatoria, true, numeroUniforme);
+      return;
+    }
+    this.agregarJugador(jugador, true, numeroUniforme);
   }
   pasarASuplente(convocatoria: ConvocatoriaPartido) {
     if (!this.validarOrganizador || this.partido.estadoPartido !== 'PROGRAMADO') return;
@@ -459,7 +499,7 @@ export class PartidoPage implements OnInit {
     const convocatoria = this.convocatoriaPosicionSeleccionada;
     const equipoId = this.idRelacion(equipo);
     if (!convocatoria?.id || !equipoId || this.intercambiandoPosiciones ||
-        this.partido.estadoPartido !== 'PROGRAMADO' || !this.puedeGestionarEquipo(equipo)) return;
+        this.partido.estadoPartido === 'TERMINADO' || !this.puedeGestionarEquipo(equipo)) return;
     const convocatoriaEquipoId = this.idRelacion(convocatoria.equipo || convocatoria.jugador?.equipo);
     if (equipoId !== convocatoriaEquipoId) {
       this.convocatoriaPosicionSeleccionada = undefined;
@@ -489,7 +529,8 @@ export class PartidoPage implements OnInit {
     });
   }
   clickPosicionVacia(equipo: Equipo | undefined, posicion: number) {
-    if (this.partido.estadoPartido === 'PROGRAMADO') {
+    if (this.partido.estadoPartido === 'PROGRAMADO' ||
+        (this.partido.estadoPartido === 'EN_PROCESO' && !!this.convocatoriaPosicionSeleccionada)) {
       this.moverAlineacionAVacia(equipo, posicion);
       return;
     }
@@ -500,6 +541,8 @@ export class PartidoPage implements OnInit {
     this.posicionVaciaModalOpen = true;
     this.cargandoJugadoresPosicionVacia = true;
     this.jugadoresPosicionVacia = [];
+    this.jugadorPosicionVaciaSeleccionado = undefined;
+    this.numeroUniformePosicionVacia = null;
     this.crud.obtener(`partido/${this.partido.id}/jugadores-disponibles/${equipo.id}`).subscribe({
       next: (jugadores: JugadorDisponiblePartido[]) => {
         this.jugadoresPosicionVacia = jugadores || [];
@@ -528,10 +571,24 @@ export class PartidoPage implements OnInit {
       !sancionadosIds.has(Number(jugador.id)) &&
       !expulsadosIds.has(Number(jugador.id)));
   }
-  agregarJugadorEnPosicionVacia(jugador: JugadorDisponiblePartido) {
+  seleccionarJugadorPosicionVacia(jugador: JugadorDisponiblePartido) {
+    this.jugadorPosicionVaciaSeleccionado = jugador;
+    this.numeroUniformePosicionVacia = jugador.numeroCamiseta ?? null;
+  }
+  numeroUniformePosicionVaciaValido(): boolean {
+    const numero = this.numeroUniformePosicionVacia;
+    return numero !== null && Number.isInteger(numero) && numero >= 0 && numero <= 99;
+  }
+  agregarJugadorEnPosicionVacia() {
     const usuarioId = this.crud.obtenerUsuario().id;
-    if (!usuarioId || !this.partido.id || !jugador.id || this.posicionVaciaIndice === undefined) return;
-    this.crud.crear({}, `partido/${this.partido.id}/alineacion/ocupar-vacia?jugadorId=${jugador.id}&posicion=${this.posicionVaciaIndice}&usuarioId=${usuarioId}`)
+    const jugador = this.jugadorPosicionVaciaSeleccionado;
+    const numero = this.numeroUniformePosicionVacia;
+    if (!usuarioId || !this.partido.id || !jugador?.id || this.posicionVaciaIndice === undefined ||
+        !this.numeroUniformePosicionVaciaValido() || numero === null) {
+      this.mostrarError({ error: { message: 'Selecciona un jugador y asigna un número de uniforme entre 0 y 99.' } });
+      return;
+    }
+    this.crud.crear({}, `partido/${this.partido.id}/alineacion/ocupar-vacia?jugadorId=${jugador.id}&posicion=${this.posicionVaciaIndice}&numeroUniforme=${numero}&usuarioId=${usuarioId}`)
       .subscribe({
         next: () => {
           this.cerrarPosicionVacia();
@@ -546,6 +603,8 @@ export class PartidoPage implements OnInit {
     this.posicionVaciaEquipo = undefined;
     this.posicionVaciaIndice = undefined;
     this.jugadoresPosicionVacia = [];
+    this.jugadorPosicionVaciaSeleccionado = undefined;
+    this.numeroUniformePosicionVacia = null;
   }
   puedeGestionarEquipo(equipo?: Equipo): boolean {
     const usuario = this.crud.obtenerUsuario();
@@ -556,7 +615,7 @@ export class PartidoPage implements OnInit {
     return this.validarOrganizador;
   }
   seleccionarPosicion(convocatoria: ConvocatoriaPartido) {
-    if (this.intercambiandoPosiciones || this.partido.estadoPartido !== 'PROGRAMADO' || !convocatoria.id) return;
+    if (this.intercambiandoPosiciones || this.partido.estadoPartido === 'TERMINADO' || !convocatoria.id) return;
     const equipo = this.equiposDelPartido().find(item =>
       this.idRelacion(item) === this.idRelacion(convocatoria.equipo || convocatoria.jugador?.equipo));
     if (!this.puedeGestionarEquipo(equipo)) return;
@@ -650,10 +709,15 @@ export class PartidoPage implements OnInit {
       this.crud.obtener(`partido/${this.partido.id}/jugadores-disponibles/${this.equipoConvocatoria.id}`).subscribe((resp: JugadorDisponiblePartido[]) => this.jugadoresDisponibles = resp || [], error => this.mostrarError(error));
     }
   }
-  agregarJugador(jugador: Jugador, titular = false) {
+  agregarJugador(jugador: Jugador, titular = false, numeroUniforme?: number) {
     const usuarioId = this.crud.obtenerUsuario().id;
     if (!usuarioId || !this.partido.id || !jugador.id) return;
-    this.crud.crear({}, `partido/${this.partido.id}/convocados?jugadorId=${jugador.id}&titular=${titular}&usuarioId=${usuarioId}`).subscribe(() => this.cargarConvocatorias(), error => this.mostrarError(error));
+    if (titular && !this.numeroUniformeValido(numeroUniforme)) {
+      this.mostrarError({ error: { message: 'El número de uniforme es obligatorio y debe estar entre 0 y 99.' } });
+      return;
+    }
+    const numero = titular ? `&numeroUniforme=${numeroUniforme}` : '';
+    this.crud.crear({}, `partido/${this.partido.id}/convocados?jugadorId=${jugador.id}&titular=${titular}${numero}&usuarioId=${usuarioId}`).subscribe(() => this.cargarConvocatorias(), error => this.mostrarError(error));
   }
   estaConvocado(jugador?: Jugador): boolean {
     return !!jugador?.id && this.convocatorias.some(convocatoria =>
@@ -678,10 +742,15 @@ export class PartidoPage implements OnInit {
     this.identificacionJugador = this.busquedaAlineacion.trim();
     this.agregarPorIdentificacion();
   }
-  cambiarTitular(convocatoria: ConvocatoriaPartido, titular = !convocatoria.titular) {
+  cambiarTitular(convocatoria: ConvocatoriaPartido, titular = !convocatoria.titular, numeroUniforme?: number) {
     const usuarioId = this.crud.obtenerUsuario().id;
     if (!usuarioId || !convocatoria.id) return;
-    this.crud.actualizar(null, `partido/convocados/${convocatoria.id}/titular?titular=${titular}&usuarioId=${usuarioId}`).subscribe(() => { this.cargarConvocatorias(); this.cargarEventos(); }, error => this.mostrarError(error));
+    if (titular && !this.numeroUniformeValido(numeroUniforme)) {
+      this.mostrarError({ error: { message: 'El número de uniforme es obligatorio y debe estar entre 0 y 99.' } });
+      return;
+    }
+    const numero = titular ? `&numeroUniforme=${numeroUniforme}` : '';
+    this.crud.actualizar(null, `partido/convocados/${convocatoria.id}/titular?titular=${titular}${numero}&usuarioId=${usuarioId}`).subscribe(() => { this.cargarConvocatorias(); this.cargarEventos(); }, error => this.mostrarError(error));
   }
   eliminarConvocatoria(convocatoria: ConvocatoriaPartido) {
     const usuarioId = this.crud.obtenerUsuario().id;
