@@ -75,6 +75,8 @@ export class PartidoPage implements OnInit {
   jugadoresDisponibles: Jugador[] = [];
   equipoConvocatoria?: Equipo;
   identificacionJugador = '';
+  busquedaAlineacion = '';
+  filtroAlineacion: 'TODOS' | 'TITULARES' | 'SUPLENTES' = 'TODOS';
   enlaceInvitacion = '';
   convocatoriaModalOpen = false;
   eventos: EventoPartido[] = [];
@@ -180,6 +182,59 @@ export class PartidoPage implements OnInit {
   titularesEquipo(equipo?: Equipo): ConvocatoriaPartido[] {
     return this.convocatoriasEquipo(equipo).filter(convocatoria => convocatoria.titular);
   }
+  suplentesEquipo(equipo?: Equipo): ConvocatoriaPartido[] {
+    return this.convocatoriasEquipo(equipo).filter(convocatoria => !convocatoria.titular);
+  }
+  convocadosEquipoActual(): number {
+    return this.convocatoriasEquipo(this.equipoConvocatoria).length;
+  }
+  titularesEquipoActual(): number {
+    return this.titularesEquipo(this.equipoConvocatoria).length;
+  }
+  suplentesEquipoActual(): number {
+    return this.suplentesEquipo(this.equipoConvocatoria).length;
+  }
+  maximoTitulares(): number {
+    return this.partido.torneo?.deporte?.maximoTitulares || 11;
+  }
+  porcentajeTitulares(): number {
+    return Math.min(this.titularesEquipoActual() / this.maximoTitulares() * 100, 100);
+  }
+  convocatoriaDeJugador(jugador?: Jugador): ConvocatoriaPartido | undefined {
+    return this.convocatorias.find(convocatoria =>
+      convocatoria.jugador?.id === jugador?.id &&
+      convocatoria.jugador?.equipo?.id === this.equipoConvocatoria?.id);
+  }
+  jugadoresAlineacion(): Jugador[] {
+    const query = this.busquedaAlineacion.trim().toLocaleLowerCase();
+    return this.jugadoresEquipoActual().filter(jugador => {
+      const convocatoria = this.convocatoriaDeJugador(jugador);
+      const coincideBusqueda = !query ||
+        jugador.nombre?.toLocaleLowerCase().includes(query) ||
+        jugador.identificacion?.toLocaleLowerCase().includes(query);
+      const coincideFiltro = this.filtroAlineacion === 'TODOS' ||
+        (this.filtroAlineacion === 'TITULARES' && convocatoria?.titular) ||
+        (this.filtroAlineacion === 'SUPLENTES' && convocatoria && !convocatoria.titular);
+      return coincideBusqueda && coincideFiltro;
+    });
+  }
+  jugadoresEquipoActual(): Jugador[] {
+    const jugadores = [
+      ...this.convocatoriasEquipo(this.equipoConvocatoria).map(convocatoria => convocatoria.jugador),
+      ...this.jugadoresDisponibles
+    ].filter((jugador): jugador is Jugador => !!jugador);
+    return Array.from(new Map(jugadores.map(jugador => [jugador.id, jugador])).values());
+  }
+  cantidadJugadoresEquipoActual(): number {
+    return this.jugadoresEquipoActual().length;
+  }
+  filasAlineacion(equipo?: Equipo): ConvocatoriaPartido[][] {
+    const titulares = this.titularesEquipo(equipo);
+    if (!titulares.length) return [];
+    const filas: ConvocatoriaPartido[][] = [[], [], []];
+    titulares.forEach((convocatoria, index) => filas[index % filas.length].push(convocatoria));
+    return filas.filter(fila => fila.length > 0);
+  }
   moverJugador(evento: CdkDragDrop<ConvocatoriaPartido[]>, titular: boolean) {
     const convocatoria = evento.item.data as ConvocatoriaPartido;
     if (convocatoria.titular !== titular) this.cambiarTitular(convocatoria, titular);
@@ -188,6 +243,10 @@ export class PartidoPage implements OnInit {
     if (!this.validarOrganizador || !convocatoria.jugador) return;
     this.jugadorEvento = convocatoria.jugador;
     this.eventoModalOpen = true;
+  }
+  abrirEventosJugador(jugador?: Jugador) {
+    const convocatoria = this.convocatoriaDeJugador(jugador);
+    if (convocatoria) this.abrirEventos(convocatoria);
   }
   cerrarEventos() {
     this.eventoModalOpen = false;
@@ -226,6 +285,7 @@ export class PartidoPage implements OnInit {
     }
     if (!this.equipoConvocatoria && this.equiposDelPartido().length) this.equipoConvocatoria = this.equiposDelPartido()[0];
     if (this.equipoConvocatoria?.id) {
+      this.jugadoresDisponibles = [];
       this.crud.obtener(`partido/${this.partido.id}/jugadores-disponibles/${this.equipoConvocatoria.id}`).subscribe((resp: Jugador[]) => this.jugadoresDisponibles = resp || [], error => this.mostrarError(error));
     }
   }
@@ -251,6 +311,10 @@ export class PartidoPage implements OnInit {
       });
       await alerta.present();
     }, error => this.mostrarError(error));
+  }
+  buscarPorIdentificacionDesdeBusqueda() {
+    this.identificacionJugador = this.busquedaAlineacion.trim();
+    this.agregarPorIdentificacion();
   }
   cambiarTitular(convocatoria: ConvocatoriaPartido, titular = !convocatoria.titular) {
     const usuarioId = this.crud.obtenerUsuario().id;
