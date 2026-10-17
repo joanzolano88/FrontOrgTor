@@ -14,6 +14,11 @@ import { TipoUsuario } from 'src/enums/TipoUsuario';
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { EventoPartido, TipoEventoPartido } from 'src/models/EventoPartido';
 
+interface FormacionPartido {
+  equipoId: number;
+  formacion: string;
+}
+
 @Component({
   selector: 'app-partido',
   templateUrl: './partido.page.html',
@@ -91,6 +96,9 @@ export class PartidoPage implements OnInit {
   perfilJugadorData: any;
   titularCambio?: ConvocatoriaPartido;
   suplenteCambio?: ConvocatoriaPartido;
+  formacionesPorEquipo: Record<number, string> = {};
+  readonly formacionesDisponibles = ['4-4-2', '4-3-3', '3-5-2', '4-2-3-1', '4-1-4-1', '4-5-1'];
+  convocatoriaPosicionSeleccionada?: ConvocatoriaPartido;
 
   constructor(private crud: CrudService, private route: ActivatedRoute,
     private router: Router, private sesionService: SesionService, private alertController: AlertController) {
@@ -112,6 +120,7 @@ export class PartidoPage implements OnInit {
         this.crud.puedeGestionarPartido(resp.id, usuarioId).subscribe(permitido => this.validarOrganizador = permitido);
       }
       this.cargarConvocatorias();
+      this.cargarFormaciones();
       this.cambiarEquipoConvocatoria();
       this.cargarEventos();
       if (this.partido.torneo?.id) this.cargarSanciones(this.partido.torneo.id);
@@ -128,6 +137,31 @@ export class PartidoPage implements OnInit {
   cargarConvocatorias() {
     if (!this.partido.id) return;
     this.crud.obtener(`partido/${this.partido.id}/convocados`).subscribe((resp: ConvocatoriaPartido[]) => this.convocatorias = resp || [], error => this.mostrarError(error));
+  }
+  cargarFormaciones() {
+    if (!this.partido.id) return;
+    this.crud.obtener(`partido/${this.partido.id}/formaciones`).subscribe((resp: FormacionPartido[]) => {
+      this.formacionesPorEquipo = {};
+      (resp || []).forEach(item => this.formacionesPorEquipo[item.equipoId] = item.formacion);
+    }, error => this.mostrarError(error));
+  }
+  formacionEquipo(equipo?: Equipo): string {
+    const equipoId = this.idRelacion(equipo);
+    return equipoId ? this.formacionesPorEquipo[equipoId] || '4-4-2' : '4-4-2';
+  }
+  seleccionarFormacion(equipo: Equipo | undefined, formacion: string) {
+    const usuarioId = this.crud.obtenerUsuario().id;
+    const equipoId = this.idRelacion(equipo);
+    if (!usuarioId || !this.partido.id || !equipoId || !this.puedeGestionarEquipo(equipo) ||
+        this.partido.estadoPartido !== 'PROGRAMADO' || !this.formacionesDisponibles.includes(formacion)) return;
+    this.crud.actualizar(null, `partido/${this.partido.id}/equipos/${equipoId}/formacion?formacion=${encodeURIComponent(formacion)}&usuarioId=${usuarioId}`).subscribe({
+      next: () => {
+        this.formacionesPorEquipo[equipoId] = formacion;
+        this.convocatoriaPosicionSeleccionada = undefined;
+        this.cargarConvocatorias();
+      },
+      error: error => this.mostrarError(error)
+    });
   }
   cargarSanciones(idTorneo: number) {
     this.crud.obtenerSancionesTorneo(idTorneo).subscribe(resp => this.sancionesTorneo = resp || [], error => this.mostrarError(error));
@@ -254,11 +288,71 @@ export class PartidoPage implements OnInit {
     this.cambiarTitular(convocatoria, false);
   }
   filasAlineacion(equipo?: Equipo): ConvocatoriaPartido[][] {
-    const titulares = this.titularesEquipo(equipo);
+    const titulares = this.titularesEquipo(equipo)
+      .sort((a, b) => (a.posicionAlineacion ?? Number.MAX_SAFE_INTEGER) - (b.posicionAlineacion ?? Number.MAX_SAFE_INTEGER) || (a.id ?? 0) - (b.id ?? 0));
     if (!titulares.length) return [];
-    const filas: ConvocatoriaPartido[][] = [[], [], []];
-    titulares.forEach((convocatoria, index) => filas[index % filas.length].push(convocatoria));
+    const lineas = [1, ...this.formacionEquipo(equipo).split('-').map(Number)];
+    const totalPosiciones = lineas.reduce((total, cantidad) => total + cantidad, 0);
+    const posiciones = new Map<number, ConvocatoriaPartido>();
+    titulares.forEach(convocatoria => {
+      const posicion = convocatoria.posicionAlineacion;
+      if (posicion !== undefined && posicion >= 0 && posicion < totalPosiciones && !posiciones.has(posicion)) {
+        posiciones.set(posicion, convocatoria);
+      } else {
+        let posicionLibre = 0;
+        while (posiciones.has(posicionLibre)) posicionLibre++;
+        posiciones.set(posicionLibre, convocatoria);
+      }
+    });
+    const filas: ConvocatoriaPartido[][] = [];
+    let inicio = 0;
+    for (const cantidad of lineas) {
+      const fila: ConvocatoriaPartido[] = [];
+      for (let indice = inicio; indice < inicio + cantidad; indice++) {
+        const convocatoria = posiciones.get(indice);
+        if (convocatoria) fila.push(convocatoria);
+      }
+      filas.push(fila);
+      inicio += cantidad;
+    }
     return filas.filter(fila => fila.length > 0);
+  }
+  esPortero(convocatoria: ConvocatoriaPartido, equipo?: Equipo): boolean {
+    return this.filasAlineacion(equipo)[0]?.includes(convocatoria) ?? false;
+  }
+  puedeGestionarEquipo(equipo?: Equipo): boolean {
+    const usuario = this.crud.obtenerUsuario();
+    if (usuario.tipoUsuario === TipoUsuario.DELEGADO) {
+      return !!equipo?.delegado?.numeroCelular &&
+        equipo.delegado.numeroCelular === usuario.numeroCelular;
+    }
+    return this.validarOrganizador;
+  }
+  seleccionarPosicion(convocatoria: ConvocatoriaPartido) {
+    if (this.partido.estadoPartido !== 'PROGRAMADO' || !convocatoria.id) return;
+    const equipo = this.equiposDelPartido().find(item =>
+      this.idRelacion(item) === this.idRelacion(convocatoria.equipo || convocatoria.jugador?.equipo));
+    if (!this.puedeGestionarEquipo(equipo)) return;
+    if (!this.convocatoriaPosicionSeleccionada) {
+      this.convocatoriaPosicionSeleccionada = convocatoria;
+      return;
+    }
+    if (this.convocatoriaPosicionSeleccionada.id === convocatoria.id) {
+      this.convocatoriaPosicionSeleccionada = undefined;
+      return;
+    }
+    const usuarioId = this.crud.obtenerUsuario().id;
+    if (!usuarioId || !this.partido.id || !this.convocatoriaPosicionSeleccionada.id) return;
+    this.crud.crear({}, `partido/${this.partido.id}/alineacion/intercambiar?convocatoriaId1=${this.convocatoriaPosicionSeleccionada.id}&convocatoriaId2=${convocatoria.id}&usuarioId=${usuarioId}`).subscribe({
+      next: () => {
+        this.convocatoriaPosicionSeleccionada = undefined;
+        this.cargarConvocatorias();
+      },
+      error: error => {
+        this.convocatoriaPosicionSeleccionada = undefined;
+        this.mostrarError(error);
+      }
+    });
   }
   moverJugador(evento: CdkDragDrop<ConvocatoriaPartido[]>, titular: boolean) {
     const convocatoria = evento.item.data as ConvocatoriaPartido;

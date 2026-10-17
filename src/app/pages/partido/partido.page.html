@@ -79,11 +79,33 @@
               <div><ion-icon name="people-outline"></ion-icon><strong>Alineación</strong></div>
               <div class="formation-controls">
                 <span>{{ titularesEquipo(partido.equipoLocal).length }} / {{ maximoTitulares() }} · {{ titularesEquipo(partido.equipoVisitante).length }} / {{ maximoTitulares() }}</span>
+                <label class="formation-select">
+                  <span>{{ partido.equipoLocal?.nombre }} · Local</span>
+                  <ion-select aria-label="Formación del equipo local" interface="popover"
+                    [disabled]="partido.estadoPartido !== 'PROGRAMADO' || !puedeGestionarEquipo(partido.equipoLocal)"
+                    [value]="formacionEquipo(partido.equipoLocal)"
+                    (ionChange)="seleccionarFormacion(partido.equipoLocal, $event.detail.value)">
+                    <ion-select-option *ngFor="let formacion of formacionesDisponibles" [value]="formacion">{{ formacion }}</ion-select-option>
+                  </ion-select>
+                </label>
+                <label class="formation-select">
+                  <span>{{ partido.equipoVisitante?.nombre }} · Visitante</span>
+                  <ion-select aria-label="Formación del equipo visitante" interface="popover"
+                    [disabled]="partido.estadoPartido !== 'PROGRAMADO' || !puedeGestionarEquipo(partido.equipoVisitante)"
+                    [value]="formacionEquipo(partido.equipoVisitante)"
+                    (ionChange)="seleccionarFormacion(partido.equipoVisitante, $event.detail.value)">
+                    <ion-select-option *ngFor="let formacion of formacionesDisponibles" [value]="formacion">{{ formacion }}</ion-select-option>
+                  </ion-select>
+                </label>
                 <ion-button size="small" (click)="abrirListasTitulares()">
                   <ion-icon slot="start" name="people-outline"></ion-icon>Titulares
                 </ion-button>
               </div>
             </header>
+            <p class="position-swap-hint" *ngIf="partido.estadoPartido === 'PROGRAMADO'">
+              Selecciona dos jugadores para intercambiar sus posiciones.
+              <span *ngIf="convocatoriaPosicionSeleccionada">Primero: {{ convocatoriaPosicionSeleccionada.jugador?.nombre }}. Selecciona el segundo.</span>
+            </p>
             <div class="pitch-wrap">
               <div class="pitch">
                 <section class="pitch-half pitch-home">
@@ -91,11 +113,14 @@
                   <div class="pitch-rows">
                     <div class="pitch-row" *ngFor="let fila of filasAlineacion(partido.equipoLocal)">
                       <button type="button" class="pitch-player" *ngFor="let convocatoria of fila"
-                        [disabled]="partido.estadoPartido !== 'EN_PROCESO' || !validarOrganizador"
-                        [attr.aria-label]="'Cambiar ' + convocatoria.jugador?.nombre"
+                        [class.goalkeeper]="esPortero(convocatoria, partido.equipoLocal)"
+                        [class.position-selected]="convocatoriaPosicionSeleccionada?.id === convocatoria.id"
+                        [disabled]="partido.estadoPartido === 'PROGRAMADO' ? !puedeGestionarEquipo(partido.equipoLocal) : partido.estadoPartido !== 'EN_PROCESO' || !validarOrganizador"
+                        [attr.aria-label]="(partido.estadoPartido === 'PROGRAMADO' ? 'Seleccionar posición de ' : 'Cambiar ') + convocatoria.jugador?.nombre"
                         [title]="convocatoria.jugador?.nombre || ''"
-                        (click)="abrirCambio(convocatoria)">
+                        (click)="partido.estadoPartido === 'PROGRAMADO' ? seleccionarPosicion(convocatoria) : abrirCambio(convocatoria)">
                         <span>{{ convocatoria.numeroUniforme || convocatoria.jugador?.numeroCamiseta || '•' }}</span>
+                        <small class="goalkeeper-label" *ngIf="esPortero(convocatoria, partido.equipoLocal)">PORTERO</small>
                         <small>{{ convocatoria.jugador?.nombre }}</small>
                       </button>
                     </div>
@@ -107,11 +132,14 @@
                   <div class="pitch-rows">
                     <div class="pitch-row" *ngFor="let fila of filasAlineacion(partido.equipoVisitante)">
                       <button type="button" class="pitch-player" *ngFor="let convocatoria of fila"
-                        [disabled]="partido.estadoPartido !== 'EN_PROCESO' || !validarOrganizador"
-                        [attr.aria-label]="'Cambiar ' + convocatoria.jugador?.nombre"
+                        [class.goalkeeper]="esPortero(convocatoria, partido.equipoVisitante)"
+                        [class.position-selected]="convocatoriaPosicionSeleccionada?.id === convocatoria.id"
+                        [disabled]="partido.estadoPartido === 'PROGRAMADO' ? !puedeGestionarEquipo(partido.equipoVisitante) : partido.estadoPartido !== 'EN_PROCESO' || !validarOrganizador"
+                        [attr.aria-label]="(partido.estadoPartido === 'PROGRAMADO' ? 'Seleccionar posición de ' : 'Cambiar ') + convocatoria.jugador?.nombre"
                         [title]="convocatoria.jugador?.nombre || ''"
-                        (click)="abrirCambio(convocatoria)">
+                        (click)="partido.estadoPartido === 'PROGRAMADO' ? seleccionarPosicion(convocatoria) : abrirCambio(convocatoria)">
                         <span>{{ convocatoria.numeroUniforme || convocatoria.jugador?.numeroCamiseta || '•' }}</span>
+                        <small class="goalkeeper-label" *ngIf="esPortero(convocatoria, partido.equipoVisitante)">PORTERO</small>
                         <small>{{ convocatoria.jugador?.nombre }}</small>
                       </button>
                     </div>

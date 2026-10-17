@@ -10,4 +10,5 @@ export class ConvocatoriaPartido {
   fueTitular?: boolean;
   expulsado?: boolean;
   cambiosRealizados?: number;
+  posicionAlineacion?: number;
 }
