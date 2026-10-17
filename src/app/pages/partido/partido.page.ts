@@ -194,6 +194,7 @@ export class PartidoPage implements OnInit {
     const equipoId = this.idRelacion(equipo);
     if (!equipoId) return [];
     return this.convocatorias.filter(convocatoria =>
+      this.idRelacion(convocatoria.equipo) === equipoId ||
       this.idRelacion(convocatoria.jugador?.equipo) === equipoId);
   }
   jugadoresEquipo(equipo?: Equipo): ConvocatoriaPartido[] {
