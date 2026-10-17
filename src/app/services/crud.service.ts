@@ -178,6 +178,10 @@ export class CrudService {
     return this.http.get<any[]>(`${this.url}partido/torneo/${idTorneo}/sanciones`);
   }
 
+  obtenerSancionesPartido(idPartido: number) {
+    return this.http.get<any[]>(`${this.url}partido/${idPartido}/sanciones`);
+  }
+
   modificarSancionPartido(idPartido: number, idJugador: number, usuarioId: number, levantar: boolean) {
     const accion = levantar ? 'levantar' : 'restaurar';
     return this.http.put<any>(`${this.url}partido/${idPartido}/sanciones/${idJugador}/${accion}?usuarioId=${usuarioId}`, {});

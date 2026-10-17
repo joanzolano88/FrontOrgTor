@@ -125,7 +125,10 @@
                           <small>{{ convocatoria.jugador?.nombre }}</small>
                         </button>
                         <ng-template #emptyLocalPosition>
-                          <div class="pitch-player pitch-player-empty" [class.goalkeeper]="posicion.portero" aria-hidden="true"><span></span></div>
+                          <button type="button" class="pitch-player pitch-player-empty" [class.goalkeeper]="posicion.portero"
+                            [disabled]="!convocatoriaPosicionSeleccionada || !puedeGestionarEquipo(partido.equipoLocal) || intercambiandoPosiciones"
+                            [attr.aria-label]="posicion.portero ? 'Posición vacía de portero' : 'Posición vacía'"
+                            (click)="moverAlineacionAVacia(partido.equipoLocal, posicion.indice)"><span></span></button>
                         </ng-template>
                       </ng-container>
                     </div>
@@ -149,7 +152,10 @@
                           <small>{{ convocatoria.jugador?.nombre }}</small>
                         </button>
                         <ng-template #emptyAwayPosition>
-                          <div class="pitch-player pitch-player-empty" [class.goalkeeper]="posicion.portero" aria-hidden="true"><span></span></div>
+                          <button type="button" class="pitch-player pitch-player-empty" [class.goalkeeper]="posicion.portero"
+                            [disabled]="!convocatoriaPosicionSeleccionada || !puedeGestionarEquipo(partido.equipoVisitante) || intercambiandoPosiciones"
+                            [attr.aria-label]="posicion.portero ? 'Posición vacía de portero' : 'Posición vacía'"
+                            (click)="moverAlineacionAVacia(partido.equipoVisitante, posicion.indice)"><span></span></button>
                         </ng-template>
                       </ng-container>
                     </div>
@@ -233,7 +239,7 @@
                   <ion-button *ngIf="validarOrganizador && sancionActiva(jugador) as sancion" fill="clear" color="warning" (click)="modificarSancionJugador(!sancion.exencionPartidoId, jugador)">
                     {{ sancion.exencionPartidoId === partido.id ? 'Restaurar' : 'Levantar sanción' }}
                   </ion-button>
-                  <ion-button *ngIf="validarOrganizador" fill="clear" color="primary" [disabled]="(!!sancionActiva(jugador) && sancionActiva(jugador).exencionPartidoId !== partido.id) || titularesEquipoActual() >= maximoTitulares() || convocadosEquipoActual() >= maximoConvocados()" (click)="pasarATitular(jugador)">Titular</ion-button>
+                  <ion-button *ngIf="validarOrganizador" fill="clear" color="primary" [disabled]="!puedeTitularizar(jugador)" (click)="pasarATitular(jugador)">Titular</ion-button>
                 </article>
                 <ion-note *ngIf="!suplentesEquipoActual() && (partido.estadoPartido !== 'PROGRAMADO' || !jugadoresDisponiblesAlineacion().length)">Aún no hay suplentes disponibles.</ion-note>
               </div>

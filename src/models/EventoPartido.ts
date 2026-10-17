@@ -4,5 +4,5 @@ export class EventoPartido {
   id?: number;
   tipo?: TipoEventoPartido;
   minuto?: number;
-  jugador?: any;
+  jugadorId?: number;
 }

@@ -10,6 +10,7 @@ import { SesionService } from 'src/app/services/restriccion/sesion.service';
 import { ConvocatoriaPartido } from 'src/models/ConvocatoriaPartido';
 import { Equipo } from 'src/models/Equipo';
 import { Jugador } from 'src/models/Jugador';
+import { JugadorDisponiblePartido } from 'src/models/JugadorDisponiblePartido';
 import { TipoUsuario } from 'src/enums/TipoUsuario';
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { EventoPartido, TipoEventoPartido } from 'src/models/EventoPartido';
@@ -22,6 +23,15 @@ interface FormacionPartido {
 interface PosicionAlineacion {
   convocatoria?: ConvocatoriaPartido;
   portero: boolean;
+  indice: number;
+}
+
+interface SancionPartido {
+  jugador?: { id?: number; nombre?: string };
+  activa: boolean;
+  partidosPendientes: number;
+  permanente: boolean;
+  exencionPartidoId?: number | null;
 }
 
 @Component({
@@ -82,7 +92,7 @@ export class PartidoPage implements OnInit {
   isAlertOpen = false;
   mensajeError = '';
   convocatorias: ConvocatoriaPartido[] = [];
-  jugadoresDisponibles: Jugador[] = [];
+  jugadoresDisponibles: JugadorDisponiblePartido[] = [];
   equipoConvocatoria?: Equipo;
   identificacionJugador = '';
   busquedaAlineacion = '';
@@ -91,7 +101,7 @@ export class PartidoPage implements OnInit {
   listasTitularesModalOpen = false;
   cambioModalOpen = false;
   eventos: EventoPartido[] = [];
-  sancionesTorneo: any[] = [];
+  sancionesTorneo: SancionPartido[] = [];
   jugadorEvento?: Jugador;
   minutoEvento = 0;
   eventoModalOpen = false;
@@ -129,7 +139,7 @@ export class PartidoPage implements OnInit {
       this.cargarFormaciones();
       this.cambiarEquipoConvocatoria();
       this.cargarEventos();
-      if (this.partido.torneo?.id) this.cargarSanciones(this.partido.torneo.id);
+      this.cargarSanciones();
       console.log(this.partido);
       
       this.alertButtonsPenalties[0].text = this.partido.equipoLocal?.nombre!;
@@ -164,23 +174,32 @@ export class PartidoPage implements OnInit {
       next: () => {
         this.formacionesPorEquipo[equipoId] = formacion;
         this.convocatoriaPosicionSeleccionada = undefined;
-        this.cargarConvocatorias();
+        this.titularesEquipo(equipo)
+          .sort((a, b) => (a.posicionAlineacion ?? Number.MAX_SAFE_INTEGER) - (b.posicionAlineacion ?? Number.MAX_SAFE_INTEGER) || (a.id ?? 0) - (b.id ?? 0))
+          .forEach((convocatoria, index) => convocatoria.posicionAlineacion = index);
       },
       error: error => this.mostrarError(error)
     });
   }
-  cargarSanciones(idTorneo: number) {
-    this.crud.obtenerSancionesTorneo(idTorneo).subscribe(resp => this.sancionesTorneo = resp || [], error => this.mostrarError(error));
+  cargarSanciones() {
+    if (!this.partido.id) return;
+    this.crud.obtenerSancionesPartido(this.partido.id).subscribe((resp: SancionPartido[]) => this.sancionesTorneo = resp || [], error => this.mostrarError(error));
   }
-  sancionActiva(jugador?: Jugador): any {
+  sancionActiva(jugador?: Jugador): SancionPartido | undefined {
     return this.sancionesTorneo.find(sancion => sancion.activa && sancion.jugador?.id === jugador?.id);
+  }
+  puedeTitularizar(jugador: Jugador): boolean {
+    const sancion = this.sancionActiva(jugador);
+    return (!sancion || sancion.exencionPartidoId === this.partido.id) &&
+      this.titularesEquipoActual() < this.maximoTitulares() &&
+      this.convocadosEquipoActual() < this.maximoConvocados();
   }
   modificarSancionJugador(levantar: boolean, jugador = this.jugadorEvento) {
     const usuarioId = this.crud.obtenerUsuario().id;
     const jugadorId = jugador?.id;
     if (!usuarioId || !this.partido.id || !jugadorId) return;
     this.crud.modificarSancionPartido(this.partido.id, jugadorId, usuarioId, levantar).subscribe({
-      next: () => this.cargarSanciones(this.partido.torneo!.id!),
+      next: () => this.cargarSanciones(),
       error: error => this.mostrarError(error)
     });
   }
@@ -264,7 +283,7 @@ export class PartidoPage implements OnInit {
   porcentajeTitulares(): number {
     return Math.min(this.titularesEquipoActual() / this.maximoTitulares() * 100, 100);
   }
-  jugadoresDisponiblesAlineacion(): Jugador[] {
+  jugadoresDisponiblesAlineacion(): JugadorDisponiblePartido[] {
     const query = this.busquedaAlineacion.trim().toLocaleLowerCase();
     return this.jugadoresDisponibles.filter(jugador => {
       const coincideBusqueda = !query ||
@@ -314,7 +333,8 @@ export class PartidoPage implements OnInit {
       for (let indice = inicio; indice < inicio + cantidad; indice++) {
         fila.push({
           convocatoria: convocatoriaPorPosicion.get(indice),
-          portero: indice === 0
+          portero: indice === 0,
+          indice
         });
       }
       filas.push(fila);
@@ -322,8 +342,8 @@ export class PartidoPage implements OnInit {
     }
     return filas;
   }
-  trackByPosicion(index: number, posicion: PosicionAlineacion): number | string {
-    return posicion.convocatoria?.id ?? `empty-${index}`;
+  trackByPosicion(_index: number, posicion: PosicionAlineacion): number | string {
+    return posicion.convocatoria?.id ?? `empty-${posicion.indice}`;
   }
   private posicionesEfectivasEquipo(equipo: Equipo | undefined, totalPosiciones: number): Map<number, number> {
     const titulares = [...this.titularesEquipo(equipo)]
@@ -346,6 +366,39 @@ export class PartidoPage implements OnInit {
       }
     });
     return posiciones;
+  }
+  moverAlineacionAVacia(equipo: Equipo | undefined, posicion: number) {
+    const convocatoria = this.convocatoriaPosicionSeleccionada;
+    const equipoId = this.idRelacion(equipo);
+    if (!convocatoria?.id || !equipoId || this.intercambiandoPosiciones ||
+        this.partido.estadoPartido !== 'PROGRAMADO' || !this.puedeGestionarEquipo(equipo)) return;
+    const convocatoriaEquipoId = this.idRelacion(convocatoria.equipo || convocatoria.jugador?.equipo);
+    if (equipoId !== convocatoriaEquipoId) {
+      this.convocatoriaPosicionSeleccionada = undefined;
+      this.mostrarError({ error: { message: 'El jugador y la posición vacía deben pertenecer al mismo equipo.' } });
+      return;
+    }
+    const usuarioId = this.crud.obtenerUsuario().id;
+    if (!usuarioId || !this.partido.id) return;
+    const totalPosiciones = [1, ...this.formacionEquipo(equipo).split('-').map(Number)]
+      .reduce((total, cantidad) => total + cantidad, 0);
+    const posicionActual = this.posicionesEfectivasEquipo(equipo, totalPosiciones).get(convocatoria.id);
+    if (posicionActual === undefined || posicionActual === posicion) {
+      this.convocatoriaPosicionSeleccionada = undefined;
+      return;
+    }
+    const posicionAnterior = convocatoria.posicionAlineacion;
+    convocatoria.posicionAlineacion = posicion;
+    this.convocatoriaPosicionSeleccionada = undefined;
+    this.intercambiandoPosiciones = true;
+    this.crud.actualizar(null, `partido/${this.partido.id}/alineacion/mover-a-vacia?convocatoriaId=${convocatoria.id}&posicion=${posicion}&usuarioId=${usuarioId}`).subscribe({
+      next: () => this.intercambiandoPosiciones = false,
+      error: error => {
+        convocatoria.posicionAlineacion = posicionAnterior;
+        this.intercambiandoPosiciones = false;
+        this.mostrarError(error);
+      }
+    });
   }
   puedeGestionarEquipo(equipo?: Equipo): boolean {
     const usuario = this.crud.obtenerUsuario();
@@ -380,7 +433,9 @@ export class PartidoPage implements OnInit {
     }
     const usuarioId = this.crud.obtenerUsuario().id;
     if (!usuarioId || !this.partido.id || !primera.id) return;
-    const posiciones = this.posicionesEfectivasEquipo(equipoPrimero, 11);
+    const totalPosiciones = [1, ...this.formacionEquipo(equipoPrimero).split('-').map(Number)]
+      .reduce((total, cantidad) => total + cantidad, 0);
+    const posiciones = this.posicionesEfectivasEquipo(equipoPrimero, totalPosiciones);
     const posicionPrimeraAnterior = primera.posicionAlineacion;
     const posicionSegundaAnterior = convocatoria.posicionAlineacion;
     const posicionPrimera = posiciones.get(primera.id);
@@ -414,7 +469,7 @@ export class PartidoPage implements OnInit {
   abrirEventosJugador(jugador?: Jugador) {
     const convocatoria = this.convocatorias.find(item =>
       item.jugador?.id === jugador?.id &&
-      item.jugador?.equipo?.id === this.equipoConvocatoria?.id);
+      item.equipo?.id === this.equipoConvocatoria?.id);
     if (convocatoria) this.abrirEventos(convocatoria);
   }
   cerrarEventos() {
@@ -428,7 +483,7 @@ export class PartidoPage implements OnInit {
   }
   cerrarPerfilJugador() { this.perfilJugadorModalOpen = false; }
   estadisticaJugador(tipo: string): number {
-    return this.eventos.filter(evento => evento.jugador?.id === this.perfilJugador?.id && evento.tipo === tipo).length;
+    return this.eventos.filter(evento => evento.jugadorId === this.perfilJugador?.id && evento.tipo === tipo).length;
   }
   abrirEquipo(equipo?: Equipo) {
     if (equipo?.id && this.partido.torneo?.id) this.router.navigateByUrl(`/auth/torneos/torneo/${this.partido.torneo.id}/equipo/${equipo.id}`);
@@ -455,7 +510,7 @@ export class PartidoPage implements OnInit {
     if (!this.equipoConvocatoria && this.equiposDelPartido().length) this.equipoConvocatoria = this.equiposDelPartido()[0];
     if (this.equipoConvocatoria?.id) {
       this.jugadoresDisponibles = [];
-      this.crud.obtener(`partido/${this.partido.id}/jugadores-disponibles/${this.equipoConvocatoria.id}`).subscribe((resp: Jugador[]) => this.jugadoresDisponibles = resp || [], error => this.mostrarError(error));
+      this.crud.obtener(`partido/${this.partido.id}/jugadores-disponibles/${this.equipoConvocatoria.id}`).subscribe((resp: JugadorDisponiblePartido[]) => this.jugadoresDisponibles = resp || [], error => this.mostrarError(error));
     }
   }
   agregarJugador(jugador: Jugador, titular = false) {
@@ -514,7 +569,7 @@ export class PartidoPage implements OnInit {
     this.crud.obtener(`partido/${this.partido.id}/eventos`).subscribe((resp: EventoPartido[]) => this.eventos = resp || [], error => this.mostrarError(error));
   }
   eventosJugadorSeleccionado(): EventoPartido[] {
-    return this.eventos.filter(evento => evento.jugador?.id === this.jugadorEvento?.id);
+    return this.eventos.filter(evento => evento.jugadorId === this.jugadorEvento?.id);
   }
   registrarEvento(tipo: 'TARJETA_AMARILLA' | 'TARJETA_ROJA') {
     const usuarioId = this.crud.obtenerUsuario().id;
