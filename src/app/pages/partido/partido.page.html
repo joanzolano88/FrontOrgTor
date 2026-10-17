@@ -162,7 +162,7 @@
                     <strong>{{ convocatoria.jugador?.nombre }}</strong><small>{{ convocatoria.jugador?.identificacion }}</small>
                   </button>
                   <ion-input *ngIf="validarOrganizador" class="uniform-input" type="number" min="0" max="99" aria-label="Número de uniforme" [(ngModel)]="convocatoria.numeroUniforme" (click)="$event.stopPropagation()" (ionBlur)="cambiarNumeroUniforme(convocatoria)"></ion-input>
-                  <ion-button *ngIf="validarOrganizador && partido.estadoPartido === 'PROGRAMADO'" fill="clear" color="primary" [disabled]="titularesEquipoActual() >= maximoTitulares()" (click)="$event.stopPropagation(); pasarATitular(convocatoria.jugador)">Titular</ion-button>
+                  <ion-button *ngIf="validarOrganizador && partido.estadoPartido === 'PROGRAMADO'" fill="clear" color="primary" [disabled]="titularesEquipoActual() >= maximoTitulares()" (click)="$event.stopPropagation(); cambiarTitular(convocatoria, true)">Titular</ion-button>
                   <ion-button *ngIf="validarOrganizador && partido.estadoPartido !== 'EN_PROCESO'" color="danger" fill="clear" (click)="$event.stopPropagation(); eliminarConvocatoria(convocatoria)">Quitar</ion-button>
                 </article>
                 <article class="roster-player-row available-roster-row" *ngFor="let jugador of partido.estadoPartido === 'PROGRAMADO' ? jugadoresDisponiblesAlineacion() : []">

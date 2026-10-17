@@ -229,9 +229,16 @@ export class PartidoPage implements OnInit {
       return coincideBusqueda && !this.estaConvocado(jugador);
     });
   }
+  private idRelacion(relacion: unknown): number | undefined {
+    const id = typeof relacion === 'object' && relacion !== null && 'id' in relacion
+      ? relacion.id
+      : relacion;
+    const idNumerico = Number(id);
+    return Number.isFinite(idNumerico) && idNumerico > 0 ? idNumerico : undefined;
+  }
   pasarATitular(jugador?: Jugador) {
     if (!jugador?.id || !this.validarOrganizador || this.partido.estadoPartido !== 'PROGRAMADO') return;
-    const convocatoria = this.convocatorias.find(item => item.jugador?.id === jugador.id);
+    const convocatoria = this.convocatorias.find(item => this.idRelacion(item.jugador) === Number(jugador.id));
     if (convocatoria) {
       this.cambiarTitular(convocatoria, true);
       return;
@@ -311,7 +318,8 @@ export class PartidoPage implements OnInit {
     this.crud.crear({}, `partido/${this.partido.id}/convocados?jugadorId=${jugador.id}&titular=${titular}&usuarioId=${usuarioId}`).subscribe(() => this.cargarConvocatorias(), error => this.mostrarError(error));
   }
   estaConvocado(jugador?: Jugador): boolean {
-    return !!jugador?.id && this.convocatorias.some(convocatoria => convocatoria.jugador?.id === jugador.id);
+    return !!jugador?.id && this.convocatorias.some(convocatoria =>
+      this.idRelacion(convocatoria.jugador) === Number(jugador.id));
   }
   async agregarPorIdentificacion() {
     const usuarioId = this.crud.obtenerUsuario().id;
