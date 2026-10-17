@@ -191,7 +191,10 @@ export class PartidoPage implements OnInit {
     return this.convocatorias.filter(convocatoria => !convocatoria.titular);
   }
   convocatoriasEquipo(equipo?: Equipo): ConvocatoriaPartido[] {
-    return this.convocatorias.filter(convocatoria => convocatoria.jugador?.equipo?.id === equipo?.id);
+    const equipoId = this.idRelacion(equipo);
+    if (!equipoId) return [];
+    return this.convocatorias.filter(convocatoria =>
+      this.idRelacion(convocatoria.jugador?.equipo) === equipoId);
   }
   jugadoresEquipo(equipo?: Equipo): ConvocatoriaPartido[] {
     return this.convocatoriasEquipo(equipo).filter(convocatoria => !convocatoria.titular);
