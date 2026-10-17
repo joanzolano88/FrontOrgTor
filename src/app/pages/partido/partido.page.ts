@@ -102,6 +102,11 @@ export class PartidoPage implements OnInit {
   cambioModalOpen = false;
   accionesJugadorModalOpen = false;
   abrirCambioDespuesDeAcciones = false;
+  posicionVaciaModalOpen = false;
+  posicionVaciaEquipo?: Equipo;
+  posicionVaciaIndice?: number;
+  cargandoJugadoresPosicionVacia = false;
+  jugadoresPosicionVacia: JugadorDisponiblePartido[] = [];
   cargandoSuplentesCambio = false;
   jugadoresInscritosEquipoCambio: JugadorDisponiblePartido[] = [];
   eventos: EventoPartido[] = [];
@@ -482,6 +487,65 @@ export class PartidoPage implements OnInit {
         this.mostrarError(error);
       }
     });
+  }
+  clickPosicionVacia(equipo: Equipo | undefined, posicion: number) {
+    if (this.partido.estadoPartido === 'PROGRAMADO') {
+      this.moverAlineacionAVacia(equipo, posicion);
+      return;
+    }
+    if (this.partido.estadoPartido !== 'EN_PROCESO' || !this.puedeGestionarEquipo(equipo) ||
+        !this.partido.id || !equipo?.id) return;
+    this.posicionVaciaEquipo = equipo;
+    this.posicionVaciaIndice = posicion;
+    this.posicionVaciaModalOpen = true;
+    this.cargandoJugadoresPosicionVacia = true;
+    this.jugadoresPosicionVacia = [];
+    this.crud.obtener(`partido/${this.partido.id}/jugadores-disponibles/${equipo.id}`).subscribe({
+      next: (jugadores: JugadorDisponiblePartido[]) => {
+        this.jugadoresPosicionVacia = jugadores || [];
+        this.cargandoJugadoresPosicionVacia = false;
+      },
+      error: error => {
+        this.cargandoJugadoresPosicionVacia = false;
+        this.mostrarError(error);
+      }
+    });
+  }
+  jugadoresParaPosicionVacia(): JugadorDisponiblePartido[] {
+    const titularesIds = new Set(this.titularesEquipo(this.posicionVaciaEquipo)
+      .map(convocatoria => Number(convocatoria.jugador?.id)));
+    const sancionadosIds = new Set(this.sancionesTorneo
+      .filter(sancion => sancion.activa &&
+        sancion.exencionPartidoId !== this.partido.id &&
+        (sancion.permanente || sancion.partidosPendientes > 0))
+      .map(sancion => Number(sancion.jugador?.id)));
+    const expulsadosIds = new Set(this.eventos
+      .filter(evento => evento.tipo === 'TARJETA_ROJA')
+      .map(evento => Number(evento.jugadorId)));
+    return this.jugadoresPosicionVacia.filter(jugador =>
+      !!jugador.id &&
+      !titularesIds.has(Number(jugador.id)) &&
+      !sancionadosIds.has(Number(jugador.id)) &&
+      !expulsadosIds.has(Number(jugador.id)));
+  }
+  agregarJugadorEnPosicionVacia(jugador: JugadorDisponiblePartido) {
+    const usuarioId = this.crud.obtenerUsuario().id;
+    if (!usuarioId || !this.partido.id || !jugador.id || this.posicionVaciaIndice === undefined) return;
+    this.crud.crear({}, `partido/${this.partido.id}/alineacion/ocupar-vacia?jugadorId=${jugador.id}&posicion=${this.posicionVaciaIndice}&usuarioId=${usuarioId}`)
+      .subscribe({
+        next: () => {
+          this.cerrarPosicionVacia();
+          this.cargarConvocatorias();
+          this.cargarEventos();
+        },
+        error: error => this.mostrarError(error)
+      });
+  }
+  cerrarPosicionVacia() {
+    this.posicionVaciaModalOpen = false;
+    this.posicionVaciaEquipo = undefined;
+    this.posicionVaciaIndice = undefined;
+    this.jugadoresPosicionVacia = [];
   }
   puedeGestionarEquipo(equipo?: Equipo): boolean {
     const usuario = this.crud.obtenerUsuario();

@@ -70,9 +70,15 @@
                 </button>
                 <ng-template #emptyLocalPosition>
                   <button type="button" class="pitch-player pitch-player-empty" [class.goalkeeper]="posicion.portero"
-                    [disabled]="partido.estadoPartido !== 'PROGRAMADO' || !convocatoriaPosicionSeleccionada || !puedeGestionarEquipo(partido.equipoLocal) || intercambiandoPosiciones"
-                    [attr.aria-label]="posicion.portero ? 'Posición vacía de portero' : 'Posición vacía'"
-                    (click)="moverAlineacionAVacia(partido.equipoLocal, posicion.indice)"><span></span></button>
+                    [disabled]="partido.estadoPartido === 'PROGRAMADO'
+                      ? !convocatoriaPosicionSeleccionada || !puedeGestionarEquipo(partido.equipoLocal) || intercambiandoPosiciones
+                      : partido.estadoPartido !== 'EN_PROCESO' || !puedeGestionarEquipo(partido.equipoLocal)"
+                    [attr.aria-label]="partido.estadoPartido === 'EN_PROCESO'
+                      ? 'Agregar jugador a posición vacía'
+                      : posicion.portero ? 'Posición vacía de portero' : 'Posición vacía'"
+                    [title]="partido.estadoPartido === 'EN_PROCESO' ? 'Agregar jugador que llegó tarde' : ''"
+                    [class.late-player-slot]="partido.estadoPartido === 'EN_PROCESO'"
+                    (click)="clickPosicionVacia(partido.equipoLocal, posicion.indice)"><span>{{ partido.estadoPartido === 'EN_PROCESO' ? '+' : '' }}</span></button>
                 </ng-template>
               </ng-container>
             </div>
@@ -97,9 +103,15 @@
                 </button>
                 <ng-template #emptyAwayPosition>
                   <button type="button" class="pitch-player pitch-player-empty" [class.goalkeeper]="posicion.portero"
-                    [disabled]="partido.estadoPartido !== 'PROGRAMADO' || !convocatoriaPosicionSeleccionada || !puedeGestionarEquipo(partido.equipoVisitante) || intercambiandoPosiciones"
-                    [attr.aria-label]="posicion.portero ? 'Posición vacía de portero' : 'Posición vacía'"
-                    (click)="moverAlineacionAVacia(partido.equipoVisitante, posicion.indice)"><span></span></button>
+                    [disabled]="partido.estadoPartido === 'PROGRAMADO'
+                      ? !convocatoriaPosicionSeleccionada || !puedeGestionarEquipo(partido.equipoVisitante) || intercambiandoPosiciones
+                      : partido.estadoPartido !== 'EN_PROCESO' || !puedeGestionarEquipo(partido.equipoVisitante)"
+                    [attr.aria-label]="partido.estadoPartido === 'EN_PROCESO'
+                      ? 'Agregar jugador a posición vacía'
+                      : posicion.portero ? 'Posición vacía de portero' : 'Posición vacía'"
+                    [title]="partido.estadoPartido === 'EN_PROCESO' ? 'Agregar jugador que llegó tarde' : ''"
+                    [class.late-player-slot]="partido.estadoPartido === 'EN_PROCESO'"
+                    (click)="clickPosicionVacia(partido.equipoVisitante, posicion.indice)"><span>{{ partido.estadoPartido === 'EN_PROCESO' ? '+' : '' }}</span></button>
                 </ng-template>
               </ng-container>
             </div>
@@ -246,7 +258,7 @@
                   <ion-button *ngIf="validarOrganizador && sancionActiva(jugador) as sancion" fill="clear" color="warning" (click)="modificarSancionJugador(!sancion.exencionPartidoId, jugador)">
                     {{ sancion.exencionPartidoId === partido.id ? 'Restaurar' : 'Levantar sanción' }}
                   </ion-button>
-                  <ion-button *ngIf="validarOrganizador" fill="clear" color="primary" [disabled]="!puedeTitularizar(jugador)" (click)="pasarATitular(jugador)">Titular</ion-button>
+                  <ion-button *ngIf="validarOrganizador && partido.estadoPartido === 'PROGRAMADO'" fill="clear" color="primary" [disabled]="!puedeTitularizar(jugador)" (click)="pasarATitular(jugador)">Titular</ion-button>
                 </article>
                 <ion-note *ngIf="!suplentesEquipoActual() && (partido.estadoPartido !== 'PROGRAMADO' || !jugadoresDisponiblesAlineacion().length)">Aún no hay suplentes disponibles.</ion-note>
               </div>
@@ -291,6 +303,38 @@
             </ion-note>
           </ng-template>
           <ion-button class="confirm-substitution" expand="block" [disabled]="!suplenteCambio" (click)="realizarCambio()">Hacer cambio</ion-button>
+        </div>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+  <ion-modal class="substitution-modal" [isOpen]="posicionVaciaModalOpen" (didDismiss)="cerrarPosicionVacia()">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>Agregar jugador a la alineación</ion-title>
+          <ion-buttons slot="end"><ion-button (click)="cerrarPosicionVacia()">Cerrar</ion-button></ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="substitution-modal-content">
+        <div class="substitution-shell">
+          <p class="substitution-label">{{ posicionVaciaEquipo?.nombre }} · Posición vacía</p>
+          <ion-note class="substitution-hint">El jugador que llegó tarde ocupará esta posición. No se cambiará la formación ni las posiciones existentes.</ion-note>
+          <div class="substitution-loading" *ngIf="cargandoJugadoresPosicionVacia">
+            <ion-spinner name="crescent"></ion-spinner><span>Cargando jugadores inscritos...</span>
+          </div>
+          <div class="substitution-options" *ngIf="!cargandoJugadoresPosicionVacia && jugadoresParaPosicionVacia().length > 0; else noLatePlayers">
+            <button type="button" class="substitution-option" *ngFor="let jugador of jugadoresParaPosicionVacia()"
+              (click)="agregarJugadorEnPosicionVacia(jugador)">
+              <span class="player-number">{{ jugador.numeroCamiseta || '–' }}</span>
+              <span><strong>{{ jugador.nombre }}</strong><small>{{ jugador.identificacion }}</small></span>
+              <ion-icon name="add-circle-outline"></ion-icon>
+            </button>
+          </div>
+          <ng-template #noLatePlayers>
+            <ion-note class="no-substitutes-note" *ngIf="!cargandoJugadoresPosicionVacia">
+              No hay jugadores inscritos y elegibles disponibles para ocupar esta posición.
+            </ion-note>
+          </ng-template>
         </div>
       </ion-content>
     </ng-template>
