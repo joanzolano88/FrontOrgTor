@@ -173,7 +173,7 @@
                   <ion-button *ngIf="validarOrganizador && sancionActiva(jugador) as sancion" fill="clear" color="warning" (click)="modificarSancionJugador(!sancion.exencionPartidoId, jugador)">
                     {{ sancion.exencionPartidoId === partido.id ? 'Restaurar' : 'Levantar sanción' }}
                   </ion-button>
-                  <ion-button *ngIf="validarOrganizador" fill="clear" color="primary" [disabled]="(!!sancionActiva(jugador) && sancionActiva(jugador).exencionPartidoId !== partido.id) || titularesEquipoActual() >= maximoTitulares()" (click)="pasarATitular(jugador)">Titular</ion-button>
+                  <ion-button *ngIf="validarOrganizador" fill="clear" color="primary" [disabled]="(!!sancionActiva(jugador) && sancionActiva(jugador).exencionPartidoId !== partido.id) || titularesEquipoActual() >= maximoTitulares() || convocadosEquipoActual() >= maximoConvocados()" (click)="pasarATitular(jugador)">Titular</ion-button>
                 </article>
                 <ion-note *ngIf="!suplentesEquipoActual() && (partido.estadoPartido !== 'PROGRAMADO' || !jugadoresDisponiblesAlineacion().length)">Aún no hay suplentes disponibles.</ion-note>
               </div>

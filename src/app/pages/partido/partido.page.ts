@@ -214,6 +214,9 @@ export class PartidoPage implements OnInit {
   maximoTitulares(): number {
     return this.partido.torneo?.deporte?.maximoTitulares || 11;
   }
+  maximoConvocados(): number {
+    return this.partido.torneo?.deporte?.maximoConvocados || 22;
+  }
   porcentajeTitulares(): number {
     return Math.min(this.titularesEquipoActual() / this.maximoTitulares() * 100, 100);
   }
