@@ -62,11 +62,18 @@ export class DetalleEquipoTorneoPage implements OnInit {
     this.crud.obtenerParticipacionesEquipo(this.equipoId).subscribe({
       next: participaciones => {
         this.jugadores = (participaciones || []).filter(item =>
-          item.torneo?.id === this.torneoId && item.equipo?.id === this.equipoId);
+          this.idRelacion(item.torneo) === this.torneoId &&
+          this.idRelacion(item.equipo) === this.equipoId);
         this.cargarPagos();
       },
       error: err => this.error = err?.error?.message || 'No se pudo cargar el plantel inscrito.'
     });
+  }
+
+  private idRelacion(relacion: any): number | undefined {
+    const id = typeof relacion === 'object' && relacion !== null ? relacion.id : relacion;
+    const idNumerico = Number(id);
+    return Number.isFinite(idNumerico) && idNumerico > 0 ? idNumerico : undefined;
   }
 
   cargarPagos() {
@@ -74,17 +81,18 @@ export class DetalleEquipoTorneoPage implements OnInit {
     if (!usuarioId) return;
     this.crud.obtenerPagosTorneo(this.torneoId, usuarioId).subscribe({
       next: pagos => this.pagos = (pagos || []).filter(pago => pago.equipoId === this.equipoId ||
-        this.jugadores.some(item => item.jugador?.id === pago.jugadorId)),
+        this.jugadores.some(item => this.idRelacion(item.jugador) === Number(pago.jugadorId))),
       error: err => this.error = err?.error?.message || 'No se pudieron cargar los pagos de este torneo.'
     });
   }
 
   jugadorInscrito(jugadorId?: number): boolean {
-    return !!jugadorId && this.jugadores.some(item => item.jugador?.id === jugadorId);
+    return !!jugadorId && this.jugadores.some(item => this.idRelacion(item.jugador) === jugadorId);
   }
 
   yaEstoyInscrito(): boolean {
-    return !!this.usuarioIdentificacion && this.jugadores.some(item => item.jugador?.identificacion === this.usuarioIdentificacion);
+    return !!this.usuarioIdentificacion && this.jugadores.some(item =>
+      typeof item.jugador === 'object' && item.jugador?.identificacion === this.usuarioIdentificacion);
   }
 
   unirmeComoJugador() {
