@@ -259,7 +259,9 @@ ion-modal.rosters-modal::part(content) { border: 1px solid #075e7e; background: 
   padding: 9px;
 }
 
-.pitch { min-height: 180px; overflow: hidden; border: 1px solid rgba(204, 255, 227, .7); border-radius: 8px; background: linear-gradient(180deg, #057542, #006638); }
+.pitch { min-height: 360px; overflow: hidden; border: 1px solid rgba(204,255,227,.7); border-radius: 8px; background: linear-gradient(180deg,#057542,#006638); }
+.pitch-half { min-height: 178px; padding: 6px; }
+.pitch-team-name { color: #e9fff1; font-size: .72rem; font-weight: 700; text-align: center; }
 
 .pitch-rows {
   display: flex;
@@ -267,9 +269,9 @@ ion-modal.rosters-modal::part(content) { border: 1px solid #075e7e; background: 
   flex-direction: column;
   align-items: center;
   justify-content: space-around;
-  gap: 8px;
-  min-height: 180px;
-  padding: 12px 8px;
+  gap: 4px;
+  min-height: 140px;
+  padding: 5px;
 }
 
 .pitch-row {
@@ -283,7 +285,6 @@ ion-modal.rosters-modal::part(content) { border: 1px solid #075e7e; background: 
 .pitch-player > span { display: grid; width: 30px; height: 30px; place-items: center; border: 1px solid rgba(255,255,255,.65); border-radius: 50%; background: #087cf0; font-size: .78rem; font-weight: 700; }
 .pitch-player small { display: -webkit-box; max-width: 64px; overflow: hidden; color: #fff; font-size: .54rem; line-height: 1.1; text-align: center; text-overflow: ellipsis; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
 .pitch-player:disabled { opacity: 1; }
-
 .lineup-footer-actions {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -331,6 +332,8 @@ ion-modal.substitution-modal { --width: min(100%, 480px); --height: min(88%, 700
   .formation-controls { gap: 3px; }
   .formation-controls > span { font-size: .65rem; }
   .formation-controls ion-button { font-size: .68rem; }
+  .pitch-player { width: 52px; flex-basis: 52px; }
+  .pitch-player small { max-width: 52px; font-size: .5rem; }
   .lineup-columns { grid-template-columns: minmax(0, 1fr); gap: 8px; }
   .roster-player-row { display: flex; flex-wrap: wrap; gap: 5px; }
   .roster-player-row .player-info { flex: 1 1 calc(100% - 40px); }

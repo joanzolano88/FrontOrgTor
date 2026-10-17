@@ -78,29 +78,47 @@
             <header class="formation-heading">
               <div><ion-icon name="people-outline"></ion-icon><strong>Alineación</strong></div>
               <div class="formation-controls">
-                <span>{{ titularesEquipoActual() }} / {{ maximoTitulares() }}</span>
+                <span>{{ titularesEquipo(partido.equipoLocal).length }} / {{ maximoTitulares() }} · {{ titularesEquipo(partido.equipoVisitante).length }} / {{ maximoTitulares() }}</span>
                 <ion-button size="small" (click)="abrirListasTitulares()">
                   <ion-icon slot="start" name="people-outline"></ion-icon>Titulares
                 </ion-button>
               </div>
             </header>
-            <div class="lineup-progress"><span [style.width.%]="porcentajeTitulares()"></span></div>
             <div class="pitch-wrap">
               <div class="pitch">
-                <div class="pitch-rows">
-                  <div class="pitch-row" *ngFor="let fila of filasAlineacion(equipoConvocatoria)">
-                    <button type="button" class="pitch-player" *ngFor="let convocatoria of fila"
-                      [disabled]="partido.estadoPartido !== 'EN_PROCESO' || !validarOrganizador"
-                      [attr.aria-label]="'Cambiar ' + convocatoria.jugador?.nombre"
-                      [title]="convocatoria.jugador?.nombre || ''"
-                      (click)="abrirCambio(convocatoria)">
-                      <span>{{ convocatoria.numeroUniforme || convocatoria.jugador?.numeroCamiseta || '•' }}</span>
-                      <small>{{ convocatoria.jugador?.nombre }}</small>
-                    </button>
+                <section class="pitch-half pitch-home">
+                  <header class="pitch-team-name">{{ partido.equipoLocal?.nombre }} <small>Local</small></header>
+                  <div class="pitch-rows">
+                    <div class="pitch-row" *ngFor="let fila of filasAlineacion(partido.equipoLocal)">
+                      <button type="button" class="pitch-player" *ngFor="let convocatoria of fila"
+                        [disabled]="partido.estadoPartido !== 'EN_PROCESO' || !validarOrganizador"
+                        [attr.aria-label]="'Cambiar ' + convocatoria.jugador?.nombre"
+                        [title]="convocatoria.jugador?.nombre || ''"
+                        (click)="abrirCambio(convocatoria)">
+                        <span>{{ convocatoria.numeroUniforme || convocatoria.jugador?.numeroCamiseta || '•' }}</span>
+                        <small>{{ convocatoria.jugador?.nombre }}</small>
+                      </button>
+                    </div>
                   </div>
-                </div>
+                </section>
+                <hr>
+                <section class="pitch-half pitch-away">
+                  <header class="pitch-team-name">{{ partido.equipoVisitante?.nombre }} <small>Visitante</small></header>
+                  <div class="pitch-rows">
+                    <div class="pitch-row" *ngFor="let fila of filasAlineacion(partido.equipoVisitante)">
+                      <button type="button" class="pitch-player" *ngFor="let convocatoria of fila"
+                        [disabled]="partido.estadoPartido !== 'EN_PROCESO' || !validarOrganizador"
+                        [attr.aria-label]="'Cambiar ' + convocatoria.jugador?.nombre"
+                        [title]="convocatoria.jugador?.nombre || ''"
+                        (click)="abrirCambio(convocatoria)">
+                        <span>{{ convocatoria.numeroUniforme || convocatoria.jugador?.numeroCamiseta || '•' }}</span>
+                        <small>{{ convocatoria.jugador?.nombre }}</small>
+                      </button>
+                    </div>
+                  </div>
+                </section>
               </div>
-              <p>Vista referencial de titulares ({{ titularesEquipoActual() }})</p>
+              <p>Alineaciones: {{ partido.equipoLocal?.nombre }} ({{ titularesEquipo(partido.equipoLocal).length }}) · {{ partido.equipoVisitante?.nombre }} ({{ titularesEquipo(partido.equipoVisitante).length }})</p>
             </div>
           </section>
 
