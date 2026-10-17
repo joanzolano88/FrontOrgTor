@@ -101,6 +101,7 @@ export class PartidoPage implements OnInit {
   listasTitularesModalOpen = false;
   cambioModalOpen = false;
   accionesJugadorModalOpen = false;
+  abrirCambioDespuesDeAcciones = false;
   eventos: EventoPartido[] = [];
   sancionesTorneo: SancionPartido[] = [];
   jugadorEvento?: Jugador;
@@ -224,8 +225,12 @@ export class PartidoPage implements OnInit {
     this.equipoConvocatoria = this.equipoDeConvocatoria(convocatoria);
     this.titularCambio = convocatoria;
     this.suplenteCambio = undefined;
-    this.accionesJugadorModalOpen = false;
-    this.cambioModalOpen = true;
+    if (this.accionesJugadorModalOpen) {
+      this.abrirCambioDespuesDeAcciones = true;
+      this.accionesJugadorModalOpen = false;
+    } else {
+      this.cambioModalOpen = true;
+    }
   }
   abrirAccionesAlineacion(convocatoria: ConvocatoriaPartido) {
     if (this.partido.estadoPartido !== 'EN_PROCESO' || !this.validarOrganizador || !convocatoria.jugador) return;
@@ -241,6 +246,10 @@ export class PartidoPage implements OnInit {
   cerrarAccionesAlineacion() {
     this.accionesJugadorModalOpen = false;
     this.convocatoriaAcciones = undefined;
+    if (this.abrirCambioDespuesDeAcciones) {
+      this.abrirCambioDespuesDeAcciones = false;
+      this.cambioModalOpen = true;
+    }
   }
   clickJugadorAlineacion(convocatoria: ConvocatoriaPartido) {
     if (this.partido.estadoPartido === 'PROGRAMADO') {

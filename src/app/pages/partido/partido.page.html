@@ -271,8 +271,8 @@
             <span class="player-number">{{ titularCambio.numeroUniforme || titularCambio.jugador?.numeroCamiseta || '–' }}</span>
             <strong>{{ titularCambio.jugador?.nombre }}</strong>
           </div>
-          <p class="substitution-label">Selecciona un suplente</p>
-          <div class="substitution-options" *ngIf="suplentesEquipo(equipoConvocatoria).length; else noSubstitutes">
+          <p class="substitution-label">Suplentes disponibles de {{ equipoConvocatoria?.nombre }} ({{ suplentesEquipo(equipoConvocatoria).length }})</p>
+          <div class="substitution-options" *ngIf="suplentesEquipo(equipoConvocatoria).length > 0; else noSubstitutes">
             <button type="button" class="substitution-option" *ngFor="let suplente of suplentesEquipo(equipoConvocatoria)"
               [class.selected]="suplenteCambio?.id === suplente.id"
               (click)="seleccionarSuplenteCambio(suplente)">
@@ -281,7 +281,11 @@
               <ion-icon [name]="suplenteCambio?.id === suplente.id ? 'radio-button-on' : 'radio-button-off'"></ion-icon>
             </button>
           </div>
-          <ng-template #noSubstitutes><ion-note>No hay suplentes disponibles para este equipo.</ion-note></ng-template>
+          <ng-template #noSubstitutes>
+            <ion-note class="no-substitutes-note">
+              No hay suplentes convocados para {{ equipoConvocatoria?.nombre }}. Revisa la lista de jugadores de este partido.
+            </ion-note>
+          </ng-template>
           <ion-button class="confirm-substitution" expand="block" [disabled]="!suplenteCambio" (click)="realizarCambio()">Hacer cambio</ion-button>
         </div>
       </ion-content>

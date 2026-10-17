@@ -33,7 +33,6 @@
   overflow: hidden;
   border: 1px solid rgba(4, 111, 78, .24);
   border-radius: 14px;
-  background: linear-gradient(180deg, #f4fbf6, #fff);
   box-shadow: 0 8px 22px rgba(32, 45, 50, .08);
 }
 .live-lineup-card > header {
@@ -321,24 +320,25 @@ ion-modal.rosters-modal::part(content) { border: 1px solid #075e7e; background: 
   gap: 8px;
 }
 
-ion-modal.substitution-modal { --width: min(100%, 480px); --height: min(88%, 700px); --border-radius: 16px; }
+ion-modal.substitution-modal { --width: min(100%, 480px); --height: min(88%, 700px); --border-radius: 16px; --background: #001b2e; }
 .substitution-modal-content { --background: #001b2e; --color: #e5f1fb; }
-.substitution-shell { display: grid; gap: 12px; padding: 18px 14px calc(20px + env(safe-area-inset-bottom)); }
-.substitution-label { margin: 0; color: #a9c2d9; font-size: .82rem; font-weight: 700; }
+.substitution-shell { display: grid; gap: 12px; min-height: 100%; padding: 18px 14px calc(20px + env(safe-area-inset-bottom)); }
+.substitution-label { margin: 0; color: #d2e5f4; font-size: .82rem; font-weight: 700; }
 .substitution-player, .substitution-option { display: flex; align-items: center; gap: 10px; padding: 10px; border: 1px solid #075e7e; border-radius: 10px; background: #00253d; color: #e5f1fb; }
 .substitution-player .player-number, .substitution-option .player-number { width: 38px; height: 38px; flex: 0 0 38px; }
-.substitution-options { display: grid; max-height: 48vh; gap: 7px; overflow-y: auto; }
+.substitution-options { display: grid; max-height: 48vh; gap: 7px; overflow-y: auto; overscroll-behavior: contain; }
 .substitution-option { width: 100%; text-align: left; cursor: pointer; }
 .substitution-option.selected { border-color: #087cf0; background: #063d63; }
 .substitution-option > span:nth-child(2) { display: grid; min-width: 0; gap: 3px; }
 .substitution-option strong, .substitution-option small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .substitution-option small { color: #91adc3; font-size: .7rem; }
 .substitution-option ion-icon { margin-left: auto; color: #70baff; font-size: 1.2rem; }
+.no-substitutes-note { display: block; padding: 14px; border: 1px dashed #39718c; border-radius: 10px; color: #d2e5f4; line-height: 1.45; }
 .confirm-substitution { margin: 4px 0 0; --border-radius: 10px; }
 
 ion-modal.player-actions-modal { --width: min(100%, 460px); --height: min(90%, 720px); --border-radius: 18px; }
 .player-actions-shell { display: grid; gap: 14px; max-width: 440px; margin: 0 auto; }
-.selected-player-card { display: flex; align-items: center; gap: 12px; padding: 12px; border: 1px solid #cde9db; border-radius: 13px; background: #f4fbf6; }
+.selected-player-card { display: flex; align-items: center; gap: 12px; padding: 12px; border: 1px solid #cde9db; border-radius: 13px; }
 .selected-player-card > div { display: grid; gap: 4px; min-width: 0; }
 .selected-player-card strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .selected-player-card small { color: var(--muted); }
