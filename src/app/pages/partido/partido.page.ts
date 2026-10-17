@@ -19,6 +19,11 @@ interface FormacionPartido {
   formacion: string;
 }
 
+interface PosicionAlineacion {
+  convocatoria?: ConvocatoriaPartido;
+  portero: boolean;
+}
+
 @Component({
   selector: 'app-partido',
   templateUrl: './partido.page.html',
@@ -99,6 +104,7 @@ export class PartidoPage implements OnInit {
   formacionesPorEquipo: Record<number, string> = {};
   readonly formacionesDisponibles = ['4-4-2', '4-3-3', '3-5-2', '4-2-3-1', '4-1-4-1', '4-5-1'];
   convocatoriaPosicionSeleccionada?: ConvocatoriaPartido;
+  intercambiandoPosiciones = false;
 
   constructor(private crud: CrudService, private route: ActivatedRoute,
     private router: Router, private sesionService: SesionService, private alertController: AlertController) {
@@ -287,38 +293,59 @@ export class PartidoPage implements OnInit {
     if (!this.validarOrganizador || this.partido.estadoPartido !== 'PROGRAMADO') return;
     this.cambiarTitular(convocatoria, false);
   }
-  filasAlineacion(equipo?: Equipo): ConvocatoriaPartido[][] {
-    const titulares = this.titularesEquipo(equipo)
-      .sort((a, b) => (a.posicionAlineacion ?? Number.MAX_SAFE_INTEGER) - (b.posicionAlineacion ?? Number.MAX_SAFE_INTEGER) || (a.id ?? 0) - (b.id ?? 0));
-    if (!titulares.length) return [];
+  filasAlineacion(equipo?: Equipo): PosicionAlineacion[][] {
     const lineas = [1, ...this.formacionEquipo(equipo).split('-').map(Number)];
     const totalPosiciones = lineas.reduce((total, cantidad) => total + cantidad, 0);
-    const posiciones = new Map<number, ConvocatoriaPartido>();
-    titulares.forEach(convocatoria => {
-      const posicion = convocatoria.posicionAlineacion;
-      if (posicion !== undefined && posicion >= 0 && posicion < totalPosiciones && !posiciones.has(posicion)) {
-        posiciones.set(posicion, convocatoria);
-      } else {
-        let posicionLibre = 0;
-        while (posiciones.has(posicionLibre)) posicionLibre++;
-        posiciones.set(posicionLibre, convocatoria);
-      }
+    const posiciones = this.posicionesEfectivasEquipo(equipo, totalPosiciones);
+    const titularesPorId = new Map(
+      this.titularesEquipo(equipo)
+        .filter(convocatoria => convocatoria.id !== undefined)
+        .map(convocatoria => [convocatoria.id!, convocatoria])
+    );
+    const convocatoriaPorPosicion = new Map<number, ConvocatoriaPartido>();
+    posiciones.forEach((posicion, convocatoriaId) => {
+      const convocatoria = titularesPorId.get(convocatoriaId);
+      if (convocatoria) convocatoriaPorPosicion.set(posicion, convocatoria);
     });
-    const filas: ConvocatoriaPartido[][] = [];
+    const filas: PosicionAlineacion[][] = [];
     let inicio = 0;
     for (const cantidad of lineas) {
-      const fila: ConvocatoriaPartido[] = [];
+      const fila: PosicionAlineacion[] = [];
       for (let indice = inicio; indice < inicio + cantidad; indice++) {
-        const convocatoria = posiciones.get(indice);
-        if (convocatoria) fila.push(convocatoria);
+        fila.push({
+          convocatoria: convocatoriaPorPosicion.get(indice),
+          portero: indice === 0
+        });
       }
       filas.push(fila);
       inicio += cantidad;
     }
-    return filas.filter(fila => fila.length > 0);
+    return filas;
   }
-  esPortero(convocatoria: ConvocatoriaPartido, equipo?: Equipo): boolean {
-    return this.filasAlineacion(equipo)[0]?.includes(convocatoria) ?? false;
+  trackByPosicion(index: number, posicion: PosicionAlineacion): number | string {
+    return posicion.convocatoria?.id ?? `empty-${index}`;
+  }
+  private posicionesEfectivasEquipo(equipo: Equipo | undefined, totalPosiciones: number): Map<number, number> {
+    const titulares = [...this.titularesEquipo(equipo)]
+      .sort((a, b) => (a.posicionAlineacion ?? Number.MAX_SAFE_INTEGER) - (b.posicionAlineacion ?? Number.MAX_SAFE_INTEGER) || (a.id ?? 0) - (b.id ?? 0));
+    const posiciones = new Map<number, number>();
+    const posicionesOcupadas = new Set<number>();
+    titulares.forEach(convocatoria => {
+      if (!convocatoria.id) return;
+      const posicion = convocatoria.posicionAlineacion;
+      if (posicion !== undefined && posicion >= 0 && posicion < totalPosiciones && !posicionesOcupadas.has(posicion)) {
+        posiciones.set(convocatoria.id, posicion);
+        posicionesOcupadas.add(posicion);
+        return;
+      }
+      let posicionLibre = 0;
+      while (posicionLibre < totalPosiciones && posicionesOcupadas.has(posicionLibre)) posicionLibre++;
+      if (posicionLibre < totalPosiciones) {
+        posiciones.set(convocatoria.id, posicionLibre);
+        posicionesOcupadas.add(posicionLibre);
+      }
+    });
+    return posiciones;
   }
   puedeGestionarEquipo(equipo?: Equipo): boolean {
     const usuario = this.crud.obtenerUsuario();
@@ -329,7 +356,7 @@ export class PartidoPage implements OnInit {
     return this.validarOrganizador;
   }
   seleccionarPosicion(convocatoria: ConvocatoriaPartido) {
-    if (this.partido.estadoPartido !== 'PROGRAMADO' || !convocatoria.id) return;
+    if (this.intercambiandoPosiciones || this.partido.estadoPartido !== 'PROGRAMADO' || !convocatoria.id) return;
     const equipo = this.equiposDelPartido().find(item =>
       this.idRelacion(item) === this.idRelacion(convocatoria.equipo || convocatoria.jugador?.equipo));
     if (!this.puedeGestionarEquipo(equipo)) return;
@@ -341,15 +368,36 @@ export class PartidoPage implements OnInit {
       this.convocatoriaPosicionSeleccionada = undefined;
       return;
     }
+    const primera = this.convocatoriaPosicionSeleccionada;
+    const equipoPrimero = this.equiposDelPartido().find(item =>
+      this.idRelacion(item) === this.idRelacion(primera.equipo || primera.jugador?.equipo));
+    const equipoSegundo = this.equiposDelPartido().find(item =>
+      this.idRelacion(item) === this.idRelacion(convocatoria.equipo || convocatoria.jugador?.equipo));
+    if (this.idRelacion(equipoPrimero) !== this.idRelacion(equipoSegundo)) {
+      this.convocatoriaPosicionSeleccionada = undefined;
+      this.mostrarError({ error: { message: 'Selecciona dos jugadores del mismo equipo para intercambiar sus posiciones.' } });
+      return;
+    }
     const usuarioId = this.crud.obtenerUsuario().id;
-    if (!usuarioId || !this.partido.id || !this.convocatoriaPosicionSeleccionada.id) return;
-    this.crud.crear({}, `partido/${this.partido.id}/alineacion/intercambiar?convocatoriaId1=${this.convocatoriaPosicionSeleccionada.id}&convocatoriaId2=${convocatoria.id}&usuarioId=${usuarioId}`).subscribe({
+    if (!usuarioId || !this.partido.id || !primera.id) return;
+    const posiciones = this.posicionesEfectivasEquipo(equipoPrimero, 11);
+    const posicionPrimeraAnterior = primera.posicionAlineacion;
+    const posicionSegundaAnterior = convocatoria.posicionAlineacion;
+    const posicionPrimera = posiciones.get(primera.id);
+    const posicionSegunda = posiciones.get(convocatoria.id);
+    if (posicionPrimera === undefined || posicionSegunda === undefined) return;
+    primera.posicionAlineacion = posicionSegunda;
+    convocatoria.posicionAlineacion = posicionPrimera;
+    this.convocatoriaPosicionSeleccionada = undefined;
+    this.intercambiandoPosiciones = true;
+    this.crud.crear({}, `partido/${this.partido.id}/alineacion/intercambiar?convocatoriaId1=${primera.id}&convocatoriaId2=${convocatoria.id}&usuarioId=${usuarioId}`).subscribe({
       next: () => {
-        this.convocatoriaPosicionSeleccionada = undefined;
-        this.cargarConvocatorias();
+        this.intercambiandoPosiciones = false;
       },
       error: error => {
-        this.convocatoriaPosicionSeleccionada = undefined;
+        primera.posicionAlineacion = posicionPrimeraAnterior;
+        convocatoria.posicionAlineacion = posicionSegundaAnterior;
+        this.intercambiandoPosiciones = false;
         this.mostrarError(error);
       }
     });

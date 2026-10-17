@@ -257,7 +257,9 @@ ion-modal.rosters-modal::part(content) { border: 1px solid #075e7e; background: 
 
 .available-roster-row { grid-template-columns: 30px minmax(0, 1fr) auto auto; }
 .roster-player-row .player-number { width: 28px; height: 28px; font-size: .78rem; }
-.roster-player-row ion-button { --padding-start: 5px; --padding-end: 5px; margin: 0; font-size: .65rem; }
+.roster-actions { display: flex; align-items: center; justify-content: flex-end; gap: 0; }
+.roster-player-row .roster-icon-button { width: 30px; height: 34px; --padding-start: 0; --padding-end: 0; margin: 0; }
+.roster-icon-button ion-icon { font-size: 1.1rem; }
 
 .pitch-wrap {
   padding: 9px;
@@ -294,6 +296,9 @@ ion-modal.rosters-modal::part(content) { border: 1px solid #075e7e; background: 
 .pitch-player .goalkeeper-label { display: block; color: #ffe08a; font-size: .45rem; font-weight: 800; letter-spacing: .04em; }
 .pitch-player.position-selected > span { outline: 3px solid #ffd166; outline-offset: 2px; }
 .pitch-player:disabled { opacity: 1; }
+.pitch-player-empty { min-height: 43px; pointer-events: none; }
+.pitch-player-empty > span { border: 1px dashed rgba(255,255,255,.22); background: transparent; }
+.pitch-player-empty.goalkeeper > span { border-color: rgba(255,224,138,.35); background: transparent; }
 .lineup-footer-actions {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -349,6 +354,7 @@ ion-modal.substitution-modal { --width: min(100%, 480px); --height: min(88%, 700
   .lineup-columns { grid-template-columns: minmax(0, 1fr); gap: 8px; }
   .roster-player-row { display: flex; flex-wrap: wrap; gap: 5px; }
   .roster-player-row .player-info { flex: 1 1 calc(100% - 40px); }
-  .roster-player-row ion-button { --padding-start: 3px; --padding-end: 3px; font-size: .6rem; }
+  .roster-player-row .roster-icon-button { width: 26px; height: 30px; }
+  .roster-icon-button ion-icon { font-size: 1rem; }
   .uniform-input { max-width: 40px; }
 }
