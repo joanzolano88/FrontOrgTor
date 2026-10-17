@@ -20,6 +20,8 @@ export class DetalleEquipoTorneoPage implements OnInit {
   nuevoPago = new Pago();
   jugadorPagoId?: number;
   jugadorInscripcionId?: number;
+  inscribiendoJugador = false;
+  mensajeInscripcion = '';
   esOrganizador = false;
   esDelegado = false;
   usuarioId?: number;
@@ -94,11 +96,36 @@ export class DetalleEquipoTorneoPage implements OnInit {
   }
 
   agregarJugador(jugador: any) {
-    const usuarioId = this.crud.obtenerUsuario().id;
-    if (!usuarioId || !jugador?.id || !this.esDelegado) return;
-    this.crud.agregarJugadorATorneo(this.equipoId, this.torneoId, jugador.id, usuarioId).subscribe({
-      next: () => this.cargarJugadores(),
-      error: err => this.error = err?.error?.message || 'No se pudo inscribir al jugador.'
+    const jugadorId = Number(jugador?.id);
+    const usuarioId = Number(this.crud.obtenerUsuario().id);
+    if (this.inscribiendoJugador) return;
+    if (!Number.isFinite(usuarioId) || usuarioId <= 0) {
+      this.error = 'Inicia sesión nuevamente para inscribir jugadores.';
+      return;
+    }
+    if (!Number.isFinite(jugadorId) || jugadorId <= 0) {
+      this.error = 'Selecciona un jugador del plantel antes de inscribirlo.';
+      return;
+    }
+    if (!this.esDelegado) {
+      this.error = 'Solo el delegado del equipo puede inscribir jugadores.';
+      return;
+    }
+
+    this.error = '';
+    this.mensajeInscripcion = '';
+    this.inscribiendoJugador = true;
+    this.crud.agregarJugadorATorneo(this.equipoId, this.torneoId, jugadorId, usuarioId).subscribe({
+      next: () => {
+        this.jugadorInscripcionId = undefined;
+        this.mensajeInscripcion = 'Jugador inscrito correctamente en el torneo.';
+        this.cargarJugadores();
+      },
+      error: err => {
+        this.error = err?.error?.message || err?.error?.detail || err?.message || 'No se pudo inscribir al jugador.';
+        this.inscribiendoJugador = false;
+      },
+      complete: () => this.inscribiendoJugador = false
     });
   }
 

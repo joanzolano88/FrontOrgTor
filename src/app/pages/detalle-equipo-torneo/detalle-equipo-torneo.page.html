@@ -27,6 +27,7 @@
         <ion-icon slot="start" name="person-add-outline"></ion-icon>Unirme como jugador
       </ion-button>
       <ion-note color="success" *ngIf="yaEstoyInscrito()">Ya estás inscrito como jugador de este equipo en el torneo.</ion-note>
+      <ion-note color="success" *ngIf="mensajeInscripcion">{{ mensajeInscripcion }}</ion-note>
       <ion-list>
         <ion-item *ngFor="let item of jugadores">
           <ion-label>{{ item.jugador?.nombre }}<small>{{ item.jugador?.identificacion }}</small></ion-label>
@@ -39,7 +40,10 @@
         <ion-select interface="popover" label="Agregar jugador del plantel" labelPlacement="floating" [(ngModel)]="jugadorInscripcionId">
           <ion-select-option *ngFor="let jugador of equipo.listaJugadoresActivos" [value]="jugador.id" [disabled]="jugadorInscrito(jugador.id)">{{ jugador.nombre }}{{ jugadorInscrito(jugador.id) ? ' · Inscrito' : '' }}</ion-select-option>
         </ion-select>
-        <ion-button [disabled]="!jugadorInscripcionId" (click)="agregarJugador({ id: jugadorInscripcionId })">Inscribir</ion-button>
+        <ion-button type="button" [disabled]="!jugadorInscripcionId || inscribiendoJugador" (click)="agregarJugador({ id: jugadorInscripcionId })">
+          <ion-spinner *ngIf="inscribiendoJugador" slot="start" name="crescent"></ion-spinner>
+          {{ inscribiendoJugador ? 'Inscribiendo...' : 'Inscribir' }}
+        </ion-button>
       </div>
     </section>
 
