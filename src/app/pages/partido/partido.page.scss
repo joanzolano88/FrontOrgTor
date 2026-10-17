@@ -9,7 +9,7 @@
 .match-teams { display: grid; grid-template-columns: minmax(0,1fr) auto minmax(0,1fr); align-items: center; gap: 8px; margin: 22px 0; }
 .detail-team { display: grid; justify-items: center; gap: 9px; text-align: center; min-width: 0; }
 .detail-team strong { max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 16px; text-wrap: auto; }
-.detail-team img, .goal-actions img { width: 58px; height: 58px; object-fit: contain; border-radius: 50%; background: var(--app-surface-muted); padding: 7px; }
+.detail-team img { width: 58px; height: 58px; object-fit: contain; border-radius: 50%; background: var(--app-surface-muted); padding: 7px; }
 .detail-score { display: flex; align-items: center; gap: 7px; }
 .detail-score span { font-size: 30px; font-weight: 800; }
 .detail-score small { color: #9eacb5; font-size: 9px; }
@@ -28,12 +28,26 @@
 .match-stats ion-col:last-child { border-right: 0; }
 .match-stats span { color: var(--muted); font-size: 13px; }
 .match-stats strong {  font-size: 14px; }
+.live-lineup-card {
+  margin: 14px;
+  overflow: hidden;
+  border: 1px solid rgba(4, 111, 78, .24);
+  border-radius: 14px;
+  background: linear-gradient(180deg, #f4fbf6, #fff);
+  box-shadow: 0 8px 22px rgba(32, 45, 50, .08);
+}
+.live-lineup-card > header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px 0;
+  color: #075e3d;
+}
+.live-lineup-card > header strong { font-size: .92rem; }
+.live-lineup-card > header span { margin-left: auto; color: var(--muted); font-size: .68rem; text-align: right; }
 .lineup-button { margin: 14px; width: calc(100% - 28px); }
 .lineup-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
 .uniform-input { max-width: 56px; margin-right: 4px; }
-.goal-actions { margin: 14px; width: calc(100% - 28px);  border-radius: 12px; }
-.goal-actions ion-col { display: grid; justify-items: center; gap: 8px; font-size: 12px; font-weight: 700; }
-.goal-actions img { cursor: default; }
 .goal-submit { margin-top: 20px; }
 .goal-player-hint { display: block; padding: 8px 16px; }
 .score-dash { align-self: center; color: var(--accent); font-size: 13px; }
@@ -296,7 +310,9 @@ ion-modal.rosters-modal::part(content) { border: 1px solid #075e7e; background: 
 .pitch-player .goalkeeper-label { display: block; color: #ffe08a; font-size: .45rem; font-weight: 800; letter-spacing: .04em; }
 .pitch-player.position-selected > span { outline: 3px solid #ffd166; outline-offset: 2px; }
 .pitch-player:disabled { opacity: 1; }
-.pitch-player-empty { min-height: 43px; pointer-events: none; }
+.pitch-player-empty { min-height: 43px; }
+.pitch-player-empty:not(:disabled) { cursor: pointer; }
+.pitch-player-empty:disabled { cursor: default; }
 .pitch-player-empty > span { border: 1px dashed rgba(255,255,255,.22); background: transparent; }
 .pitch-player-empty.goalkeeper > span { border-color: rgba(255,224,138,.35); background: transparent; }
 .lineup-footer-actions {
@@ -320,6 +336,17 @@ ion-modal.substitution-modal { --width: min(100%, 480px); --height: min(88%, 700
 .substitution-option ion-icon { margin-left: auto; color: #70baff; font-size: 1.2rem; }
 .confirm-substitution { margin: 4px 0 0; --border-radius: 10px; }
 
+ion-modal.player-actions-modal { --width: min(100%, 460px); --height: min(90%, 720px); --border-radius: 18px; }
+.player-actions-shell { display: grid; gap: 14px; max-width: 440px; margin: 0 auto; }
+.selected-player-card { display: flex; align-items: center; gap: 12px; padding: 12px; border: 1px solid #cde9db; border-radius: 13px; background: #f4fbf6; }
+.selected-player-card > div { display: grid; gap: 4px; min-width: 0; }
+.selected-player-card strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.selected-player-card small { color: var(--muted); }
+.action-minute { --border-radius: 10px; }
+.player-action-buttons { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.player-action-buttons ion-button { margin: 0; min-height: 42px; --border-radius: 10px; }
+.player-action-buttons ion-button:last-child { grid-column: 1 / -1; }
+
 @media (min-width: 760px) {
   ion-modal.lineup-modal,
   ion-modal.rosters-modal {
@@ -334,6 +361,9 @@ ion-modal.substitution-modal { --width: min(100%, 480px); --height: min(88%, 700
     padding: 9px 8px calc(18px + env(safe-area-inset-bottom));
   }
 
+  .live-lineup-card { margin: 12px 10px; }
+  .live-lineup-card > header { align-items: flex-start; flex-wrap: wrap; }
+  .live-lineup-card > header span { flex-basis: 100%; margin-left: 25px; text-align: left; }
   .match-summary {
     grid-template-columns: minmax(0, 1fr) minmax(90px, .8fr) minmax(0, 1fr);
     gap: 3px;

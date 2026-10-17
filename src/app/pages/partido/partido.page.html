@@ -45,6 +45,70 @@
       </ion-col>
     </ion-row>
   </ion-grid>
+  <section class="live-lineup-card" *ngIf="partido.estadoPartido === 'EN_PROCESO'">
+    <header><ion-icon name="football-outline"></ion-icon><strong>Alineación del partido</strong><span *ngIf="validarOrganizador">Selecciona un jugador para registrar una acción</span></header>
+    <ng-container *ngTemplateOutlet="alineacionCancha"></ng-container>
+  </section>
+  <ng-template #alineacionCancha>
+    <div class="pitch-wrap">
+      <div class="pitch">
+        <section class="pitch-half pitch-home">
+          <header class="pitch-team-name">{{ partido.equipoLocal?.nombre }} <small>Local</small></header>
+          <div class="pitch-rows">
+            <div class="pitch-row" *ngFor="let fila of filasAlineacion(partido.equipoLocal)">
+              <ng-container *ngFor="let posicion of fila; trackBy: trackByPosicion">
+                <button type="button" class="pitch-player" *ngIf="posicion.convocatoria as convocatoria; else emptyLocalPosition"
+                  [class.goalkeeper]="posicion.portero"
+                  [class.position-selected]="convocatoriaPosicionSeleccionada?.id === convocatoria.id"
+                  [disabled]="partido.estadoPartido === 'PROGRAMADO' ? !puedeGestionarEquipo(partido.equipoLocal) || intercambiandoPosiciones : partido.estadoPartido !== 'EN_PROCESO' || !validarOrganizador"
+                  [attr.aria-label]="(partido.estadoPartido === 'PROGRAMADO' ? 'Seleccionar posición de ' : 'Acciones de ') + convocatoria.jugador?.nombre"
+                  [title]="convocatoria.jugador?.nombre || ''"
+                  (click)="clickJugadorAlineacion(convocatoria)">
+                  <span>{{ convocatoria.numeroUniforme ?? convocatoria.jugador?.numeroCamiseta ?? '' }}</span>
+                  <small class="goalkeeper-label" *ngIf="posicion.portero">PORTERO</small>
+                  <small>{{ convocatoria.jugador?.nombre }}</small>
+                </button>
+                <ng-template #emptyLocalPosition>
+                  <button type="button" class="pitch-player pitch-player-empty" [class.goalkeeper]="posicion.portero"
+                    [disabled]="partido.estadoPartido !== 'PROGRAMADO' || !convocatoriaPosicionSeleccionada || !puedeGestionarEquipo(partido.equipoLocal) || intercambiandoPosiciones"
+                    [attr.aria-label]="posicion.portero ? 'Posición vacía de portero' : 'Posición vacía'"
+                    (click)="moverAlineacionAVacia(partido.equipoLocal, posicion.indice)"><span></span></button>
+                </ng-template>
+              </ng-container>
+            </div>
+          </div>
+        </section>
+        <hr>
+        <section class="pitch-half pitch-away">
+          <header class="pitch-team-name">{{ partido.equipoVisitante?.nombre }} <small>Visitante</small></header>
+          <div class="pitch-rows">
+            <div class="pitch-row" *ngFor="let fila of filasAlineacion(partido.equipoVisitante)">
+              <ng-container *ngFor="let posicion of fila; trackBy: trackByPosicion">
+                <button type="button" class="pitch-player" *ngIf="posicion.convocatoria as convocatoria; else emptyAwayPosition"
+                  [class.goalkeeper]="posicion.portero"
+                  [class.position-selected]="convocatoriaPosicionSeleccionada?.id === convocatoria.id"
+                  [disabled]="partido.estadoPartido === 'PROGRAMADO' ? !puedeGestionarEquipo(partido.equipoVisitante) || intercambiandoPosiciones : partido.estadoPartido !== 'EN_PROCESO' || !validarOrganizador"
+                  [attr.aria-label]="(partido.estadoPartido === 'PROGRAMADO' ? 'Seleccionar posición de ' : 'Acciones de ') + convocatoria.jugador?.nombre"
+                  [title]="convocatoria.jugador?.nombre || ''"
+                  (click)="clickJugadorAlineacion(convocatoria)">
+                  <span>{{ convocatoria.numeroUniforme ?? convocatoria.jugador?.numeroCamiseta ?? '' }}</span>
+                  <small class="goalkeeper-label" *ngIf="posicion.portero">PORTERO</small>
+                  <small>{{ convocatoria.jugador?.nombre }}</small>
+                </button>
+                <ng-template #emptyAwayPosition>
+                  <button type="button" class="pitch-player pitch-player-empty" [class.goalkeeper]="posicion.portero"
+                    [disabled]="partido.estadoPartido !== 'PROGRAMADO' || !convocatoriaPosicionSeleccionada || !puedeGestionarEquipo(partido.equipoVisitante) || intercambiandoPosiciones"
+                    [attr.aria-label]="posicion.portero ? 'Posición vacía de portero' : 'Posición vacía'"
+                    (click)="moverAlineacionAVacia(partido.equipoVisitante, posicion.indice)"><span></span></button>
+                </ng-template>
+              </ng-container>
+            </div>
+          </div>
+        </section>
+      </div>
+      <p>Alineaciones: {{ partido.equipoLocal?.nombre }} ({{ titularesEquipo(partido.equipoLocal).length }}) · {{ partido.equipoVisitante?.nombre }} ({{ titularesEquipo(partido.equipoVisitante).length }})</p>
+    </div>
+  </ng-template>
   <ion-button class="lineup-button" *ngIf="(partido.estadoPartido == 'PROGRAMADO' || partido.estadoPartido == 'EN_PROCESO') && puedeGestionarConvocatoria()" expand="block" (click)="abrirConvocatoria()">
     Ver lista de jugadores ({{ convocatorias.length }})
   </ion-button>
@@ -106,64 +170,7 @@
               Selecciona dos jugadores para intercambiar sus posiciones.
               <span *ngIf="convocatoriaPosicionSeleccionada">Primero: {{ convocatoriaPosicionSeleccionada.jugador?.nombre }}. Selecciona el segundo.</span>
             </p>
-            <div class="pitch-wrap">
-              <div class="pitch">
-                <section class="pitch-half pitch-home">
-                  <header class="pitch-team-name">{{ partido.equipoLocal?.nombre }} <small>Local</small></header>
-                  <div class="pitch-rows">
-                    <div class="pitch-row" *ngFor="let fila of filasAlineacion(partido.equipoLocal)">
-                      <ng-container *ngFor="let posicion of fila; trackBy: trackByPosicion">
-                        <button type="button" class="pitch-player" *ngIf="posicion.convocatoria as convocatoria; else emptyLocalPosition"
-                          [class.goalkeeper]="posicion.portero"
-                          [class.position-selected]="convocatoriaPosicionSeleccionada?.id === convocatoria.id"
-                          [disabled]="partido.estadoPartido === 'PROGRAMADO' ? !puedeGestionarEquipo(partido.equipoLocal) || intercambiandoPosiciones : partido.estadoPartido !== 'EN_PROCESO' || !validarOrganizador"
-                          [attr.aria-label]="(partido.estadoPartido === 'PROGRAMADO' ? 'Seleccionar posición de ' : 'Cambiar ') + convocatoria.jugador?.nombre"
-                          [title]="convocatoria.jugador?.nombre || ''"
-                          (click)="partido.estadoPartido === 'PROGRAMADO' ? seleccionarPosicion(convocatoria) : abrirCambio(convocatoria)">
-                          <span>{{ convocatoria.numeroUniforme ?? convocatoria.jugador?.numeroCamiseta ?? '' }}</span>
-                          <small class="goalkeeper-label" *ngIf="posicion.portero">PORTERO</small>
-                          <small>{{ convocatoria.jugador?.nombre }}</small>
-                        </button>
-                        <ng-template #emptyLocalPosition>
-                          <button type="button" class="pitch-player pitch-player-empty" [class.goalkeeper]="posicion.portero"
-                            [disabled]="!convocatoriaPosicionSeleccionada || !puedeGestionarEquipo(partido.equipoLocal) || intercambiandoPosiciones"
-                            [attr.aria-label]="posicion.portero ? 'Posición vacía de portero' : 'Posición vacía'"
-                            (click)="moverAlineacionAVacia(partido.equipoLocal, posicion.indice)"><span></span></button>
-                        </ng-template>
-                      </ng-container>
-                    </div>
-                  </div>
-                </section>
-                <hr>
-                <section class="pitch-half pitch-away">
-                  <header class="pitch-team-name">{{ partido.equipoVisitante?.nombre }} <small>Visitante</small></header>
-                  <div class="pitch-rows">
-                    <div class="pitch-row" *ngFor="let fila of filasAlineacion(partido.equipoVisitante)">
-                      <ng-container *ngFor="let posicion of fila; trackBy: trackByPosicion">
-                        <button type="button" class="pitch-player" *ngIf="posicion.convocatoria as convocatoria; else emptyAwayPosition"
-                          [class.goalkeeper]="posicion.portero"
-                          [class.position-selected]="convocatoriaPosicionSeleccionada?.id === convocatoria.id"
-                          [disabled]="partido.estadoPartido === 'PROGRAMADO' ? !puedeGestionarEquipo(partido.equipoVisitante) || intercambiandoPosiciones : partido.estadoPartido !== 'EN_PROCESO' || !validarOrganizador"
-                          [attr.aria-label]="(partido.estadoPartido === 'PROGRAMADO' ? 'Seleccionar posición de ' : 'Cambiar ') + convocatoria.jugador?.nombre"
-                          [title]="convocatoria.jugador?.nombre || ''"
-                          (click)="partido.estadoPartido === 'PROGRAMADO' ? seleccionarPosicion(convocatoria) : abrirCambio(convocatoria)">
-                          <span>{{ convocatoria.numeroUniforme ?? convocatoria.jugador?.numeroCamiseta ?? '' }}</span>
-                          <small class="goalkeeper-label" *ngIf="posicion.portero">PORTERO</small>
-                          <small>{{ convocatoria.jugador?.nombre }}</small>
-                        </button>
-                        <ng-template #emptyAwayPosition>
-                          <button type="button" class="pitch-player pitch-player-empty" [class.goalkeeper]="posicion.portero"
-                            [disabled]="!convocatoriaPosicionSeleccionada || !puedeGestionarEquipo(partido.equipoVisitante) || intercambiandoPosiciones"
-                            [attr.aria-label]="posicion.portero ? 'Posición vacía de portero' : 'Posición vacía'"
-                            (click)="moverAlineacionAVacia(partido.equipoVisitante, posicion.indice)"><span></span></button>
-                        </ng-template>
-                      </ng-container>
-                    </div>
-                  </div>
-                </section>
-              </div>
-              <p>Alineaciones: {{ partido.equipoLocal?.nombre }} ({{ titularesEquipo(partido.equipoLocal).length }}) · {{ partido.equipoVisitante?.nombre }} ({{ titularesEquipo(partido.equipoVisitante).length }})</p>
-            </div>
+            <ng-container *ngTemplateOutlet="alineacionCancha"></ng-container>
           </section>
 
           <div class="lineup-footer-actions">
@@ -203,7 +210,7 @@
             <section class="lineup-column">
               <h3><ion-icon name="checkmark-circle" color="success"></ion-icon> Titulares ({{ titularesEquipoActual() }})</h3>
               <div class="roster-drop-list" cdkDropList [cdkDropListDisabled]="partido.estadoPartido === 'EN_PROCESO'" [id]="'titulares-' + equipoConvocatoria?.id" [cdkDropListData]="titularesEquipo(equipoConvocatoria)" [cdkDropListConnectedTo]="['jugadores-' + equipoConvocatoria?.id]" (cdkDropListDropped)="moverJugador($event, true)">
-                <article class="roster-player-row" *ngFor="let convocatoria of titularesEquipo(equipoConvocatoria)" cdkDrag [cdkDragData]="convocatoria" (click)="abrirEventos(convocatoria)">
+                <article class="roster-player-row" *ngFor="let convocatoria of titularesEquipo(equipoConvocatoria)" cdkDrag [cdkDragData]="convocatoria">
                   <span class="player-number">{{ convocatoria.numeroUniforme || convocatoria.jugador?.numeroCamiseta || '–' }}</span>
                   <button type="button" class="player-info" (click)="$event.stopPropagation(); abrirPerfilJugador(convocatoria.jugador)">
                     <strong>{{ convocatoria.jugador?.nombre }}</strong><small>{{ convocatoria.jugador?.identificacion }}</small>
@@ -220,7 +227,7 @@
             <section class="lineup-column">
               <h3><ion-icon name="people-outline"></ion-icon> Suplentes ({{ suplentesEquipoActual() + (partido.estadoPartido === 'PROGRAMADO' ? jugadoresDisponiblesAlineacion().length : 0) }})</h3>
               <div class="roster-drop-list" cdkDropList [cdkDropListDisabled]="partido.estadoPartido === 'EN_PROCESO'" [id]="'jugadores-' + equipoConvocatoria?.id" [cdkDropListData]="jugadoresEquipo(equipoConvocatoria)" [cdkDropListConnectedTo]="['titulares-' + equipoConvocatoria?.id]" (cdkDropListDropped)="moverJugador($event, false)">
-                <article class="roster-player-row" *ngFor="let convocatoria of jugadoresEquipo(equipoConvocatoria)" cdkDrag [cdkDragData]="convocatoria" (click)="abrirEventos(convocatoria)">
+                <article class="roster-player-row" *ngFor="let convocatoria of jugadoresEquipo(equipoConvocatoria)" cdkDrag [cdkDragData]="convocatoria">
                   <span class="player-number">{{ convocatoria.numeroUniforme || convocatoria.jugador?.numeroCamiseta || '–' }}</span>
                   <button type="button" class="player-info" (click)="$event.stopPropagation(); abrirPerfilJugador(convocatoria.jugador)">
                     <strong>{{ convocatoria.jugador?.nombre }}</strong><small>{{ convocatoria.jugador?.identificacion }}</small>
@@ -280,22 +287,6 @@
       </ion-content>
     </ng-template>
   </ion-modal>
-  <ion-modal [isOpen]="eventoModalOpen" (didDismiss)="cerrarEventos()">
-    <ng-template>
-      <ion-header><ion-toolbar><ion-title>Eventos: {{ jugadorEvento?.nombre }}</ion-title><ion-buttons slot="end"><ion-button (click)="cerrarEventos()">Cerrar</ion-button></ion-buttons></ion-toolbar></ion-header>
-      <ion-content class="ion-padding">
-        <ion-note color="danger" *ngIf="sancionActiva(jugadorEvento) as sancionActual">
-          Suspendido: {{ sancionActual.permanente ? 'resto del torneo' : sancionActual.partidosPendientes + ' partido(s) pendiente(s)' }}
-        </ion-note>
-        <ion-button *ngIf="validarOrganizador && sancionActiva(jugadorEvento) as sancionActual" expand="block" color="warning" (click)="modificarSancionJugador(!sancionActual.exencionPartidoId)">
-          {{ sancionActual.exencionPartidoId === partido.id ? 'Restaurar sanción' : 'Levantar sanción para este partido' }}
-        </ion-button>
-        <ion-item><ion-input type="number" label="Minuto" [(ngModel)]="minutoEvento"></ion-input></ion-item>
-        <div class="lineup-actions"><ion-button color="warning" (click)="registrarEvento('TARJETA_AMARILLA')">Amarilla</ion-button><ion-button color="danger" (click)="registrarEvento('TARJETA_ROJA')">Roja</ion-button></div>
-        <ion-list><ion-item *ngFor="let evento of eventosJugadorSeleccionado()"><ion-label>{{ nombreEvento(evento.tipo) }}<small>Minuto {{ evento.minuto }}</small></ion-label></ion-item></ion-list>
-      </ion-content>
-    </ng-template>
-  </ion-modal>
   <ion-modal [isOpen]="perfilJugadorModalOpen" (didDismiss)="cerrarPerfilJugador()">
     <ng-template>
       <ion-header><ion-toolbar><ion-title>Perfil del jugador</ion-title><ion-buttons slot="end"><ion-button (click)="cerrarPerfilJugador()">Cerrar</ion-button></ion-buttons></ion-toolbar></ion-header>
@@ -306,21 +297,45 @@
       </ion-content>
     </ng-template>
   </ion-modal>
-  <ion-grid class="goal-actions" *ngIf="validarOrganizador && partido.estadoPartido == 'EN_PROCESO'">
-    <ion-row>
-      <ion-col class="ion-text-center">
-        <img appImageFallback="assets/images/shield-placeholder.svg" [src]="mostrarEscudo(partido.equipoLocal?.escudo)" [alt]="'Escudo de ' + (partido.equipoLocal?.nombre || 'equipo local')">
-        <span>{{ partido.equipoLocal?.nombre }}</span>
-        <ion-button size="small" (click)="sumarGol(partido.equipoLocal)">Anotar gol</ion-button>
-      </ion-col>
-      <ion-col class="ion-text-center score-dash">VS</ion-col>
-      <ion-col class="ion-text-center">
-        <img appImageFallback="assets/images/shield-placeholder.svg" [src]="mostrarEscudo(partido.equipoVisitante?.escudo)" [alt]="'Escudo de ' + (partido.equipoVisitante?.nombre || 'equipo visitante')">
-        <span>{{ partido.equipoVisitante?.nombre }}</span>
-        <ion-button size="small" (click)="sumarGol(partido.equipoVisitante)">Anotar gol</ion-button>
-      </ion-col>
-    </ion-row>
-  </ion-grid>
+  <ion-modal class="player-actions-modal" [isOpen]="accionesJugadorModalOpen" (didDismiss)="cerrarAccionesAlineacion()">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>{{ convocatoriaAcciones?.jugador?.nombre || 'Acciones del jugador' }}</ion-title>
+          <ion-buttons slot="end"><ion-button (click)="cerrarAccionesAlineacion()">Cerrar</ion-button></ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="ion-padding player-actions-content">
+        <div class="player-actions-shell" *ngIf="convocatoriaAcciones as convocatoria">
+          <div class="selected-player-card">
+            <span class="player-number">{{ convocatoria.numeroUniforme ?? convocatoria.jugador?.numeroCamiseta ?? '–' }}</span>
+            <div><strong>{{ convocatoria.jugador?.nombre }}</strong><small>{{ equipoDeConvocatoria(convocatoria)?.nombre }}</small></div>
+          </div>
+          <ion-item class="action-minute"><ion-input type="number" label="Minuto del evento" min="0" [(ngModel)]="minutoEvento"></ion-input></ion-item>
+          <div class="player-action-buttons">
+            <ion-button expand="block" color="success" (click)="anotarGolDeJugador(false)"><ion-icon slot="start" name="football-outline"></ion-icon>Gol</ion-button>
+            <ion-button expand="block" color="warning" (click)="anotarGolDeJugador(true)"><ion-icon slot="start" name="football-outline"></ion-icon>Autogol</ion-button>
+            <ion-button expand="block" color="warning" (click)="registrarEvento('TARJETA_AMARILLA')"><ion-icon slot="start" name="warning-outline"></ion-icon>Tarjeta amarilla</ion-button>
+            <ion-button expand="block" color="danger" (click)="registrarEvento('TARJETA_ROJA')"><ion-icon slot="start" name="card-outline"></ion-icon>Tarjeta roja</ion-button>
+            <ion-button *ngIf="convocatoria.titular" expand="block" fill="outline" (click)="abrirCambio(convocatoria)"><ion-icon slot="start" name="swap-horizontal-outline"></ion-icon>Sustituir jugador</ion-button>
+          </div>
+          <ion-note color="danger" *ngIf="validarOrganizador && sancionActiva(jugadorEvento) as sancionActual">
+            Sancionado: {{ sancionActual.permanente ? 'resto del torneo' : sancionActual.partidosPendientes + ' partido(s) pendiente(s)' }}
+          </ion-note>
+          <ion-button *ngIf="validarOrganizador && sancionActiva(jugadorEvento) as sancionActual" expand="block" fill="clear" color="warning"
+            (click)="modificarSancionJugador(!sancionActual.exencionPartidoId)">
+            {{ sancionActual.exencionPartidoId === partido.id ? 'Restaurar sanción' : 'Levantar sanción para este partido' }}
+          </ion-button>
+          <ion-list>
+            <ion-list-header>Eventos del partido</ion-list-header>
+            <ion-item *ngFor="let evento of eventosJugadorSeleccionado()">
+              <ion-label>{{ nombreEvento(evento.tipo) }}<small>Minuto {{ evento.minuto }}</small></ion-label>
+            </ion-item>
+          </ion-list>
+        </div>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
   <ion-modal [isOpen]="registroGolModalOpen" (didDismiss)="cerrarRegistroGol()">
     <ng-template>
       <ion-header>
