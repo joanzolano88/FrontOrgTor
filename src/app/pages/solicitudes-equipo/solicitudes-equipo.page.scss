@@ -1,13 +1,10 @@
 :host {
-  --page-background: #f3f6fb;
-  --navy: #102b52;
   --muted: #74839a;
   --line: #e7edf5;
   display: block;
 }
 
 .requests-header ion-toolbar {
-  --color: #172b48;
   --border-color: var(--line);
   padding: 4px 12px;
 
@@ -21,10 +18,6 @@
     font-size: 21px;
     margin-inline: 14px;
   }
-}
-
-.requests-content {
-  --background: var(--page-background);
 }
 
 .requests-page {
@@ -52,7 +45,6 @@
 
   h1 {
     margin: 0;
-    color: #102746;
     font-size: clamp(28px, 5vw, 38px);
     font-weight: 800;
     letter-spacing: -1px;
@@ -75,7 +67,6 @@
   padding: 16px 20px;
   border: 1px solid #d9e7f7;
   border-radius: 16px;
-  color: var(--navy);
 
   .summary-icon {
     display: grid;
@@ -119,7 +110,6 @@
   ion-segment-button {
     --color: #687991;
     --color-checked: #174c88;
-    --background-checked: #fff;
     --indicator-color: transparent;
     min-height: 40px;
     border-radius: 10px;
@@ -157,7 +147,6 @@
 
   h2 {
     margin: 0;
-    color: #172d4b;
     font-size: 18px;
     font-weight: 800;
   }
@@ -249,7 +238,6 @@
 
   strong {
     overflow: hidden;
-    color: #1a2e4a;
     font-size: 15px;
     font-weight: 800;
     text-overflow: ellipsis;
@@ -327,7 +315,6 @@
   }
 
   strong {
-    color: #263b57;
     font-size: 14px;
   }
 
