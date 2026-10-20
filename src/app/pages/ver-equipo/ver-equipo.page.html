@@ -11,6 +11,7 @@
   <div class="team-shell">
     <section class="team-hero">
       <div class="hero-glow"></div>
+      <ion-icon class="hero-ball" name="football-outline" aria-hidden="true"></ion-icon>
       <div class="team-identity">
         <div class="team-badge">
           <img appImageFallback="assets/images/shield-placeholder.svg" alt="Escudo del equipo" [src]="equipo.escudo ? 'data:image/png;base64,' + equipo.escudo : ''">
@@ -18,7 +19,7 @@
         <div class="team-copy">
           <span class="eyebrow">Club</span>
           <h1>{{ equipo.nombre || 'Equipo sin nombre' }}</h1>
-          <p>{{ equipo.ciudad?.nombre || 'Ciudad no registrada' }}</p>
+          <p><ion-icon name="location"></ion-icon>{{ equipo.ciudad?.nombre || 'Ciudad no registrada' }}</p>
         </div>
       </div>
 
@@ -37,51 +38,64 @@
 
     <section class="team-stats">
       <div class="stat-box">
-        <strong>{{ equipo.listaJugadoresActivos?.length || 0 }}</strong>
-        <span>Jugadores</span>
+      <span class="stat-icon"><ion-icon name="people-outline"></ion-icon></span>
+      <strong>{{ equipo.listaJugadoresActivos?.length || 0 }}</strong>
+      <span class="stat-label">Jugadores</span>
       </div>
       <div class="stat-box">
-        <strong>{{ torneosConParticipacion().length || 0 }}</strong>
-        <span>Torneos</span>
+      <span class="stat-icon"><ion-icon name="trophy-outline"></ion-icon></span>
+      <strong>{{ torneosConParticipacion().length || 0 }}</strong>
+      <span class="stat-label">Torneos</span>
       </div>
       <div class="stat-box">
-        <strong>{{ participacionSeleccionada() ? '1' : '0' }}</strong>
-        <span>Actual</span>
+      <span class="stat-icon"><ion-icon name="calendar-outline"></ion-icon></span>
+      <strong>{{ participacionSeleccionada() ? '1' : '0' }}</strong>
+      <span class="stat-label">Actual</span>
       </div>
     </section>
 
     <section class="team-panels">
       <div class="panel info-panel">
-        <div class="panel-header">
-          <span class="eyebrow">Información</span>
-          <h2>Detalles del equipo</h2>
-        </div>
+      <div class="panel-header icon-heading">
+        <span class="heading-icon"><ion-icon name="document-text-outline"></ion-icon></span>
+        <h2>Información del equipo</h2>
+      </div>
 
-        <div class="detail-grid">
-          <div class="detail-item">
-            <span class="label">Delegado</span>
-            <strong>{{ equipo.delegado?.nombre || 'Sin delegado' }}</strong>
+      <div class="detail-grid">
+        <div class="detail-item">
+          <span class="detail-icon"><ion-icon name="person-outline"></ion-icon></span>
+          <div>
+          <span class="label">Delegado</span>
+          <strong>{{ equipo.delegado?.nombre || 'Sin delegado' }}</strong>
           </div>
-          <div class="detail-item">
-            <span class="label">Celular</span>
-            <strong>{{ equipo.delegado?.numeroCelular || 'No disponible' }}</strong>
+        </div>
+        <div class="detail-item">
+          <span class="detail-icon"><ion-icon name="call-outline"></ion-icon></span>
+          <div>
+          <span class="label">Celular</span>
+          <strong>{{ equipo.delegado?.numeroCelular || 'No disponible' }}</strong>
           </div>
-          <div class="detail-item">
-            <span class="label">Ciudad</span>
-            <strong>{{ equipo.ciudad?.nombre || 'Sin ciudad registrada' }}</strong>
+        </div>
+        <div class="detail-item">
+          <span class="detail-icon"><ion-icon name="location-outline"></ion-icon></span>
+          <div>
+          <span class="label">Ciudad</span>
+          <strong>{{ equipo.ciudad?.nombre || 'Sin ciudad registrada' }}</strong>
           </div>
         </div>
       </div>
+      </div>
 
       <div class="panel roster-panel">
-        <ion-accordion-group>
-          <ion-accordion value="jugadores">
-            <ion-item slot="header" lines="none" class="roster-accordion-header">
-              <ion-label>
-                <span class="eyebrow">Plantilla general</span>
-                <h2>Jugadores del equipo</h2>
-              </ion-label>
-              <ion-badge slot="end">{{ equipo.listaJugadoresActivos?.length || 0 }}</ion-badge>
+      <ion-accordion-group>
+        <ion-accordion value="jugadores">
+          <ion-item slot="header" lines="none" class="roster-accordion-header">
+            <span slot="start" class="section-icon"><ion-icon name="people-outline"></ion-icon></span>
+            <ion-label>
+              <h2>Plantilla general</h2>
+              <p>Jugadores del equipo</p>
+            </ion-label>
+            <ion-badge slot="end">{{ equipo.listaJugadoresActivos?.length || 0 }}</ion-badge>
             </ion-item>
             <div slot="content" class="roster-accordion-content">
               <div class="player-list" *ngIf="equipo.listaJugadoresActivos?.length; else emptyPlayers">
@@ -146,8 +160,13 @@
       <div class="panel tournament-panel" *ngIf="equipo.id">
         <div class="panel-header row-header">
           <div>
-            <span class="eyebrow">Participación</span>
-            <h2>Torneos del equipo</h2>
+            <div class="tournament-heading">
+              <span class="section-icon"><ion-icon name="trophy-outline"></ion-icon></span>
+              <div>
+                <h2>Participación en torneos</h2>
+                <p>Torneos del equipo</p>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -159,7 +178,11 @@
         <div class="tournament-list" *ngIf="!cargandoTorneos && !errorTorneos">
           <button class="tournament-pill" *ngFor="let participacion of torneosConParticipacion()" type="button"
             [disabled]="!esParticipacionAceptada(participacion)" (click)="abrirDetalleTorneo(participacion)">
+            <span class="tournament-icon"><ion-icon name="football-outline"></ion-icon></span>
+            <span class="tournament-copy">
             <span class="tournament-name">{{ participacion.torneo?.nombre || 'Torneo' }}</span>
+            <span class="tournament-state">{{ participacion.torneo?.estadoTorneo || 'Participación registrada' }}</span>
+            </span>
             <ion-badge [color]="colorEstadoParticipacion(participacion)">{{ etiquetaEstadoParticipacion(participacion) }}</ion-badge>
             <ion-icon *ngIf="esParticipacionAceptada(participacion)" name="chevron-forward-outline"></ion-icon>
           </button>
