@@ -208,11 +208,8 @@
                   [class.goalkeeper]="posicion.portero"
                   [class.position-selected]="convocatoriaPosicionSeleccionada?.id === convocatoria.id"
                   [disabled]="intercambiandoPosiciones"
-                  [attr.aria-label]="(partido.estadoPartido === 'PROGRAMADO' || (partido.estadoPartido === 'EN_PROCESO' && esDelegado()) ? 'Seleccionar posición de ' : 'Acciones de ') + convocatoria.jugador?.nombre"
+                  [attr.aria-label]="(partido.estadoPartido === 'PROGRAMADO' || (partido.estadoPartido === 'EN_PROCESO' && modoCambiarPosiciones) ? 'Seleccionar posición de ' : 'Ver información de ') + convocatoria.jugador?.nombre"
                   [title]="convocatoria.jugador?.nombre || ''"
-                  (pointerdown)="iniciarPulsacionJugador(convocatoria)" (pointerup)="finalizarPulsacionJugador(convocatoria)"
-                  (pointerleave)="cancelarPulsacionJugador()" (pointercancel)="cancelarPulsacionJugador()"
-                  (contextmenu)="$event.preventDefault(); abrirPerfilJugador(convocatoria.jugador)"
                   (click)="clickJugadorAlineacion(convocatoria)">
                   <span>{{ convocatoria.numeroUniforme ?? convocatoria.jugador?.numeroCamiseta ?? '' }}</span>
                   <small class="goalkeeper-label" *ngIf="posicion.portero">PORTERO</small>
@@ -247,11 +244,8 @@
                   [class.goalkeeper]="posicion.portero"
                   [class.position-selected]="convocatoriaPosicionSeleccionada?.id === convocatoria.id"
                   [disabled]="intercambiandoPosiciones"
-                  [attr.aria-label]="(partido.estadoPartido === 'PROGRAMADO' || (partido.estadoPartido === 'EN_PROCESO' && esDelegado()) ? 'Seleccionar posición de ' : 'Acciones de ') + convocatoria.jugador?.nombre"
+                  [attr.aria-label]="(partido.estadoPartido === 'PROGRAMADO' || (partido.estadoPartido === 'EN_PROCESO' && modoCambiarPosiciones) ? 'Seleccionar posición de ' : 'Ver información de ') + convocatoria.jugador?.nombre"
                   [title]="convocatoria.jugador?.nombre || ''"
-                  (pointerdown)="iniciarPulsacionJugador(convocatoria)" (pointerup)="finalizarPulsacionJugador(convocatoria)"
-                  (pointerleave)="cancelarPulsacionJugador()" (pointercancel)="cancelarPulsacionJugador()"
-                  (contextmenu)="$event.preventDefault(); abrirPerfilJugador(convocatoria.jugador)"
                   (click)="clickJugadorAlineacion(convocatoria)">
                   <span>{{ convocatoria.numeroUniforme ?? convocatoria.jugador?.numeroCamiseta ?? '' }}</span>
                   <small class="goalkeeper-label" *ngIf="posicion.portero">PORTERO</small>
@@ -523,6 +517,9 @@
       <ion-content class="ion-padding">
         <ion-card><ion-card-header><ion-card-title>{{ perfilJugador?.nombre }}</ion-card-title><ion-card-subtitle>{{ perfilJugador?.identificacion }}</ion-card-subtitle></ion-card-header><ion-card-content><ion-grid><ion-row><ion-col>Goles<strong>{{ estadisticaJugador('GOL') }}</strong></ion-col><ion-col>Autogoles<strong>{{ estadisticaJugador('AUTOGOL') }}</strong></ion-col><ion-col>Asistencias<strong>{{ estadisticaJugador('ASISTENCIA') }}</strong></ion-col><ion-col>Amarillas<strong>{{ estadisticaJugador('TARJETA_AMARILLA') }}</strong></ion-col><ion-col>Expulsiones<strong>{{ estadisticaJugador('TARJETA_ROJA') }}</strong></ion-col></ion-row></ion-grid></ion-card-content></ion-card>
         <ion-note color="danger" *ngIf="perfilJugadorData?.sancionTorneo as sancion">Sanción: {{ sancion.permanente ? 'resto del torneo' : sancion.partidosPendientes + ' partido(s) pendiente(s)' }}</ion-note>
+        <ion-button *ngIf="puedeAbrirAccionesDesdePerfil()" expand="block" (click)="abrirAccionesDesdePerfil()">
+          Acciones del partido
+        </ion-button>
         <ion-list><ion-list-header>Equipos y torneos</ion-list-header><ion-item *ngFor="let participacion of perfilJugadorData?.participaciones"><ion-label>{{ participacion.equipo?.nombre }}<small>{{ participacion.torneo?.nombre }}<span *ngIf="participacion.cambioEquipo"> · Cambio realizado</span></small></ion-label></ion-item></ion-list>
       </ion-content>
     </ng-template>

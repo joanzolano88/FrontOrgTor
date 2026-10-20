@@ -150,10 +150,6 @@ export class PartidoPage implements OnInit {
   modoCambiarPosiciones = false;
   golPenalti = false;
   tarjetaRojaDobleAmarilla = false;
-  private pulsacionJugadorTimer?: ReturnType<typeof setTimeout>;
-  private pulsacionJugadorConsumida = false;
-  private suprimirClickJugador = false;
-  private suprimirClickJugadorTimer?: ReturnType<typeof setTimeout>;
 
   constructor(private crud: CrudService, private route: ActivatedRoute,
     private router: Router, private sesionService: SesionService, private alertController: AlertController) {
@@ -374,6 +370,21 @@ export class PartidoPage implements OnInit {
     this.accionesJugadorModalOpen = false;
     this.convocatoriaAcciones = undefined;
   }
+  puedeAbrirAccionesDesdePerfil(): boolean {
+    if (this.partido.estadoPartido !== 'EN_PROCESO' || !this.perfilJugador?.id) return false;
+    const convocatoria = this.convocatorias.find(item =>
+      Number(item.jugador?.id) === Number(this.perfilJugador?.id));
+    return !!convocatoria && (this.validarOrganizador ||
+      (this.esDelegado() && this.puedeGestionarEquipo(this.equipoDeConvocatoria(convocatoria))));
+  }
+  abrirAccionesDesdePerfil() {
+    if (!this.perfilJugador?.id || !this.puedeAbrirAccionesDesdePerfil()) return;
+    const convocatoria = this.convocatorias.find(item =>
+      Number(item.jugador?.id) === Number(this.perfilJugador?.id));
+    if (!convocatoria) return;
+    this.perfilJugadorModalOpen = false;
+    this.abrirAccionesAlineacion(convocatoria);
+  }
   cerrarAccionesAlineacion() {
     this.accionesJugadorModalOpen = false;
     this.convocatoriaAcciones = undefined;
@@ -383,52 +394,12 @@ export class PartidoPage implements OnInit {
     }
   }
   clickJugadorAlineacion(convocatoria: ConvocatoriaPartido) {
-    if (this.suprimirClickJugador) {
-      this.suprimirClickJugador = false;
-      if (this.suprimirClickJugadorTimer) clearTimeout(this.suprimirClickJugadorTimer);
-      this.suprimirClickJugadorTimer = undefined;
-      return;
-    }
-    if (this.pulsacionJugadorConsumida) {
-      this.pulsacionJugadorConsumida = false;
-      return;
-    }
     if (this.partido.estadoPartido === 'PROGRAMADO' ||
         (this.partido.estadoPartido === 'EN_PROCESO' && this.modoCambiarPosiciones)) {
       this.seleccionarPosicion(convocatoria);
-    } else if (this.partido.estadoPartido === 'EN_PROCESO') {
-      this.abrirAccionesAlineacion(convocatoria);
-    }
-  }
-  iniciarPulsacionJugador(convocatoria: ConvocatoriaPartido) {
-    this.cancelarPulsacionJugador();
-    this.pulsacionJugadorConsumida = false;
-    this.pulsacionJugadorTimer = setTimeout(() => {
-      this.pulsacionJugadorConsumida = true;
+    } else {
       this.abrirPerfilJugador(convocatoria.jugador);
-    }, 550);
-  }
-  finalizarPulsacionJugador(convocatoria: ConvocatoriaPartido) {
-    this.cancelarPulsacionJugador();
-    if (this.pulsacionJugadorConsumida) {
-      this.pulsacionJugadorConsumida = false;
-      this.suprimirClickPunteroJugador();
-      return;
     }
-    this.suprimirClickPunteroJugador();
-    this.clickJugadorAlineacion(convocatoria);
-  }
-  private suprimirClickPunteroJugador() {
-    this.suprimirClickJugador = true;
-    if (this.suprimirClickJugadorTimer) clearTimeout(this.suprimirClickJugadorTimer);
-    this.suprimirClickJugadorTimer = setTimeout(() => {
-      this.suprimirClickJugador = false;
-      this.suprimirClickJugadorTimer = undefined;
-    }, 0);
-  }
-  cancelarPulsacionJugador() {
-    if (this.pulsacionJugadorTimer) clearTimeout(this.pulsacionJugadorTimer);
-    this.pulsacionJugadorTimer = undefined;
   }
   alternarModoPosiciones() {
     this.modoCambiarPosiciones = !this.modoCambiarPosiciones;
