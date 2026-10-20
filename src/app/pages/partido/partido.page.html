@@ -210,7 +210,7 @@
                   [disabled]="intercambiandoPosiciones"
                   [attr.aria-label]="(partido.estadoPartido === 'PROGRAMADO' || (partido.estadoPartido === 'EN_PROCESO' && esDelegado()) ? 'Seleccionar posición de ' : 'Acciones de ') + convocatoria.jugador?.nombre"
                   [title]="convocatoria.jugador?.nombre || ''"
-                  (pointerdown)="iniciarPulsacionJugador(convocatoria)" (pointerup)="cancelarPulsacionJugador()"
+                  (pointerdown)="iniciarPulsacionJugador(convocatoria)" (pointerup)="finalizarPulsacionJugador(convocatoria)"
                   (pointerleave)="cancelarPulsacionJugador()" (pointercancel)="cancelarPulsacionJugador()"
                   (contextmenu)="$event.preventDefault(); abrirPerfilJugador(convocatoria.jugador)"
                   (click)="clickJugadorAlineacion(convocatoria)">
@@ -249,7 +249,7 @@
                   [disabled]="intercambiandoPosiciones"
                   [attr.aria-label]="(partido.estadoPartido === 'PROGRAMADO' || (partido.estadoPartido === 'EN_PROCESO' && esDelegado()) ? 'Seleccionar posición de ' : 'Acciones de ') + convocatoria.jugador?.nombre"
                   [title]="convocatoria.jugador?.nombre || ''"
-                  (pointerdown)="iniciarPulsacionJugador(convocatoria)" (pointerup)="cancelarPulsacionJugador()"
+                  (pointerdown)="iniciarPulsacionJugador(convocatoria)" (pointerup)="finalizarPulsacionJugador(convocatoria)"
                   (pointerleave)="cancelarPulsacionJugador()" (pointercancel)="cancelarPulsacionJugador()"
                   (contextmenu)="$event.preventDefault(); abrirPerfilJugador(convocatoria.jugador)"
                   (click)="clickJugadorAlineacion(convocatoria)">
