@@ -22,6 +22,7 @@ export class TorneoComponent {
   esPropietario = false;
   puedeRegistrarEquipos = false;
   torneo: Torneo = new Torneo();
+  estadoSeleccionado: EstadoTorneo = EstadoTorneo.INSCRIPCIONES;
   listCancha: Cancha[] = [];
   documento: string = "";
   isAlertOpen = false;
@@ -37,6 +38,7 @@ export class TorneoComponent {
   ngOnInit(): void {
     this.crud.obtenerParametro(this.route.snapshot.paramMap.get('idTorneo'), "torneo").subscribe((respT: Torneo) =>{
       this.torneo = respT;
+      this.estadoSeleccionado = respT.estadoTorneo || EstadoTorneo.INSCRIPCIONES;
       const usuario = this.crud.obtenerUsuario();
       this.esPropietario = this.validarOrganizador && this.torneo.encargadoTorneo?.id === usuario?.id;
       if (this.esPropietario) {
@@ -213,32 +215,30 @@ export class TorneoComponent {
       this.setOpen(true);
     });
   }
-  async cambiarEstadoTorneo(event: any) {
-    if (!this.esPropietario) {
-      return;
-    }
-    const nuevoEstado = event?.detail?.value as string;
+  async cambiarEstadoTorneo() {
+    if (!this.esPropietario) return;
+    const nuevoEstado = this.estadoSeleccionado;
     const estadoAnterior = this.torneo.estadoTorneo;
+    if (!nuevoEstado || nuevoEstado === estadoAnterior) return;
     if (this.torneo.estadoTorneo === EstadoTorneo.FINALIZADO) {
       this.mensajeError = 'El torneo ya está finalizado y no admite modificaciones.';
       this.setOpen(true);
-      this.torneo.estadoTorneo = EstadoTorneo.FINALIZADO;
+      this.estadoSeleccionado = EstadoTorneo.FINALIZADO;
       return;
     }
-    const estadoActual = this.torneo.estadoTorneo as string;
+    const estadoActual = estadoAnterior as string;
     const esEstadoInscripcionActivo = estadoActual === EstadoTorneo.INSCRIPCIONES_ACTIVO || estadoActual === 'INSCRIPCIONES_ACRIVO';
     if (nuevoEstado === EstadoTorneo.INSCRIPCIONES && !esEstadoInscripcionActivo && this.torneo.estadoTorneo !== EstadoTorneo.INSCRIPCIONES) {
       this.mensajeError = 'No se puede devolver el torneo a INSCRIPCIONES desde otro estado.';
       this.setOpen(true);
-      this.torneo.estadoTorneo = this.torneo.estadoTorneo;
+      this.estadoSeleccionado = this.torneo.estadoTorneo || EstadoTorneo.INSCRIPCIONES;
       return;
     }
-    this.torneo.estadoTorneo = estadoActual as any;
     const alerta = await this.alertController.create({
       header: 'Cambiar estado del torneo',
       message: this.mensajeCambioEstado(nuevoEstado),
       buttons: [
-        { text: 'Cancelar', role: 'cancel', handler: () => this.torneo.estadoTorneo = estadoActual as any },
+        { text: 'Cancelar', role: 'cancel', handler: () => this.estadoSeleccionado = this.torneo.estadoTorneo || EstadoTorneo.INSCRIPCIONES },
         { text: 'Confirmar', role: 'confirm', handler: () => this.confirmarCambioEstado(nuevoEstado, estadoActual) }
       ]
     });
@@ -262,6 +262,7 @@ export class TorneoComponent {
     this.crud.actualizar({ ...this.torneo, estadoTorneo: nuevoEstado }, 'torneo').subscribe({
       next: (torneoActualizado: Torneo) => {
         this.torneo = torneoActualizado;
+        this.estadoSeleccionado = torneoActualizado.estadoTorneo || nuevoEstado as EstadoTorneo;
         const debeArmar = (nuevoEstado === EstadoTorneo.INSCRIPCIONES || nuevoEstado === EstadoTorneo.INSCRIPCIONES_ACTIVO) &&
           estadoAnterior !== nuevoEstado;
         if (debeArmar && this.torneo.id) {
@@ -271,7 +272,7 @@ export class TorneoComponent {
       error: (err: HttpErrorResponse) => {
         this.mensajeError = err.error?.message || 'No se pudo cambiar el estado del torneo.';
         this.setOpen(true);
-        this.torneo.estadoTorneo = estadoAnterior as any;
+        this.estadoSeleccionado = estadoAnterior as EstadoTorneo;
       }
     });
   }

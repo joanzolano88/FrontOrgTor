@@ -5,12 +5,24 @@
   </ion-refresher>
   <ion-card class="status-panel">
     <div class="section-heading"><div><strong>Estado actual</strong></div><ion-badge [color]="colorEstadoTorneo()">{{ etiquetaEstadoTorneo() }}</ion-badge></div>
-    <ion-segment [(ngModel)]="torneo.estadoTorneo" [disabled]="!esPropietario || torneo.estadoTorneo == 'FINALIZADO'" (ionChange)="cambiarEstadoTorneo($event)">
-      <ion-segment-button value="INSCRIPCIONES"><ion-label>Inscripciones</ion-label></ion-segment-button>
-      <ion-segment-button value="INSCRIPCIONES_ACTIVO"><ion-label>Activo/inscripciones</ion-label></ion-segment-button>
-      <ion-segment-button value="ACTIVO"><ion-label>Activo</ion-label></ion-segment-button>
-      <ion-segment-button value="FINALIZADO"><ion-label>Finalizado</ion-label></ion-segment-button>
-    </ion-segment>
+    <div class="status-editor" *ngIf="esPropietario && torneo.estadoTorneo !== 'FINALIZADO'">
+      <ion-select
+        [(ngModel)]="estadoSeleccionado"
+        interface="alert"
+        label="Cambiar estado"
+        labelPlacement="stacked"
+        aria-label="Seleccionar nuevo estado del torneo">
+        <ion-select-option value="INSCRIPCIONES">Inscripciones</ion-select-option>
+        <ion-select-option value="INSCRIPCIONES_ACTIVO">Inscripciones activas</ion-select-option>
+        <ion-select-option value="ACTIVO">En juego</ion-select-option>
+        <ion-select-option value="FINALIZADO">Finalizado</ion-select-option>
+      </ion-select>
+      <ion-button
+        [disabled]="!estadoSeleccionado || estadoSeleccionado === torneo.estadoTorneo"
+        (click)="cambiarEstadoTorneo()">
+        Aplicar cambio
+      </ion-button>
+    </div>
   </ion-card>
   <ion-card class="tournament-actions">
     <div class="section-heading"><div><strong>Gestiona este torneo</strong></div></div>

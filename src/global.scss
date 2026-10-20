@@ -120,6 +120,10 @@ ion-content {
     color: var(--ion-text-color);
 }
 
+ion-content[fullscreen]::part(scroll) {
+    padding-bottom: calc(72px + env(safe-area-inset-bottom));
+}
+
 ion-toolbar {
     --background: var(--ion-toolbar-background);
     --color: var(--ion-toolbar-color);
