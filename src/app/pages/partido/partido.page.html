@@ -511,16 +511,100 @@
       </ion-content>
     </ng-template>
   </ion-modal>
-  <ion-modal [isOpen]="perfilJugadorModalOpen" (didDismiss)="cerrarPerfilJugador()">
+  <ion-modal class="player-profile-modal" [isOpen]="perfilJugadorModalOpen" (didDismiss)="cerrarPerfilJugador()">
     <ng-template>
-      <ion-header><ion-toolbar><ion-title>Perfil del jugador</ion-title><ion-buttons slot="end"><ion-button (click)="cerrarPerfilJugador()">Cerrar</ion-button></ion-buttons></ion-toolbar></ion-header>
-      <ion-content class="ion-padding">
-        <ion-card><ion-card-header><ion-card-title>{{ perfilJugador?.nombre }}</ion-card-title><ion-card-subtitle>{{ perfilJugador?.identificacion }}</ion-card-subtitle></ion-card-header><ion-card-content><ion-grid><ion-row><ion-col>Goles<strong>{{ estadisticaJugador('GOL') }}</strong></ion-col><ion-col>Autogoles<strong>{{ estadisticaJugador('AUTOGOL') }}</strong></ion-col><ion-col>Asistencias<strong>{{ estadisticaJugador('ASISTENCIA') }}</strong></ion-col><ion-col>Amarillas<strong>{{ estadisticaJugador('TARJETA_AMARILLA') }}</strong></ion-col><ion-col>Expulsiones<strong>{{ estadisticaJugador('TARJETA_ROJA') }}</strong></ion-col></ion-row></ion-grid></ion-card-content></ion-card>
-        <ion-note color="danger" *ngIf="perfilJugadorData?.sancionTorneo as sancion">Sanción: {{ sancion.permanente ? 'resto del torneo' : sancion.partidosPendientes + ' partido(s) pendiente(s)' }}</ion-note>
-        <ion-button *ngIf="puedeAbrirAccionesDesdePerfil()" expand="block" (click)="abrirAccionesDesdePerfil()">
-          Acciones del partido
-        </ion-button>
-        <ion-list><ion-list-header>Equipos y torneos</ion-list-header><ion-item *ngFor="let participacion of perfilJugadorData?.participaciones"><ion-label>{{ participacion.equipo?.nombre }}<small>{{ participacion.torneo?.nombre }}<span *ngIf="participacion.cambioEquipo"> · Cambio realizado</span></small></ion-label></ion-item></ion-list>
+      <ion-header class="player-profile-header">
+        <ion-toolbar>
+          <ion-title><ion-icon name="person-circle-outline"></ion-icon> Perfil del jugador</ion-title>
+          <ion-buttons slot="end">
+            <ion-button aria-label="Cerrar perfil" (click)="cerrarPerfilJugador()">
+              <ion-icon slot="icon-only" name="close-outline"></ion-icon>
+            </ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="player-profile-content">
+        <div class="player-profile-shell" *ngIf="perfilJugador as jugador">
+          <section class="player-profile-summary">
+            <span class="profile-jersey-number">{{ convocatoriaPerfil()?.numeroUniforme ?? jugador.numeroCamiseta ?? '–' }}</span>
+            <div class="profile-player-identity">
+              <h2>{{ jugador.nombre || 'Jugador' }}</h2>
+              <p>ID: {{ jugador.identificacion || 'No disponible' }}</p>
+              <div class="profile-player-badges">
+                <span class="profile-role-badge">{{ convocatoriaPerfil()?.titular ? 'Titular' : 'Suplente' }}</span>
+                <span class="profile-status-badge" *ngIf="jugador.estadoJugador">{{ jugador.estadoJugador }}</span>
+              </div>
+            </div>
+            <div class="profile-team-badge" *ngIf="equipoPerfil() as equipo">
+              <img appImageFallback="assets/images/shield-placeholder.svg"
+                [src]="mostrarEscudo(equipo.escudo)"
+                [alt]="'Escudo de ' + equipo.nombre">
+              <strong>{{ equipo.nombre }}</strong>
+              <small>Equipo</small>
+            </div>
+          </section>
+
+          <section class="player-profile-stats" aria-label="Estadísticas del jugador en este partido">
+            <div class="profile-stat">
+              <ion-icon name="football-outline" class="stat-goals"></ion-icon>
+              <span>Goles</span><strong>{{ estadisticaJugador('GOL') }}</strong>
+            </div>
+            <div class="profile-stat">
+              <ion-icon name="football-outline" class="stat-own-goals"></ion-icon>
+              <span>Autogoles</span><strong>{{ estadisticaJugador('AUTOGOL') }}</strong>
+            </div>
+            <div class="profile-stat">
+              <ion-icon name="shield-checkmark-outline" class="stat-assists"></ion-icon>
+              <span>Asistencias</span><strong>{{ estadisticaJugador('ASISTENCIA') }}</strong>
+            </div>
+            <div class="profile-stat">
+              <span class="event-card card-yellow"></span>
+              <span>Amarillas</span><strong>{{ estadisticaJugador('TARJETA_AMARILLA') }}</strong>
+            </div>
+            <div class="profile-stat">
+              <span class="event-card card-red"></span>
+              <span>Expulsiones</span><strong>{{ estadisticaJugador('TARJETA_ROJA') }}</strong>
+            </div>
+          </section>
+
+          <section class="player-profile-history">
+            <h3><ion-icon name="trophy-outline"></ion-icon> Equipos y torneos</h3>
+            <article class="profile-participation"
+              *ngFor="let participacion of perfilJugadorData?.participaciones">
+              <img appImageFallback="assets/images/shield-placeholder.svg"
+                [src]="mostrarEscudo(participacion.equipo?.escudo)"
+                [alt]="'Escudo de ' + (participacion.equipo?.nombre || 'equipo')">
+              <div>
+                <strong>{{ participacion.torneo?.nombre || 'Torneo' }}</strong>
+                <small>{{ participacion.equipo?.nombre || 'Equipo' }}</small>
+              </div>
+              <span class="profile-current-team"
+                *ngIf="esEquipoActualPerfil(participacion.equipo)">Equipo actual</span>
+            </article>
+            <article class="profile-participation"
+              *ngIf="!perfilJugadorData?.participaciones?.length && equipoPerfil() as equipo">
+              <img appImageFallback="assets/images/shield-placeholder.svg"
+                [src]="mostrarEscudo(equipo.escudo)" [alt]="'Escudo de ' + equipo.nombre">
+              <div>
+                <strong>{{ partido.torneo?.nombre || 'Torneo' }}</strong>
+                <small>{{ equipo.nombre }}</small>
+              </div>
+              <span class="profile-current-team">Equipo actual</span>
+            </article>
+            <ion-note class="profile-empty-history"
+              *ngIf="!perfilJugadorData?.participaciones?.length && !equipoPerfil()">Sin participaciones para mostrar.</ion-note>
+          </section>
+
+          <ion-note class="profile-suspension" color="danger"
+            *ngIf="perfilJugadorData?.sancionTorneo as sancion">
+            Sanción: {{ sancion.permanente ? 'resto del torneo' : sancion.partidosPendientes + ' partido(s) pendiente(s)' }}
+          </ion-note>
+          <ion-button class="profile-substitution-button" expand="block"
+            *ngIf="puedeSolicitarSustitucionPerfil()" (click)="solicitarSustitucionDesdePerfil()">
+            <ion-icon slot="start" name="swap-horizontal-outline"></ion-icon>
+            Solicitar sustitución
+          </ion-button>
+        </div>
       </ion-content>
     </ng-template>
   </ion-modal>
