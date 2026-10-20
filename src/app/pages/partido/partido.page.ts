@@ -363,6 +363,15 @@ export class PartidoPage implements OnInit {
     this.tarjetaRojaDobleAmarilla = false;
     this.accionesJugadorModalOpen = true;
   }
+  seleccionarJugadorParaCambiarPosicion(convocatoria: ConvocatoriaPartido) {
+    if (!this.puedeCambiarPosicionesEnJuego() ||
+        !this.puedeModificarTactica(this.equipoDeConvocatoria(convocatoria)) ||
+        !convocatoria.id) return;
+    this.modoCambiarPosiciones = true;
+    this.convocatoriaPosicionSeleccionada = convocatoria;
+    this.accionesJugadorModalOpen = false;
+    this.convocatoriaAcciones = undefined;
+  }
   cerrarAccionesAlineacion() {
     this.accionesJugadorModalOpen = false;
     this.convocatoriaAcciones = undefined;

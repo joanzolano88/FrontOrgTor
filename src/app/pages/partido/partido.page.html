@@ -543,6 +543,10 @@
           </div>
           <ion-item class="action-minute" *ngIf="validarOrganizador"><ion-input type="number" label="Minuto del evento" min="0" [(ngModel)]="minutoEvento"></ion-input></ion-item>
           <div class="player-action-buttons">
+            <ion-button *ngIf="puedeCambiarPosicionesEnJuego() && puedeModificarTactica(equipoDeConvocatoria(convocatoria))"
+              expand="block" fill="outline" (click)="seleccionarJugadorParaCambiarPosicion(convocatoria)">
+              <ion-icon slot="start" name="swap-horizontal-outline"></ion-icon>Seleccionar para cambiar posición
+            </ion-button>
             <ng-container *ngIf="validarOrganizador">
               <ion-button expand="block" color="success" (click)="anotarGolDeJugador(false)"><ion-icon slot="start" name="football-outline"></ion-icon>Gol</ion-button>
               <ion-button expand="block" color="warning" (click)="anotarGolDeJugador(true)"><ion-icon slot="start" name="football-outline"></ion-icon>Autogol</ion-button>
