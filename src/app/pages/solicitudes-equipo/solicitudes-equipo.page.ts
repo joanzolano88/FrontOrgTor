@@ -13,6 +13,7 @@ import { Equipo } from 'src/models/Equipo';
 export class SolicitudesEquipoPage {
   solicitudes: Equipo[] = [];
   aceptadas: Equipo[] = [];
+  filtro: 'todas' | 'pendientes' | 'aceptadas' = 'todas';
   idTorneo = '';
   mensajeError = '';
   alertOpen = false;
@@ -48,8 +49,33 @@ export class SolicitudesEquipoPage {
     });
     this.crud.obtenerSolicitudesTodas(this.idTorneo).subscribe({
       next: (equipos: Equipo[]) => this.aceptadas = (equipos || []).filter(equipo => equipo.participacionTorneo?.estado === 'ACEPTADO'),
-      error: () => this.aceptadas = []
+      error: err => {
+        this.mensajeError = this.extraerMensajeError(err, 'No se pudieron cargar los equipos aceptados.');
+        this.alertOpen = true;
+      }
     });
+  }
+
+  get mostrarPendientes(): boolean {
+    return this.filtro !== 'aceptadas';
+  }
+
+  get mostrarAceptadas(): boolean {
+    return this.filtro !== 'pendientes';
+  }
+
+  cambiarFiltro(valor: string | number | undefined) {
+    if (valor === 'todas' || valor === 'pendientes' || valor === 'aceptadas') {
+      this.filtro = valor;
+    }
+  }
+
+  nombreFase(fase?: string): string {
+    if (!fase) {
+      return 'Sin definir';
+    }
+    return fase.replace(/_/g, ' ').replace(/^FASE /, 'Fase ').toLowerCase()
+      .replace(/\b\w/g, letra => letra.toUpperCase());
   }
 
   async aceptar(solicitud: Equipo) {

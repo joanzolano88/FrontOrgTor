@@ -1,38 +1,112 @@
-<ion-header>
+<ion-header class="requests-header">
   <ion-toolbar>
-    <ion-buttons slot="start"><ion-back-button [defaultHref]="'/auth/torneos/torneo/' + idTorneo"></ion-back-button></ion-buttons>
+    <ion-buttons slot="start">
+      <ion-back-button [defaultHref]="'/auth/torneos/torneo/' + idTorneo"></ion-back-button>
+    </ion-buttons>
     <ion-title>Solicitudes de equipos</ion-title>
+    <ion-icon slot="end" name="notifications-outline" aria-hidden="true"></ion-icon>
   </ion-toolbar>
 </ion-header>
 
-<ion-content>
-  <ion-list>
-    <ion-list-header><ion-label>Solicitudes pendientes ({{ solicitudes.length }})</ion-label></ion-list-header>
-  </ion-list>
-  <ion-list>
-    <ion-item *ngFor="let solicitud of solicitudes">
-      <ion-thumbnail slot="start"><img appImageFallback="assets/images/shield-placeholder.svg" alt="Escudo del equipo" [src]="solicitud.escudo ? 'data:image/png;base64,' + solicitud.escudo : ''"></ion-thumbnail>
-      <ion-label (click)="verEquipo(solicitud.id)">
-        <h2>{{ solicitud.nombre }}</h2>
-        <p>Delegado: {{ solicitud.delegado?.nombre }}</p>
-        <p>Celular: {{ solicitud.delegado?.numeroCelular }}</p>
-      </ion-label>
-      <ion-button slot="end" (click)="aceptar(solicitud)">Aceptar</ion-button>
-      <ion-button slot="end" color="danger" fill="outline" (click)="rechazar(solicitud)">Rechazar</ion-button>
-    </ion-item>
-  </ion-list>
-  <ion-item *ngIf="solicitudes.length === 0"><ion-label>No hay solicitudes pendientes.</ion-label></ion-item>
-  <ion-list>
-    <ion-list-header><ion-label>Equipos aceptados ({{ aceptadas.length }})</ion-label></ion-list-header>
-    <ion-item *ngFor="let equipo of aceptadas">
-      <ion-label (click)="verEquipo(equipo.id)">
-        <h2>{{ equipo.nombre }}</h2>
-        <p>Delegado: {{ equipo.delegado?.nombre }}</p>
-        <p>Fase: {{ equipo.participacionTorneo?.faseActual }}</p>
-      </ion-label>
-      <ion-badge color="success">Aceptado</ion-badge>
-    </ion-item>
-    <ion-item *ngIf="aceptadas.length === 0"><ion-label>Aún no hay equipos aceptados.</ion-label></ion-item>
-  </ion-list>
+<ion-content class="requests-content">
+  <main class="requests-page">
+    <section class="requests-intro">
+      <div class="intro-copy">
+        <p class="eyebrow">GESTIÓN DEL TORNEO</p>
+        <h1>Equipos</h1>
+        <p class="intro-description">Administra las solicitudes y los equipos participantes.</p>
+      </div>
+      <div class="summary-card">
+        <div class="summary-icon"><ion-icon name="people-outline"></ion-icon></div>
+        <div>
+          <strong>{{ solicitudes.length }}</strong>
+          <span>solicitudes<br>pendientes</span>
+        </div>
+        <div class="summary-decoration" aria-hidden="true">
+          <ion-icon name="shield-outline"></ion-icon>
+        </div>
+      </div>
+    </section>
+
+    <ion-segment class="requests-filter" [value]="filtro" (ionChange)="cambiarFiltro($event.detail.value)">
+      <ion-segment-button value="todas">
+        <ion-label>Todas <span>{{ solicitudes.length + aceptadas.length }}</span></ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="pendientes">
+        <ion-label>Pendientes <span>{{ solicitudes.length }}</span></ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="aceptadas">
+        <ion-label>Aceptadas <span>{{ aceptadas.length }}</span></ion-label>
+      </ion-segment-button>
+    </ion-segment>
+
+    <section class="team-section" *ngIf="mostrarPendientes">
+      <div class="section-heading">
+        <div>
+          <h2>Solicitudes pendientes</h2>
+          <p>Revisa y gestiona los equipos que quieren participar.</p>
+        </div>
+        <span class="section-count">{{ solicitudes.length }}</span>
+      </div>
+
+      <article class="team-card pending-card" *ngFor="let solicitud of solicitudes">
+        <button class="team-card-main" type="button" (click)="verEquipo(solicitud.id)" [attr.aria-label]="'Ver equipo ' + solicitud.nombre">
+          <span class="team-crest">
+            <img appImageFallback="assets/images/shield-placeholder.svg" alt="" [src]="solicitud.escudo ? 'data:image/png;base64,' + solicitud.escudo : ''">
+          </span>
+          <span class="team-information">
+            <strong>{{ solicitud.nombre || 'Equipo sin nombre' }}</strong>
+            <span class="team-delegate">Delegado: {{ solicitud.delegado?.nombre || 'No especificado' }}</span>
+            <span class="team-phase">Solicitud de ingreso</span>
+          </span>
+          <span class="team-status status-pending">Pendiente</span>
+          <ion-icon class="team-chevron" name="chevron-forward-outline"></ion-icon>
+        </button>
+        <div class="team-actions">
+          <ion-button fill="clear" size="small" color="medium" (click)="verEquipo(solicitud.id)">Ver equipo</ion-button>
+          <div>
+            <ion-button fill="outline" size="small" color="danger" (click)="rechazar(solicitud)">Rechazar</ion-button>
+            <ion-button size="small" (click)="aceptar(solicitud)">Aceptar</ion-button>
+          </div>
+        </div>
+      </article>
+
+      <div class="empty-state" *ngIf="solicitudes.length === 0">
+        <div class="empty-icon"><ion-icon name="checkmark-done-outline"></ion-icon></div>
+        <strong>Todo al día</strong>
+        <p>No hay solicitudes pendientes.</p>
+      </div>
+    </section>
+
+    <section class="team-section" *ngIf="mostrarAceptadas">
+      <div class="section-heading">
+        <div>
+          <h2>Equipos aceptados</h2>
+          <p>Equipos confirmados para participar en el torneo.</p>
+        </div>
+        <span class="section-count">{{ aceptadas.length }}</span>
+      </div>
+
+      <button class="team-card accepted-card" type="button" *ngFor="let equipo of aceptadas" (click)="verEquipo(equipo.id)">
+        <span class="team-crest">
+          <img appImageFallback="assets/images/shield-placeholder.svg" alt="" [src]="equipo.escudo ? 'data:image/png;base64,' + equipo.escudo : ''">
+        </span>
+        <span class="team-information">
+          <strong>{{ equipo.nombre || 'Equipo sin nombre' }}</strong>
+          <span class="team-delegate">Delegado: {{ equipo.delegado?.nombre || 'No especificado' }}</span>
+          <span class="team-phase">Fase: {{ nombreFase(equipo.participacionTorneo?.faseActual || equipo.faseActual) }}</span>
+        </span>
+        <span class="team-status status-accepted">Aceptado</span>
+        <ion-icon class="team-chevron" name="chevron-forward-outline"></ion-icon>
+      </button>
+
+      <div class="empty-state" *ngIf="aceptadas.length === 0">
+        <div class="empty-icon"><ion-icon name="shield-outline"></ion-icon></div>
+        <strong>Aún no hay equipos aceptados</strong>
+        <p>Los equipos aceptados aparecerán en esta lista.</p>
+      </div>
+    </section>
+  </main>
+
   <ion-alert [isOpen]="alertOpen" [header]="alertOpen ? 'Aviso' : ''" [message]="mensajeError" [buttons]="alertButtons" (didDismiss)="alertOpen = false"></ion-alert>
 </ion-content>
