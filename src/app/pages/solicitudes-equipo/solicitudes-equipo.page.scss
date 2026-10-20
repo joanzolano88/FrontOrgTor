@@ -1,10 +1,14 @@
 :host {
-  --muted: #74839a;
-  --line: #e7edf5;
+  --muted: var(--app-muted, #aab8ba);
+  --line: var(--app-border, #405157);
+  --surface: var(--app-surface, #1a272c);
+  --text: var(--app-ink, #edf3f1);
   display: block;
 }
 
 .requests-header ion-toolbar {
+  --background: var(--ion-background-color, #10191d);
+  --color: var(--ion-text-color, #edf3f1);
   --border-color: var(--line);
   padding: 4px 12px;
 
@@ -14,10 +18,15 @@
   }
 
   ion-icon[slot='end'] {
-    color: #526781;
+    color: var(--muted);
     font-size: 21px;
     margin-inline: 14px;
   }
+}
+
+.requests-content {
+  --background: var(--ion-background-color, #10191d);
+  --color: var(--text);
 }
 
 .requests-page {
@@ -37,7 +46,7 @@
 .intro-copy {
   .eyebrow {
     margin: 0 0 8px;
-    color: #5682ba;
+    color: #80b8f4;
     font-size: 11px;
     font-weight: 800;
     letter-spacing: 1.5px;
@@ -45,6 +54,7 @@
 
   h1 {
     margin: 0;
+    color: var(--text);
     font-size: clamp(28px, 5vw, 38px);
     font-weight: 800;
     letter-spacing: -1px;
@@ -65,8 +75,10 @@
   min-width: 235px;
   overflow: hidden;
   padding: 16px 20px;
-  border: 1px solid #d9e7f7;
+  border: 1px solid var(--line);
   border-radius: 16px;
+  background: linear-gradient(115deg, #1b282d 15%, #22343d 100%);
+  color: var(--text);
 
   .summary-icon {
     display: grid;
@@ -74,7 +86,8 @@
     height: 42px;
     place-items: center;
     border-radius: 13px;
-    color: #3373c1;
+    background: #263f4b;
+    color: #80b8f4;
     font-size: 22px;
   }
 
@@ -87,7 +100,7 @@
   span {
     display: block;
     margin-top: 4px;
-    color: #63758f;
+    color: var(--muted);
     font-size: 11px;
     line-height: 1.25;
   }
@@ -96,20 +109,24 @@
     position: absolute;
     right: 7px;
     bottom: -19px;
-    color: #dceaff;
+    color: #2c424b;
     font-size: 79px;
     transform: rotate(-12deg);
   }
 }
 
 .requests-filter {
+  --background: var(--surface);
+  --color: var(--muted);
   padding: 5px;
+  border: 1px solid var(--line);
   border-radius: 13px;
   margin-bottom: 30px;
 
   ion-segment-button {
-    --color: #687991;
-    --color-checked: #174c88;
+    --color: #aab8ba;
+    --color-checked: #edf3f1;
+    --background-checked: #344b54;
     --indicator-color: transparent;
     min-height: 40px;
     border-radius: 10px;
@@ -128,7 +145,8 @@
       margin-left: 5px;
       padding: 0 5px;
       border-radius: 10px;
-      color: #64758c;
+      background: #26383e;
+      color: #b0bec0;
       font-size: 10px;
     }
   }
@@ -147,6 +165,7 @@
 
   h2 {
     margin: 0;
+    color: var(--text);
     font-size: 18px;
     font-weight: 800;
   }
@@ -164,7 +183,8 @@
     place-items: center;
     padding: 0 8px;
     border-radius: 10px;
-    color: #275f9f;
+    background: #263f4b;
+    color: #91c4ff;
     font-size: 12px;
     font-weight: 800;
   }
@@ -176,7 +196,8 @@
   text-align: left;
   border: 1px solid var(--line);
   border-radius: 15px;
-  box-shadow: 0 4px 14px rgb(25 51 83 / 4%);
+  background: linear-gradient(145deg, #1c2a30, #172328);
+  box-shadow: 0 8px 20px rgb(0 0 0 / 14%);
 }
 
 .pending-card {
@@ -207,7 +228,7 @@
   transition: border-color 120ms ease, transform 120ms ease;
 
   &:hover {
-    border-color: #c6d8ee;
+    border-color: #5b7780;
     transform: translateY(-1px);
   }
 }
@@ -219,8 +240,9 @@
   height: 48px;
   place-items: center;
   overflow: hidden;
-  border: 1px solid #e8edf4;
+  border: 1px solid var(--line);
   border-radius: 13px;
+  background: #223238;
 
   img {
     width: 100%;
@@ -238,6 +260,7 @@
 
   strong {
     overflow: hidden;
+    color: var(--text);
     font-size: 15px;
     font-weight: 800;
     text-overflow: ellipsis;
@@ -247,7 +270,7 @@
   .team-delegate,
   .team-phase {
     overflow: hidden;
-    color: #76859a;
+    color: var(--muted);
     font-size: 12px;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -263,16 +286,18 @@
 }
 
 .status-pending {
-  color: #ad7418;
+  background: rgb(249 188 77 / 13%);
+  color: #ffd27c;
 }
 
 .status-accepted {
-  color: #258151;
+  background: rgb(84 201 130 / 14%);
+  color: #83e6a8;
 }
 
 .team-chevron {
   flex: 0 0 auto;
-  color: #9aa8b9;
+  color: var(--muted);
   font-size: 18px;
 }
 
@@ -280,7 +305,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-top: 1px solid #eef2f7;
+  border-top: 1px solid var(--line);
   padding-top: 8px;
 
   ion-button {
@@ -299,8 +324,9 @@
   display: grid;
   justify-items: center;
   padding: 35px 20px;
-  border: 1px dashed #d5dfec;
+  border: 1px dashed var(--line);
   border-radius: 15px;
+  background: rgb(26 39 44 / 65%);
   text-align: center;
 
   .empty-icon {
@@ -310,11 +336,13 @@
     place-items: center;
     margin-bottom: 10px;
     border-radius: 14px;
-    color: #477db8;
+    background: #263f4b;
+    color: #91c4ff;
     font-size: 22px;
   }
 
   strong {
+    color: var(--text);
     font-size: 14px;
   }
 
