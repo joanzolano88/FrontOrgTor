@@ -191,12 +191,12 @@ export class CrudService {
     return this.http.put<any>(`${this.url}equipo/torneo/${idTorneo}/jugador/${idJugador}/cambiar-equipo/${idEquipoNuevo}?usuarioId=${usuarioId}`, {});
   }
 
-  sustituirJugador(idPartido: number, titularId: number, suplenteId: number, numeroUniforme: number, usuarioId: number) {
-    return this.http.post(`${this.url}partido/${idPartido}/sustituciones?titularId=${titularId}&suplenteId=${suplenteId}&numeroUniforme=${numeroUniforme}&usuarioId=${usuarioId}`, {});
+  sustituirJugador(idPartido: number, titularId: number, suplenteId: number, numeroUniforme: number, minuto: number, usuarioId: number) {
+    return this.http.post(`${this.url}partido/${idPartido}/sustituciones?titularId=${titularId}&suplenteId=${suplenteId}&numeroUniforme=${numeroUniforme}&minuto=${minuto}&usuarioId=${usuarioId}`, {});
   }
 
-  sustituirJugadorInscrito(idPartido: number, titularId: number, jugadorId: number, numeroUniforme: number, usuarioId: number) {
-    return this.http.post(`${this.url}partido/${idPartido}/sustituciones/jugador-inscrito?titularId=${titularId}&jugadorId=${jugadorId}&numeroUniforme=${numeroUniforme}&usuarioId=${usuarioId}`, {});
+  sustituirJugadorInscrito(idPartido: number, titularId: number, jugadorId: number, numeroUniforme: number, minuto: number, usuarioId: number) {
+    return this.http.post(`${this.url}partido/${idPartido}/sustituciones/jugador-inscrito?titularId=${titularId}&jugadorId=${jugadorId}&numeroUniforme=${numeroUniforme}&minuto=${minuto}&usuarioId=${usuarioId}`, {});
   }
 
   obtenerPerfilJugador(idJugador: number, idTorneo?: number) {

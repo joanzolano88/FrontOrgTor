@@ -20,11 +20,25 @@ interface FormacionPartido {
   formacion: string;
 }
 
+interface SolicitudCambioPartido {
+  id: number;
+  equipoId: number;
+  nombreEquipo: string;
+  titularId: number;
+  suplenteId?: number | null;
+  jugadorId?: number | null;
+  numeroUniforme: number;
+  minuto: number;
+  estado: string;
+}
+
 interface PosicionAlineacion {
   convocatoria?: ConvocatoriaPartido;
   portero: boolean;
   indice: number;
 }
+
+type VistaPartido = 'alineacion' | 'eventos';
 
 interface SancionPartido {
   jugador?: { id?: number; nombre?: string };
@@ -93,6 +107,9 @@ export class PartidoPage implements OnInit {
   mensajeError = '';
   convocatorias: ConvocatoriaPartido[] = [];
   jugadoresDisponibles: JugadorDisponiblePartido[] = [];
+  jugadoresPorEquipo: Record<number, JugadorDisponiblePartido[]> = {};
+  solicitudesCambio: SolicitudCambioPartido[] = [];
+  solicitudesPropias: SolicitudCambioPartido[] = [];
   equipoConvocatoria?: Equipo;
   identificacionJugador = '';
   busquedaAlineacion = '';
@@ -122,12 +139,19 @@ export class PartidoPage implements OnInit {
   titularCambio?: ConvocatoriaPartido;
   suplenteCambio?: JugadorDisponiblePartido;
   numeroUniformeCambio: number | null = null;
+  minutoCambio = 0;
   numerosUniformeDisponibles: Record<number, number | null> = {};
   convocatoriaAcciones?: ConvocatoriaPartido;
   formacionesPorEquipo: Record<number, string> = {};
   readonly formacionesDisponibles = ['4-4-2', '4-3-3', '3-5-2', '4-2-3-1', '4-1-4-1', '4-5-1'];
   convocatoriaPosicionSeleccionada?: ConvocatoriaPartido;
   intercambiandoPosiciones = false;
+  vistaPartido: VistaPartido = 'alineacion';
+  modoCambiarPosiciones = false;
+  golPenalti = false;
+  tarjetaRojaDobleAmarilla = false;
+  private pulsacionJugadorTimer?: ReturnType<typeof setTimeout>;
+  private pulsacionJugadorConsumida = false;
 
   constructor(private crud: CrudService, private route: ActivatedRoute,
     private router: Router, private sesionService: SesionService, private alertController: AlertController) {
@@ -146,11 +170,18 @@ export class PartidoPage implements OnInit {
       const usuarioId = this.crud.obtenerUsuario().id;
       this.validarOrganizador = false;
       if (usuarioId && resp.id) {
-        this.crud.puedeGestionarPartido(resp.id, usuarioId).subscribe(permitido => this.validarOrganizador = permitido);
+        this.crud.puedeGestionarPartido(resp.id, usuarioId).subscribe({
+          next: permitido => {
+            this.validarOrganizador = permitido;
+            if (permitido || this.esDelegado()) this.cargarSolicitudesCambio();
+          },
+          error: error => this.mostrarError(error)
+        });
       }
       this.cargarConvocatorias();
       this.cargarFormaciones();
       this.cambiarEquipoConvocatoria();
+      this.cargarJugadoresDeAmbosEquipos();
       this.cargarEventos();
       this.cargarSanciones();
       console.log(this.partido);
@@ -167,12 +198,66 @@ export class PartidoPage implements OnInit {
     if (!this.partido.id) return;
     this.crud.obtener(`partido/${this.partido.id}/convocados`).subscribe((resp: ConvocatoriaPartido[]) => this.convocatorias = resp || [], error => this.mostrarError(error));
   }
+  cargarSolicitudesCambio() {
+    if (!this.partido.id || (!this.validarOrganizador && !this.esDelegado())) return;
+    this.crud.obtener(`partido/${this.partido.id}/solicitudes-sustitucion`).subscribe({
+      next: (resp: SolicitudCambioPartido[]) => {
+        this.solicitudesCambio = resp || [];
+        this.solicitudesPropias = this.solicitudesCambio.filter(item => item.estado === 'PENDIENTE');
+      },
+      error: error => this.mostrarError(error)
+    });
+  }
+  solicitudesPendientes(): SolicitudCambioPartido[] {
+    return this.solicitudesCambio.filter(item => item.estado === 'PENDIENTE');
+  }
+  puedeRevisarCambios(): boolean {
+    return this.validarOrganizador;
+  }
+  nombreJugadorSolicitudSalida(solicitud: SolicitudCambioPartido): string {
+    return this.convocatorias.find(item => Number(item.id) === Number(solicitud.titularId))?.jugador?.nombre || 'Titular';
+  }
+  nombreJugadorSolicitudEntrada(solicitud: SolicitudCambioPartido): string {
+    const incomingId = solicitud.jugadorId ?? solicitud.suplenteId;
+    const byPlayer = Object.keys(this.jugadoresPorEquipo).reduce<JugadorDisponiblePartido[]>(
+      (all, key) => all.concat(this.jugadoresPorEquipo[Number(key)] || []), [])
+      .find(item => Number(item.id) === Number(incomingId));
+    if (byPlayer?.nombre) return byPlayer.nombre;
+    return this.convocatorias.find(item => Number(item.id) === Number(incomingId))?.jugador?.nombre || 'Suplente';
+  }
+  decidirSolicitud(solicitudId: number, aprobar: boolean) {
+    if (!solicitudId) return;
+    const accion = aprobar ? 'aprobar' : 'rechazar';
+    this.crud.actualizar(null, `partido/solicitudes-sustitucion/${solicitudId}/${accion}`).subscribe({
+      next: () => {
+        this.cargarSolicitudesCambio();
+        if (aprobar) {
+          this.cargarConvocatorias();
+          this.cargarEventos();
+        }
+      },
+      error: error => this.mostrarError(error)
+    });
+  }
   cargarFormaciones() {
     if (!this.partido.id) return;
     this.crud.obtener(`partido/${this.partido.id}/formaciones`).subscribe((resp: FormacionPartido[]) => {
       this.formacionesPorEquipo = {};
       (resp || []).forEach(item => this.formacionesPorEquipo[item.equipoId] = item.formacion);
     }, error => this.mostrarError(error));
+  }
+  cargarJugadoresDeAmbosEquipos() {
+    if (!this.partido.id) return;
+    this.jugadoresPorEquipo = {};
+    this.equiposDelPartido().forEach(equipo => {
+      if (!equipo.id) return;
+      this.crud.obtener(`partido/${this.partido.id}/jugadores-disponibles/${equipo.id}`).subscribe({
+        next: (jugadores: JugadorDisponiblePartido[]) => {
+          this.jugadoresPorEquipo[equipo.id!] = jugadores || [];
+        },
+        error: error => this.mostrarError(error)
+      });
+    });
   }
   formacionEquipo(equipo?: Equipo): string {
     const equipoId = this.idRelacion(equipo);
@@ -184,7 +269,7 @@ export class PartidoPage implements OnInit {
   seleccionarFormacion(equipo: Equipo | undefined, formacion: string) {
     const usuarioId = this.crud.obtenerUsuario().id;
     const equipoId = this.idRelacion(equipo);
-    if (!usuarioId || !this.partido.id || !equipoId || !this.puedeGestionarEquipo(equipo) ||
+    if (!usuarioId || !this.partido.id || !equipoId || !this.puedeModificarTactica(equipo) ||
         this.partido.estadoPartido === 'TERMINADO' || !this.formacionesDisponibles.includes(formacion)) return;
     this.crud.actualizar(null, `partido/${this.partido.id}/equipos/${equipoId}/formacion?formacion=${encodeURIComponent(formacion)}&usuarioId=${usuarioId}`).subscribe({
       next: () => {
@@ -235,12 +320,15 @@ export class PartidoPage implements OnInit {
     this.listasTitularesModalOpen = false;
   }
   abrirCambio(convocatoria: ConvocatoriaPartido) {
-    if (this.partido.estadoPartido !== 'EN_PROCESO' || !this.validarOrganizador || !convocatoria.titular) return;
+    const gestorDelegado = this.esDelegado() && this.puedeGestionarEquipo(this.equipoDeConvocatoria(convocatoria));
+    if (this.partido.estadoPartido !== 'EN_PROCESO' ||
+        (!this.validarOrganizador && !gestorDelegado) || !convocatoria.titular) return;
     this.equipoConvocatoria = this.equipoDeConvocatoria(convocatoria);
     if (!this.equipoConvocatoria?.id || !this.partido.id) return;
     this.titularCambio = convocatoria;
     this.suplenteCambio = undefined;
     this.numeroUniformeCambio = null;
+    this.minutoCambio = 0;
     this.cargandoSuplentesCambio = true;
     this.jugadoresInscritosEquipoCambio = [];
     this.crud.obtener(`partido/${this.partido.id}/jugadores-disponibles/${this.equipoConvocatoria.id}`)
@@ -262,7 +350,9 @@ export class PartidoPage implements OnInit {
     }
   }
   abrirAccionesAlineacion(convocatoria: ConvocatoriaPartido) {
-    if (this.partido.estadoPartido !== 'EN_PROCESO' || !this.validarOrganizador || !convocatoria.jugador) return;
+    const delegadoPropio = this.esDelegado() && this.puedeGestionarEquipo(this.equipoDeConvocatoria(convocatoria));
+    if (this.partido.estadoPartido !== 'EN_PROCESO' ||
+        (!this.validarOrganizador && !delegadoPropio) || !convocatoria.jugador) return;
     this.convocatoriaAcciones = convocatoria;
     this.jugadorEvento = {
       id: convocatoria.jugador.id,
@@ -270,6 +360,7 @@ export class PartidoPage implements OnInit {
       identificacion: convocatoria.jugador.identificacion
     };
     this.minutoEvento = 0;
+    this.tarjetaRojaDobleAmarilla = false;
     this.accionesJugadorModalOpen = true;
   }
   cerrarAccionesAlineacion() {
@@ -281,12 +372,32 @@ export class PartidoPage implements OnInit {
     }
   }
   clickJugadorAlineacion(convocatoria: ConvocatoriaPartido) {
+    if (this.pulsacionJugadorConsumida) {
+      this.pulsacionJugadorConsumida = false;
+      return;
+    }
     if (this.partido.estadoPartido === 'PROGRAMADO' ||
-        (this.partido.estadoPartido === 'EN_PROCESO' && this.crud.obtenerUsuario().tipoUsuario === TipoUsuario.DELEGADO)) {
+        (this.partido.estadoPartido === 'EN_PROCESO' && this.modoCambiarPosiciones)) {
       this.seleccionarPosicion(convocatoria);
     } else if (this.partido.estadoPartido === 'EN_PROCESO') {
       this.abrirAccionesAlineacion(convocatoria);
     }
+  }
+  iniciarPulsacionJugador(convocatoria: ConvocatoriaPartido) {
+    this.cancelarPulsacionJugador();
+    this.pulsacionJugadorConsumida = false;
+    this.pulsacionJugadorTimer = setTimeout(() => {
+      this.pulsacionJugadorConsumida = true;
+      this.abrirPerfilJugador(convocatoria.jugador);
+    }, 550);
+  }
+  cancelarPulsacionJugador() {
+    if (this.pulsacionJugadorTimer) clearTimeout(this.pulsacionJugadorTimer);
+    this.pulsacionJugadorTimer = undefined;
+  }
+  alternarModoPosiciones() {
+    this.modoCambiarPosiciones = !this.modoCambiarPosiciones;
+    this.convocatoriaPosicionSeleccionada = undefined;
   }
   anotarGolDeJugador(autogol: boolean) {
     if (!this.validarOrganizador || this.partido.estadoPartido !== 'EN_PROCESO') return;
@@ -300,6 +411,7 @@ export class PartidoPage implements OnInit {
     this.tipoGol = autogol ? 'AUTOGOL' : 'GOL';
     this.jugadorGolId = convocatoria.jugador.id;
     this.asistenciaGolId = undefined;
+    this.golPenalti = false;
     this.registroGolModalOpen = true;
     this.cerrarAccionesAlineacion();
   }
@@ -334,17 +446,37 @@ export class PartidoPage implements OnInit {
   }
   numeroUniformeCambioValido(): boolean {
     const numero = this.numeroUniformeCambio;
-    return numero !== null && Number.isInteger(Number(numero)) && Number(numero) >= 0 && Number(numero) <= 99;
+    return numero !== null && Number.isInteger(Number(numero)) && Number(numero) >= 0 && Number(numero) <= 99 &&
+      !this.numeroUniformeEnUso(this.equipoConvocatoria, Number(numero), this.suplenteCambio?.id);
+  }
+  minutoCambioValido(): boolean {
+    return Number.isInteger(Number(this.minutoCambio)) && Number(this.minutoCambio) >= 0;
   }
   realizarCambio() {
     const usuarioId = this.crud.obtenerUsuario().id;
     const numeroUniforme = this.numeroUniformeCambio === null ? null : Number(this.numeroUniformeCambio);
+    const minuto = Number(this.minutoCambio);
     if (!usuarioId || !this.partido.id || !this.titularCambio?.id || !this.suplenteCambio?.id ||
-        !this.numeroUniformeCambioValido() || numeroUniforme === null) {
-      this.mostrarError({ error: { message: 'Selecciona un suplente y asigna un número de uniforme único entre 0 y 99.' } });
+        !this.numeroUniformeCambioValido() || numeroUniforme === null || !this.minutoCambioValido()) {
+      this.mostrarError({ error: { message: 'Selecciona un suplente, asigna un número único entre 0 y 99 e indica un minuto válido.' } });
       return;
     }
-    this.crud.sustituirJugadorInscrito(this.partido.id, this.titularCambio.id, this.suplenteCambio.id, numeroUniforme, usuarioId).subscribe({
+    if (this.esDelegado()) {
+      this.crud.crear({
+        titularId: this.titularCambio.id,
+        jugadorId: this.suplenteCambio.id,
+        numeroUniforme,
+        minuto
+      }, `partido/${this.partido.id}/solicitudes-sustitucion`).subscribe({
+        next: () => {
+          this.cerrarCambio();
+          this.cargarSolicitudesCambio();
+        },
+        error: error => this.mostrarError(error)
+      });
+      return;
+    }
+    this.crud.sustituirJugadorInscrito(this.partido.id, this.titularCambio.id, this.suplenteCambio.id, numeroUniforme, minuto, usuarioId).subscribe({
       next: () => { this.cerrarCambio(); this.cargarConvocatorias(); this.cargarEventos(); },
       error: error => this.mostrarError(error)
     });
@@ -397,6 +529,81 @@ export class PartidoPage implements OnInit {
         jugador.identificacion?.toLocaleLowerCase().includes(query);
       return coincideBusqueda && !this.estaConvocado(jugador);
     });
+  }
+  jugadoresSuplentesEquipo(equipo?: Equipo): JugadorDisponiblePartido[] {
+    const equipoId = this.idRelacion(equipo);
+    if (!equipoId) return [];
+    const titulares = new Set(this.titularesEquipo(equipo).map(item => Number(item.jugador?.id)));
+    const disponibles = this.jugadoresPorEquipo[equipoId] || [];
+    const suplentesConvocados = this.convocatoriasEquipo(equipo)
+      .filter(item => !item.titular && item.jugador?.id)
+      .map(item => ({
+        id: item.jugador!.id,
+        nombre: item.jugador!.nombre,
+        identificacion: item.jugador!.identificacion,
+        numeroCamiseta: item.numeroUniforme ?? item.jugador!.numeroCamiseta
+      }));
+    const jugadores = new Map<number, JugadorDisponiblePartido>();
+    [...suplentesConvocados, ...disponibles].forEach(jugador => {
+      if (jugador.id && !titulares.has(Number(jugador.id))) {
+        jugadores.set(Number(jugador.id), jugador);
+      }
+    });
+    return [...jugadores.values()].sort((a, b) => (a.nombre || '').localeCompare(b.nombre || ''));
+  }
+  numeroUniformeEnUso(equipo: Equipo | undefined, numero: number, jugadorId?: number): boolean {
+    return this.convocatoriasEquipo(equipo).some(item =>
+      Number(item.jugador?.id) !== Number(jugadorId) &&
+      Number(item.numeroUniforme ?? item.jugador?.numeroCamiseta) === numero);
+  }
+  eventosEquipo(equipo?: Equipo): EventoPartido[] {
+    return this.eventos
+      .filter(evento => evento.tipo !== 'ASISTENCIA' && evento.tipo !== 'SALE_TITULAR' &&
+        (evento.equipoId ?? this.idRelacion(this.equipoDeJugadorId(evento.jugadorId))) === this.idRelacion(equipo))
+      .map(evento => {
+        if (evento.tipo !== 'ENTRA_TITULAR') return evento;
+        const salida = this.eventos.find(item => item.tipo === 'SALE_TITULAR' &&
+          item.minuto === evento.minuto &&
+          (item.equipoId ?? this.idRelacion(this.equipoDeJugadorId(item.jugadorId))) === this.idRelacion(equipo));
+        return salida ? Object.assign(new EventoPartido(), evento, { jugadorSaleId: salida.jugadorId }) : evento;
+      })
+      .sort((a, b) => (a.minuto ?? 0) - (b.minuto ?? 0) || (a.id ?? 0) - (b.id ?? 0));
+  }
+  private equipoDeJugadorId(jugadorId?: number): Equipo | undefined {
+    return this.convocatorias.find(item => Number(item.jugador?.id) === Number(jugadorId))
+      ? this.equipoDeConvocatoria(this.convocatorias.find(item => Number(item.jugador?.id) === Number(jugadorId)))
+      : undefined;
+  }
+  eventosIconosJugador(jugadorId?: number): EventoPartido[] {
+    return this.eventos
+      .filter(evento => Number(evento.jugadorId) === Number(jugadorId))
+      .sort((a, b) => (a.minuto ?? 0) - (b.minuto ?? 0));
+  }
+  nombreJugadorEvento(jugadorId?: number): string {
+    return this.convocatorias.find(item => Number(item.jugador?.id) === Number(jugadorId))?.jugador?.nombre || 'Jugador';
+  }
+  nombreEventoConGol(evento: EventoPartido): string {
+    const asistidorId = evento.asistidorId ??
+      this.eventos.find(item => item.tipo === 'ASISTENCIA' && item.minuto === evento.minuto &&
+        this.idRelacion(this.equipoDeJugadorId(item.jugadorId)) === this.idRelacion(this.equipoDeJugadorId(evento.jugadorId)))?.jugadorId;
+    const asistidor = asistidorId ? ` (${this.nombreJugadorEvento(asistidorId)})` : '';
+    const autogol = evento.tipo === 'AUTOGOL' ? ' (A)' : '';
+    const penalti = evento.penalti ? ' (P)' : '';
+    return `${this.nombreJugadorEvento(evento.jugadorId)}${asistidor}${autogol}${penalti}`;
+  }
+  abrirPerfilPorId(jugadorId?: number) {
+    if (!jugadorId) return;
+    const convocatoria = this.convocatorias.find(item => Number(item.jugador?.id) === Number(jugadorId));
+    const disponible = Object.keys(this.jugadoresPorEquipo).reduce<JugadorDisponiblePartido[]>(
+      (all, key) => all.concat(this.jugadoresPorEquipo[Number(key)] || []), [])
+      .find(item => Number(item.id) === Number(jugadorId));
+    const jugador = convocatoria?.jugador || Object.assign(new Jugador(), {
+      id: jugadorId,
+      nombre: disponible?.nombre,
+      identificacion: disponible?.identificacion,
+      numeroCamiseta: disponible?.numeroCamiseta
+    });
+    this.abrirPerfilJugador(jugador);
   }
   private idRelacion(relacion: unknown): number | undefined {
     const id = typeof relacion === 'object' && relacion !== null && 'id' in relacion
@@ -499,7 +706,7 @@ export class PartidoPage implements OnInit {
     const convocatoria = this.convocatoriaPosicionSeleccionada;
     const equipoId = this.idRelacion(equipo);
     if (!convocatoria?.id || !equipoId || this.intercambiandoPosiciones ||
-        this.partido.estadoPartido === 'TERMINADO' || !this.puedeGestionarEquipo(equipo)) return;
+        this.partido.estadoPartido === 'TERMINADO' || !this.puedeModificarTactica(equipo)) return;
     const convocatoriaEquipoId = this.idRelacion(convocatoria.equipo || convocatoria.jugador?.equipo);
     if (equipoId !== convocatoriaEquipoId) {
       this.convocatoriaPosicionSeleccionada = undefined;
@@ -529,30 +736,33 @@ export class PartidoPage implements OnInit {
     });
   }
   clickPosicionVacia(equipo: Equipo | undefined, posicion: number) {
-    if (this.partido.estadoPartido === 'PROGRAMADO' ||
-        (this.partido.estadoPartido === 'EN_PROCESO' && !!this.convocatoriaPosicionSeleccionada)) {
+    if ((this.partido.estadoPartido === 'PROGRAMADO' || this.partido.estadoPartido === 'EN_PROCESO') &&
+        this.modoCambiarPosiciones && this.convocatoriaPosicionSeleccionada) {
       this.moverAlineacionAVacia(equipo, posicion);
       return;
     }
-    if (this.partido.estadoPartido !== 'EN_PROCESO' || !this.puedeGestionarEquipo(equipo) ||
+    if (this.partido.estadoPartido !== 'PROGRAMADO' || !this.puedeGestionarEquipo(equipo) ||
         !this.partido.id || !equipo?.id) return;
     this.posicionVaciaEquipo = equipo;
     this.posicionVaciaIndice = posicion;
     this.posicionVaciaModalOpen = true;
-    this.cargandoJugadoresPosicionVacia = true;
-    this.jugadoresPosicionVacia = [];
+    this.cargandoJugadoresPosicionVacia = !this.jugadoresPorEquipo[equipo.id];
+    this.jugadoresPosicionVacia = this.jugadoresPorEquipo[equipo.id] || [];
     this.jugadorPosicionVaciaSeleccionado = undefined;
     this.numeroUniformePosicionVacia = null;
-    this.crud.obtener(`partido/${this.partido.id}/jugadores-disponibles/${equipo.id}`).subscribe({
-      next: (jugadores: JugadorDisponiblePartido[]) => {
-        this.jugadoresPosicionVacia = jugadores || [];
-        this.cargandoJugadoresPosicionVacia = false;
-      },
-      error: error => {
-        this.cargandoJugadoresPosicionVacia = false;
-        this.mostrarError(error);
-      }
-    });
+    if (this.cargandoJugadoresPosicionVacia) {
+      this.crud.obtener(`partido/${this.partido.id}/jugadores-disponibles/${equipo.id}`).subscribe({
+        next: (jugadores: JugadorDisponiblePartido[]) => {
+          this.jugadoresPorEquipo[equipo.id!] = jugadores || [];
+          this.jugadoresPosicionVacia = jugadores || [];
+          this.cargandoJugadoresPosicionVacia = false;
+        },
+        error: error => {
+          this.cargandoJugadoresPosicionVacia = false;
+          this.mostrarError(error);
+        }
+      });
+    }
   }
   jugadoresParaPosicionVacia(): JugadorDisponiblePartido[] {
     const titularesIds = new Set(this.titularesEquipo(this.posicionVaciaEquipo)
@@ -573,16 +783,18 @@ export class PartidoPage implements OnInit {
   }
   seleccionarJugadorPosicionVacia(jugador: JugadorDisponiblePartido) {
     this.jugadorPosicionVaciaSeleccionado = jugador;
-    this.numeroUniformePosicionVacia = jugador.numeroCamiseta ?? null;
+    const convocatoria = this.convocatorias.find(item => Number(item.jugador?.id) === Number(jugador.id));
+    this.numeroUniformePosicionVacia = convocatoria?.numeroUniforme ?? jugador.numeroCamiseta ?? null;
   }
   numeroUniformePosicionVaciaValido(): boolean {
     const numero = this.numeroUniformePosicionVacia;
-    return numero !== null && Number.isInteger(numero) && numero >= 0 && numero <= 99;
+    return numero !== null && Number.isInteger(Number(numero)) && Number(numero) >= 0 && Number(numero) <= 99 &&
+      !this.numeroUniformeEnUso(this.posicionVaciaEquipo, Number(numero), this.jugadorPosicionVaciaSeleccionado?.id);
   }
   agregarJugadorEnPosicionVacia() {
     const usuarioId = this.crud.obtenerUsuario().id;
     const jugador = this.jugadorPosicionVaciaSeleccionado;
-    const numero = this.numeroUniformePosicionVacia;
+    const numero = this.numeroUniformePosicionVacia === null ? null : Number(this.numeroUniformePosicionVacia);
     if (!usuarioId || !this.partido.id || !jugador?.id || this.posicionVaciaIndice === undefined ||
         !this.numeroUniformePosicionVaciaValido() || numero === null) {
       this.mostrarError({ error: { message: 'Selecciona un jugador y asigna un número de uniforme entre 0 y 99.' } });
@@ -614,11 +826,17 @@ export class PartidoPage implements OnInit {
     }
     return this.validarOrganizador;
   }
+  puedeModificarTactica(equipo?: Equipo): boolean {
+    if (this.partido.estadoPartido === 'EN_PROCESO') {
+      return this.esDelegado() && this.puedeGestionarEquipo(equipo);
+    }
+    return this.puedeGestionarEquipo(equipo);
+  }
   seleccionarPosicion(convocatoria: ConvocatoriaPartido) {
     if (this.intercambiandoPosiciones || this.partido.estadoPartido === 'TERMINADO' || !convocatoria.id) return;
     const equipo = this.equiposDelPartido().find(item =>
       this.idRelacion(item) === this.idRelacion(convocatoria.equipo || convocatoria.jugador?.equipo));
-    if (!this.puedeGestionarEquipo(equipo)) return;
+    if (!this.puedeModificarTactica(equipo)) return;
     if (!this.convocatoriaPosicionSeleccionada) {
       this.convocatoriaPosicionSeleccionada = convocatoria;
       return;
@@ -781,7 +999,8 @@ export class PartidoPage implements OnInit {
     const usuarioId = this.crud.obtenerUsuario().id;
     if (!this.validarOrganizador || this.partido.estadoPartido !== 'EN_PROCESO' ||
         !usuarioId || !this.partido.id || !this.jugadorEvento?.id) return;
-    this.crud.crear({}, `partido/${this.partido.id}/eventos?jugadorId=${this.jugadorEvento.id}&tipo=${tipo}&minuto=${this.minutoEvento}&usuarioId=${usuarioId}`).subscribe({
+    const dobleAmarilla = tipo === 'TARJETA_ROJA' && this.tarjetaRojaDobleAmarilla;
+    this.crud.crear({}, `partido/${this.partido.id}/eventos?jugadorId=${this.jugadorEvento.id}&tipo=${tipo}&minuto=${this.minutoEvento}&dobleAmarilla=${dobleAmarilla}&usuarioId=${usuarioId}`).subscribe({
       next: () => {
         this.cargarEventos();
         this.cargarSanciones();
@@ -862,6 +1081,7 @@ export class PartidoPage implements OnInit {
     this.tipoGol = tipo;
     this.jugadorGolId = undefined;
     this.asistenciaGolId = undefined;
+    this.golPenalti = false;
   }
   jugadoresParaGol(): ConvocatoriaPartido[] {
     const equipoId = this.tipoGol === 'AUTOGOL'
@@ -889,6 +1109,7 @@ export class PartidoPage implements OnInit {
       jugadorId: this.jugadorGolId,
       asistenciaId: this.tipoGol === 'GOL' ? this.asistenciaGolId || null : null,
       autogol: this.tipoGol === 'AUTOGOL',
+      penalti: this.tipoGol === 'GOL' && this.golPenalti,
       minuto: this.minutoEvento
     };
     this.crud.crear(solicitud, `partido/${this.partido.id}/goles`).subscribe((resp: Partido) => {

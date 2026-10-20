@@ -5,4 +5,9 @@ export class EventoPartido {
   tipo?: TipoEventoPartido;
   minuto?: number;
   jugadorId?: number;
+  asistidorId?: number;
+  equipoId?: number;
+  penalti?: boolean;
+  dobleAmarilla?: boolean;
+  jugadorSaleId?: number;
 }

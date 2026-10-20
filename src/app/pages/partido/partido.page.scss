@@ -392,3 +392,139 @@ ion-modal.player-actions-modal { --width: min(100%, 460px); --height: min(90%, 7
   .roster-icon-button ion-icon { font-size: 1rem; }
   .uniform-input { max-width: 40px; }
 }
+
+.match-carousel {
+  display: grid;
+  gap: 14px;
+  margin: 16px;
+}
+
+.lineup-toolbar,
+.lineup-toolbar > div:first-child,
+.inline-player-picker > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.lineup-toolbar > div:first-child { justify-content: flex-start; }
+.lineup-toolbar strong { font-size: 1.1rem; }
+
+.inline-player-picker,
+.pending-substitution-panel {
+  padding: 14px;
+  border: 1px solid var(--ion-color-step-150);
+  border-radius: 14px;
+  background: var(--ion-card-background, var(--ion-background-color));
+}
+
+.inline-player-picker ion-note { display: block; margin: 7px 0; }
+.inline-player-options { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 8px; margin-top: 10px; }
+.inline-player-options button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px;
+  border: 1px solid var(--ion-color-step-200);
+  border-radius: 9px;
+  color: var(--ion-text-color);
+  background: var(--ion-background-color);
+  text-align: left;
+}
+.inline-player-options button.selected { border-color: var(--ion-color-primary); background: rgba(var(--ion-color-primary-rgb), .1); }
+.inline-player-confirm { display: flex; align-items: center; gap: 12px; margin-top: 10px; }
+.inline-player-confirm ion-item { flex: 0 1 180px; }
+
+.bench-columns,
+.event-timeline {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.bench-team,
+.event-team-column {
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid var(--ion-color-step-150);
+  border-radius: 13px;
+  background: var(--ion-card-background, var(--ion-background-color));
+}
+.bench-team h3,
+.event-team-column h3,
+.pending-substitution-panel h3 { margin: 0 0 10px; font-size: .96rem; }
+.bench-player {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 42px;
+  border-bottom: 1px solid var(--ion-color-step-100);
+}
+.bench-player-info {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+  padding: 4px 0;
+  color: var(--ion-text-color);
+  background: transparent;
+  text-align: left;
+}
+.bench-player-info strong,
+.bench-player-info small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bench-player-info small { color: var(--ion-color-medium); }
+.player-event-icons,
+.pitch-event-icons {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+.pitch-event-icons {
+  justify-content: center;
+  min-height: 18px;
+  padding: 2px 4px;
+  border-radius: 4px;
+  color: white;
+  background: #111;
+}
+.pitch-player > .pitch-event-icons { width: auto; height: 18px; border: 0; border-radius: 4px; }
+.pitch-event-icons ion-icon,
+.player-event-icons ion-icon { font-size: .8rem; }
+
+.match-event {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 38px;
+  padding: 5px 6px;
+  border-bottom: 1px solid var(--ion-color-step-100);
+  font-size: .88rem;
+}
+.match-event time { flex: 0 0 38px; color: var(--ion-color-medium); font-variant-numeric: tabular-nums; }
+.event-goal,
+.event-substitution { display: inline-flex; align-items: center; gap: 5px; }
+.event-goal ion-icon { color: var(--ion-color-success); font-size: 1.1rem; }
+.event-substitution ion-icon { color: var(--ion-color-primary); font-size: 1rem; }
+.event-card {
+  display: inline-block;
+  width: 13px;
+  height: 18px;
+  flex: 0 0 13px;
+  border: 1px solid rgba(0, 0, 0, .18);
+  border-radius: 2px;
+}
+.card-yellow { background: #ffd500; }
+.card-red { background: #e53232; }
+.card-double { background: linear-gradient(90deg, #ffd500 0 50%, #e53232 50% 100%); }
+.pending-substitution { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 7px 0; }
+
+@media (max-width: 680px) {
+  .match-carousel { margin: 12px 8px; }
+  .lineup-toolbar { align-items: flex-start; flex-direction: column; }
+  .lineup-toolbar .formation-controls { width: 100%; flex-wrap: wrap; }
+  .bench-columns,
+  .event-timeline { grid-template-columns: minmax(0, 1fr); }
+  .inline-player-confirm { align-items: stretch; flex-direction: column; }
+  .inline-player-confirm ion-item { flex-basis: auto; }
+  .pending-substitution { align-items: flex-start; flex-direction: column; }
+}
