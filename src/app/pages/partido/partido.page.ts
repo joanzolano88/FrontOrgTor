@@ -832,6 +832,11 @@ export class PartidoPage implements OnInit {
     }
     return this.puedeGestionarEquipo(equipo);
   }
+  puedeCambiarPosicionesEnJuego(): boolean {
+    return this.partido.estadoPartido === 'EN_PROCESO' &&
+      this.esDelegado() &&
+      this.equiposDelPartido().some(equipo => this.puedeGestionarEquipo(equipo));
+  }
   seleccionarPosicion(convocatoria: ConvocatoriaPartido) {
     if (this.intercambiandoPosiciones || this.partido.estadoPartido === 'TERMINADO' || !convocatoria.id) return;
     const equipo = this.equiposDelPartido().find(item =>
@@ -864,7 +869,11 @@ export class PartidoPage implements OnInit {
     const posicionSegundaAnterior = convocatoria.posicionAlineacion;
     const posicionPrimera = posiciones.get(primera.id);
     const posicionSegunda = posiciones.get(convocatoria.id);
-    if (posicionPrimera === undefined || posicionSegunda === undefined) return;
+    if (posicionPrimera === undefined || posicionSegunda === undefined) {
+      this.convocatoriaPosicionSeleccionada = undefined;
+      this.mostrarError({ error: { message: 'No se pudieron determinar las posiciones actuales. Recarga la alineación e inténtalo de nuevo.' } });
+      return;
+    }
     primera.posicionAlineacion = posicionSegunda;
     convocatoria.posicionAlineacion = posicionPrimera;
     this.convocatoriaPosicionSeleccionada = undefined;
@@ -872,6 +881,7 @@ export class PartidoPage implements OnInit {
     this.crud.crear({}, `partido/${this.partido.id}/alineacion/intercambiar?convocatoriaId1=${primera.id}&convocatoriaId2=${convocatoria.id}&usuarioId=${usuarioId}`).subscribe({
       next: () => {
         this.intercambiandoPosiciones = false;
+        this.cargarConvocatorias();
       },
       error: error => {
         primera.posicionAlineacion = posicionPrimeraAnterior;
@@ -909,12 +919,6 @@ export class PartidoPage implements OnInit {
   equipoDeConvocatoria(convocatoria?: ConvocatoriaPartido): Equipo | undefined {
     const equipoId = this.idRelacion(convocatoria?.equipo || convocatoria?.jugador?.equipo);
     return this.equiposDelPartido().find(equipo => this.idRelacion(equipo) === equipoId);
-  }
-  puedeGestionarConvocatoria(): boolean {
-    const usuario = this.crud.obtenerUsuario();
-    if (this.validarOrganizador) return true;
-    if (usuario.tipoUsuario !== TipoUsuario.DELEGADO || !this.equipoConvocatoria?.delegado) return false;
-    return usuario.numeroCelular === this.equipoConvocatoria.delegado.numeroCelular;
   }
   cambiarEquipoConvocatoria() {
     const usuario = this.crud.obtenerUsuario();

@@ -72,7 +72,7 @@
               <ion-select-option *ngFor="let formacion of formacionesDisponibles" [value]="formacion">{{ formacion }}</ion-select-option>
             </ion-select>
           </label>
-          <ion-button *ngIf="partido.estadoPartido === 'EN_PROCESO' && esDelegado() && puedeGestionarConvocatoria()"
+          <ion-button *ngIf="puedeCambiarPosicionesEnJuego()"
             size="small" fill="outline" (click)="alternarModoPosiciones()">
             {{ modoCambiarPosiciones ? 'Terminar posiciones' : 'Cambiar posiciones' }}
           </ion-button>
