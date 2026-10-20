@@ -238,7 +238,13 @@ export class TorneoComponent {
       header: 'Cambiar estado del torneo',
       message: this.mensajeCambioEstado(nuevoEstado),
       buttons: [
-        { text: 'Cancelar', role: 'cancel', handler: () => this.estadoSeleccionado = this.torneo.estadoTorneo || EstadoTorneo.INSCRIPCIONES },
+        {
+          text: 'Cancelar',
+          role: 'cancel',
+          handler: () => {
+            this.estadoSeleccionado = this.torneo.estadoTorneo || EstadoTorneo.INSCRIPCIONES;
+          }
+        },
         { text: 'Confirmar', role: 'confirm', handler: () => this.confirmarCambioEstado(nuevoEstado, estadoActual) }
       ]
     });
