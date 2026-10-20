@@ -7,7 +7,6 @@
 }
 
 .requests-header ion-toolbar {
-  --background: #fff;
   --color: #172b48;
   --border-color: var(--line);
   padding: 4px 12px;
@@ -76,7 +75,6 @@
   padding: 16px 20px;
   border: 1px solid #d9e7f7;
   border-radius: 16px;
-  background: linear-gradient(115deg, #fff 15%, #eaf3ff 100%);
   color: var(--navy);
 
   .summary-icon {
@@ -85,7 +83,6 @@
     height: 42px;
     place-items: center;
     border-radius: 13px;
-    background: #dceaff;
     color: #3373c1;
     font-size: 22px;
   }
@@ -115,7 +112,6 @@
 }
 
 .requests-filter {
-  --background: #e7edf5;
   padding: 5px;
   border-radius: 13px;
   margin-bottom: 30px;
@@ -142,7 +138,6 @@
       margin-left: 5px;
       padding: 0 5px;
       border-radius: 10px;
-      background: #edf2f8;
       color: #64758c;
       font-size: 10px;
     }
@@ -180,7 +175,6 @@
     place-items: center;
     padding: 0 8px;
     border-radius: 10px;
-    background: #e4edf9;
     color: #275f9f;
     font-size: 12px;
     font-weight: 800;
@@ -193,7 +187,6 @@
   text-align: left;
   border: 1px solid var(--line);
   border-radius: 15px;
-  background: #fff;
   box-shadow: 0 4px 14px rgb(25 51 83 / 4%);
 }
 
@@ -239,7 +232,6 @@
   overflow: hidden;
   border: 1px solid #e8edf4;
   border-radius: 13px;
-  background: #f5f8fc;
 
   img {
     width: 100%;
@@ -283,12 +275,10 @@
 }
 
 .status-pending {
-  background: #fff4df;
   color: #ad7418;
 }
 
 .status-accepted {
-  background: #e3f6ec;
   color: #258151;
 }
 
@@ -323,7 +313,6 @@
   padding: 35px 20px;
   border: 1px dashed #d5dfec;
   border-radius: 15px;
-  background: rgb(255 255 255 / 65%);
   text-align: center;
 
   .empty-icon {
@@ -333,7 +322,6 @@
     place-items: center;
     margin-bottom: 10px;
     border-radius: 14px;
-    background: #e9f2fc;
     color: #477db8;
     font-size: 22px;
   }
