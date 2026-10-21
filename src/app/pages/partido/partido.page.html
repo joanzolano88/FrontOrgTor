@@ -198,7 +198,7 @@
   </section>
   <ng-template #alineacionCancha>
     <div class="pitch-wrap">
-      <div class="pitch">
+      <div class="pitch" [class.futsal-pitch]="esFutbolSala()">
         <section class="pitch-half pitch-home">
           <header class="pitch-team-name">{{ partido.equipoLocal?.nombre }} <small>Local</small></header>
           <div class="pitch-rows">

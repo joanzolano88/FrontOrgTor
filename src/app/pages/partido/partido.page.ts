@@ -144,7 +144,8 @@ export class PartidoPage implements OnInit {
   numerosUniformeDisponibles: Record<number, number | null> = {};
   convocatoriaAcciones?: ConvocatoriaPartido;
   formacionesPorEquipo: Record<number, string> = {};
-  readonly formacionesDisponibles = ['4-4-2', '4-3-3', '3-5-2', '4-2-3-1', '4-1-4-1', '4-5-1'];
+  private readonly formacionesFutbol = ['4-4-2', '4-3-3', '3-5-2', '4-2-3-1', '4-1-4-1', '4-5-1'];
+  private readonly formacionesFutbolSala = ['2-2', '3-1', '1-2-1', '4-0'];
   convocatoriaPosicionSeleccionada?: ConvocatoriaPartido;
   intercambiandoPosiciones = false;
   vistaPartido: VistaPartido = 'alineacion';
@@ -258,9 +259,19 @@ export class PartidoPage implements OnInit {
       });
     });
   }
+  esFutbolSala(): boolean {
+    const deporte = this.partido.torneo?.deporte?.nombre?.trim().toLocaleLowerCase();
+    return deporte === 'futbol sala' || deporte === 'fútbol sala' || deporte === 'futsal';
+  }
+  get formacionesDisponibles(): string[] {
+    return this.esFutbolSala() ? this.formacionesFutbolSala : this.formacionesFutbol;
+  }
+  private formacionInicial(): string {
+    return this.esFutbolSala() ? '2-2' : '4-4-2';
+  }
   formacionEquipo(equipo?: Equipo): string {
     const equipoId = this.idRelacion(equipo);
-    return equipoId ? this.formacionesPorEquipo[equipoId] || '4-4-2' : '4-4-2';
+    return equipoId ? this.formacionesPorEquipo[equipoId] || this.formacionInicial() : this.formacionInicial();
   }
   esDelegado(): boolean {
     return this.crud.obtenerUsuario().tipoUsuario === TipoUsuario.DELEGADO;
@@ -646,7 +657,7 @@ export class PartidoPage implements OnInit {
     this.cambiarTitular(convocatoria, false);
   }
   filasAlineacion(equipo?: Equipo): PosicionAlineacion[][] {
-    const lineas = [1, ...this.formacionEquipo(equipo).split('-').map(Number)];
+    const lineas = [1, ...this.formacionEquipo(equipo).split('-').map(Number)].filter(cantidad => cantidad > 0);
     const totalPosiciones = lineas.reduce((total, cantidad) => total + cantidad, 0);
     const posiciones = this.posicionesEfectivasEquipo(equipo, totalPosiciones);
     const titularesPorId = new Map(

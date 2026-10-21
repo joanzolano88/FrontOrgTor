@@ -84,6 +84,9 @@ ion-content.match-page.match-page {
   }
 
   .pitch-home { border-bottom: 1px solid rgb(225 255 237 / 35%); }
+  .pitch.futsal-pitch { min-height: 270px; }
+  .futsal-pitch .pitch-half { min-height: 130px; }
+  .futsal-pitch .pitch-rows { min-height: 100px; gap: 8px; }
   .pitch-team-name { color: #f1fff6; }
   .pitch-team-name small { color: #b5ebcb; }
   .pitch-player > span:first-child { border-color: white; background: var(--match-accent); box-shadow: 0 2px 5px rgb(0 0 0 / 20%); }
@@ -147,6 +150,8 @@ ion-content.match-page.match-page {
     .detail-score { gap: 6px; padding: 8px; }
     .match-carousel { padding: 10px; }
     .pitch { min-height: 340px; }
+    .pitch.futsal-pitch { min-height: 250px; }
+    .futsal-pitch .pitch-half { min-height: 120px; }
   }
 
   @media (max-width: 380px) {
