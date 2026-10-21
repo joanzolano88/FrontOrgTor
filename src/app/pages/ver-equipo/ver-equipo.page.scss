@@ -145,6 +145,13 @@
   font-weight: 700;
 }
 
+.edit-restriction {
+  display: block;
+  margin: 6px 8px 0;
+  font-size: 12px;
+  text-align: center;
+}
+
 .team-stats {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

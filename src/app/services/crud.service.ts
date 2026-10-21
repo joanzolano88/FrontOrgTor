@@ -71,8 +71,12 @@ export class CrudService {
     };
     const formData = new FormData();
     formData.append('objeto', JSON.stringify(authData));
-    formData.append('archivo1', archivo1);
-    formData.append('archivo2', archivo2);
+    if (archivo1 instanceof Blob) {
+      formData.append('archivo1', archivo1);
+    }
+    if (archivo2 instanceof Blob) {
+      formData.append('archivo2', archivo2);
+    }
     
     return this.http.post(this.url + tipo, formData);
   }
@@ -234,8 +238,12 @@ export class CrudService {
     };
     const formData = new FormData();
     formData.append('objeto', JSON.stringify(authData));
-    formData.append('archivo1', archivo1);
-    formData.append('archivo2', archivo2);
+    if (archivo1 instanceof Blob) {
+      formData.append('archivo1', archivo1);
+    }
+    if (archivo2 instanceof Blob) {
+      formData.append('archivo2', archivo2);
+    }
     if (tipo === 'equipo') {
       const usuario = this.obtenerUsuario();
       if (usuario.id) {
@@ -243,6 +251,15 @@ export class CrudService {
       }
     }
     return this.http.put(this.url + tipo, formData);
+  }
+
+  actualizarPerfilEquipoTorneo(equipoId: number, delegadoId: number, escudo?: Blob) {
+    const formData = new FormData();
+    formData.append('delegadoId', String(delegadoId));
+    if (escudo) {
+      formData.append('archivo1', escudo);
+    }
+    return this.http.put<any>(`${this.url}equipo/${equipoId}/perfil-torneo`, formData);
   }
 
   borrar( id: number, tipo: string, objeto?: any) {

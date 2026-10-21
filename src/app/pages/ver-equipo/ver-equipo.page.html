@@ -29,10 +29,17 @@
           Unirme
         </ion-button>
 
-        <ion-button *ngIf="esDelegado && (!torneoSeleccionado() || torneoSeleccionado()?.estadoTorneo === 'INSCRIPCIONES' || torneoSeleccionado()?.estadoTorneo === 'INSCRIPCIONES_ACTIVO')" expand="block" color="primary" (click)="editar()">
+        <ion-button *ngIf="esDelegado && idTorneo && idTorneo !== '0'" expand="block" color="primary" (click)="editarPerfilTorneo()">
           <ion-icon slot="start" name="create-outline"></ion-icon>
-          Editar información
+          Editar escudo y delegado
         </ion-button>
+        <ion-button *ngIf="esDelegado && (!idTorneo || idTorneo === '0')" expand="block" color="primary" [disabled]="!puedeEditarEquipo()" (click)="editar()">
+          <ion-icon slot="start" name="create-outline"></ion-icon>
+          Editar información del equipo
+        </ion-button>
+        <ion-note *ngIf="esDelegado && (!idTorneo || idTorneo === '0') && !cargandoTorneos && !puedeEditarEquipo()" class="edit-restriction">
+          La información del equipo solo se puede editar durante las inscripciones.
+        </ion-note>
       </div>
     </section>
 

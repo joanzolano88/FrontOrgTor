@@ -70,6 +70,12 @@ export class VerEquipoPage {
       participacion.torneo?.id === this.torneoSeleccionadoId)?.torneo;
   }
 
+  puedeEditarEquipo(): boolean {
+    if (!this.esDelegado || this.cargandoTorneos) return false;
+    const estado = this.torneoSeleccionado()?.estadoTorneo || this.equipo.torneo?.estadoTorneo;
+    return !estado || estado === 'INSCRIPCIONES' || estado === 'INSCRIPCIONES_ACTIVO';
+  }
+
   participacionSeleccionada(): any {
     return this.torneosConParticipacion().find(participacion =>
       this.esParticipacionAceptada(participacion) &&
@@ -148,6 +154,13 @@ export class VerEquipoPage {
   editar() {
     if (!this.equipo.id || !this.esDelegado) return;
     this.router.navigateByUrl('/auth/equipo-configurar/' + this.equipo.id);
+  }
+
+  editarPerfilTorneo() {
+    if (!this.equipo.id || !this.esDelegado || !this.idTorneo || this.idTorneo === '0') return;
+    this.router.navigate(['/auth/equipo-configurar', this.equipo.id, 'perfil-torneo'], {
+      queryParams: { returnUrl: `/auth/torneos/torneo/${this.idTorneo}/equipo/${this.equipo.id}` }
+    });
   }
 
   abrirWhatsapp(numero?: string, mensaje = '') {

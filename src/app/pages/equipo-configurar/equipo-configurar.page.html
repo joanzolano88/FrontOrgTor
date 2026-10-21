@@ -3,20 +3,42 @@
     <ion-buttons slot="start">
       <ion-back-button text="" (click)="volverAtras()"></ion-back-button>
     </ion-buttons>
-    <ion-title>Crear equipo</ion-title>
+    <ion-title>{{ editando ? 'Editar información del equipo' : 'Crear equipo' }}</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true">
   <div class="team-shell">
-    <div class="header-card">
-      <span class="eyebrow">Nuevo equipo</span>
-      <h2>{{ torneo.nombre || 'Registro de equipo' }}</h2>
-      <p>Completa la información del equipo para registrarlo en el sistema.</p>
+    <div class="header-card" *ngIf="!cargandoEquipo">
+      <span class="eyebrow">{{ perfilTorneo ? 'Perfil del torneo' : (editando ? 'Editar equipo' : 'Nuevo equipo') }}</span>
+      <h2>{{ editando ? equipo.nombre : (torneo.nombre || 'Registro de equipo') }}</h2>
+      <p>{{ perfilTorneo ? 'Actualiza el escudo del equipo o asigna un nuevo delegado.' : (editando ? 'Actualiza la información general del equipo.' : 'Completa la información del equipo para registrarlo en el sistema.') }}</p>
     </div>
 
-    <form #f="ngForm" (ngSubmit)="onSubmit(f)" class="team-form">
+    <form *ngIf="!cargandoEquipo" #f="ngForm" (ngSubmit)="onSubmit(f)" class="team-form">
       <div class="card-block">
+        <ng-container *ngIf="perfilTorneo; else generalTeamFields">
+          <div class="upload-block">
+            <div class="upload-label">Escudo del equipo</div>
+            <ion-input type="file" class="ion-hide" #fileEsc name="escudo" (change)="cargarImagen(imgEsc,'escudo',$event)" accept="image/png, image/jpeg"></ion-input>
+            <div class="upload-box" (click)="activarSubirArchivo(fileEsc)">
+              <img appImageFallback="assets/images/shield-placeholder.svg" alt="Previsualización del escudo" #imgEsc [src]="imgEscudo()" />
+              <span>Seleccionar nuevo escudo</span>
+            </div>
+          </div>
+
+          <ion-item lines="none" class="field-wrap">
+            <ion-select interface="popover" [(ngModel)]="nuevoDelegadoId" label="Delegado del equipo" labelPlacement="floating" name="delegado-equipo" required [disabled]="cargandoDelegados">
+              <ion-select-option *ngFor="let persona of delegadoLista" [value]="persona.id">
+                {{ persona.nombre }}{{ persona.numeroCelular ? ' · ' + persona.numeroCelular : '' }}
+              </ion-select-option>
+            </ion-select>
+          </ion-item>
+          <ion-note color="medium" *ngIf="cargandoDelegados">Cargando personas disponibles...</ion-note>
+          <ion-note color="medium">Solo se podrá asignar una persona con cuenta de delegado que no esté vinculada a otro equipo.</ion-note>
+        </ng-container>
+
+        <ng-template #generalTeamFields>
         <div class="field-row">
           <ion-item lines="none" class="field-wrap">
             <ion-input label="Nombre del equipo" labelPlacement="floating" name="nombre" [(ngModel)]="equipo.nombre" required minlength="3" [counter]="true"></ion-input>
@@ -25,7 +47,7 @@
 
         <div class="upload-block">
           <div class="upload-label">Escudo del equipo</div>
-          <ion-input type="file" class="ion-hide" #fileEsc (change)="cargarImagen(imgEsc,'escudo',$event)" accept="image/png, image/jpeg" required></ion-input>
+          <ion-input type="file" class="ion-hide" #fileEsc name="escudo" (change)="cargarImagen(imgEsc,'escudo',$event)" accept="image/png, image/jpeg" [required]="!editando"></ion-input>
           <div class="upload-box" (click)="activarSubirArchivo(fileEsc)">
             <img appImageFallback="assets/images/shield-placeholder.svg" alt="Previsualización del escudo" #imgEsc id="img-escudo" [src]="imgEscudo()" />
             <span>Seleccionar imagen</span>
@@ -55,10 +77,18 @@
             <ion-select-option value="{{ i + 1 }}" *ngFor="let item of [].constructor(torneo.cantidadGrupos); let i = index">{{i + 1}}</ion-select-option>
           </ion-select>
         </ion-item>
+        </ng-template>
       </div>
 
-      <ion-button expand="block" type="submit" class="submit-btn">Guardar equipo</ion-button>
+      <ion-button expand="block" type="submit" class="submit-btn" [disabled]="perfilTorneo && cargandoDelegados">
+        <ion-icon slot="start" [name]="editando ? 'save-outline' : 'add-circle-outline'"></ion-icon>
+        {{ perfilTorneo ? 'Guardar escudo y delegado' : (editando ? 'Guardar cambios' : 'Guardar equipo') }}
+      </ion-button>
     </form>
+    <div class="activity-feedback" *ngIf="cargandoEquipo">
+      <ion-spinner name="crescent"></ion-spinner>
+      <span>Cargando información del equipo...</span>
+    </div>
   </div>
 
   <ion-alert

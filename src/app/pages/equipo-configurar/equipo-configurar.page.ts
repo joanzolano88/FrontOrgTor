@@ -22,6 +22,10 @@ export class EquipoConfigurarPage{
   delegado: Persona = new Persona();
   idEquipo?: string;
   idTorneo?: string;
+  editando = false;
+  perfilTorneo = false;
+  cargandoEquipo = false;
+  cargandoDelegados = false;
   delegadLista: Persona[] = [];
   paises: any[] = [];
   departamentos: any[] = [];
@@ -30,6 +34,7 @@ export class EquipoConfigurarPage{
   departamentoSeleccionado?: number;
   ciudadSeleccionada?: number;
   delegadoLista: Persona[] = [];
+  nuevoDelegadoId?: number;
   escudoEquipo: any;
   identificacionDelegado: any;
   isAlertOpen = false;
@@ -48,7 +53,8 @@ export class EquipoConfigurarPage{
     }
     this.idEquipo = route.snapshot.paramMap.get('idEquipo')!;
     this.idTorneo = route.snapshot.paramMap.get('idTorneo') || undefined;
-    this.cargarPaises();
+    this.editando = !!this.idEquipo;
+    this.perfilTorneo = route.snapshot.url.some(segment => segment.path === 'perfil-torneo');
     if (this.idTorneo) {
       crud.obtenerParametro(this.idTorneo, "torneo").subscribe((respT: Torneo) =>{
         this.torneo = respT;
@@ -58,24 +64,44 @@ export class EquipoConfigurarPage{
       });
     }
     if (this.idEquipo != undefined) {
+      this.cargandoEquipo = true;
       crud.obtenerParametro(this.idEquipo, "equipo").subscribe(async (respE: Equipo) =>{
         this.equipo = respE;
         if (this.equipo.delegado) {
           this.delegado = this.equipo.delegado;
+          this.nuevoDelegadoId = this.equipo.delegado.id;
         }
         this.escudoEquipo = this.equipo.escudo;
         this.identificacionDelegado = this.delegado?.identificacion;
-        
-        (document.getElementById('img-escudo') as HTMLImageElement).src = this.escudoEquipo
-          ? 'data:image/png;base64,' + this.escudoEquipo
-          : 'assets/images/shield-placeholder.svg';
-        (document.getElementById('img-identificacion') as HTMLImageElement).src =  'data:image/png;base64,' + this.identificacionDelegado;
+        if (this.perfilTorneo) {
+          this.cargarDelegados();
+        } else {
+          this.cargarPaises();
+        }
+        this.cargandoEquipo = false;
       }, err=>{
         this.mensajeError = err.error.message;
         this.setOpen(true);
-        
+        this.cargandoEquipo = false;
       });
+    } else {
+      this.cargarPaises();
     }
+  }
+
+  private cargarDelegados(): void {
+    this.cargandoDelegados = true;
+    this.crud.obtener('persona').subscribe({
+      next: (personas: Persona[]) => {
+        this.delegadoLista = personas || [];
+        this.cargandoDelegados = false;
+      },
+      error: err => {
+        this.mensajeError = err?.error?.message || 'No se pudieron cargar los delegados disponibles.';
+        this.setOpen(true);
+        this.cargandoDelegados = false;
+      }
+    });
   }
   cargarImagen(imgElem: HTMLImageElement, tipo: string, input?: Event) {
     if (input) {
@@ -94,20 +120,24 @@ export class EquipoConfigurarPage{
   cargarPaises() {
     this.crud.obtenerPaises().subscribe((resp: any[]) => {
       this.paises = resp || [];
-      const colombia = this.paises.find(p => p.nombre?.toLowerCase() === 'colombia');
-      if (colombia) {
-        this.paisSeleccionado = colombia.id;
-        this.cargarDepartamentos(colombia.id);
+      const departamentoActual = this.equipo.ciudad?.departamento;
+      const paisActualId = departamentoActual?.pais?.id;
+      const pais = this.paises.find(item => item.id === paisActualId) ||
+        this.paises.find(item => item.nombre?.toLowerCase() === 'colombia');
+      if (pais) {
+        this.paisSeleccionado = pais.id;
+        this.cargarDepartamentos(pais.id, departamentoActual?.id, this.equipo.ciudad?.id);
       }
     });
   }
 
-  cargarDepartamentos(paisId: number) {
+  cargarDepartamentos(paisId: number, departamentoId?: number, ciudadId?: number) {
     this.crud.obtenerDepartamentosPorPais(paisId).subscribe((resp: any[]) => {
       this.departamentos = resp || [];
       if (this.departamentos.length > 0) {
-        this.departamentoSeleccionado = this.departamentos[0].id;
-        this.cargarCiudades(this.departamentos[0].id);
+        const departamento = this.departamentos.find(item => item.id === departamentoId) || this.departamentos[0];
+        this.departamentoSeleccionado = departamento.id;
+        this.cargarCiudades(departamento.id, ciudadId);
       } else {
         this.departamentos = [];
         this.ciudades = [];
@@ -117,13 +147,13 @@ export class EquipoConfigurarPage{
     });
   }
 
-  cargarCiudades(departamentoId: number) {
+  cargarCiudades(departamentoId: number, ciudadId?: number) {
     this.crud.obtenerCiudadesPorDepartamento(departamentoId).subscribe((resp: any[]) => {
       this.ciudades = resp || [];
       if (this.ciudades.length > 0) {
-        this.ciudadSeleccionada = this.ciudades[0].id;
-        const ciudad = this.ciudades.find(c => c.id === this.ciudadSeleccionada);
-        this.equipo.ciudad = ciudad || undefined;
+        const ciudad = this.ciudades.find(item => item.id === ciudadId) || this.ciudades[0];
+        this.ciudadSeleccionada = ciudad.id;
+        this.equipo.ciudad = ciudad;
       } else {
         this.ciudadSeleccionada = undefined;
         this.equipo.ciudad = undefined;
@@ -194,6 +224,15 @@ export class EquipoConfigurarPage{
     this.cargarImagen((document.getElementById('img-identificacion') as HTMLImageElement), this.identificacionDelegado);
   }
   volverAtras() {
+    if (this.editando && this.equipo.id) {
+      const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
+      if (returnUrl) {
+        this.router.navigateByUrl(returnUrl);
+        return;
+      }
+      this.router.navigateByUrl(`/auth/equipo/${this.equipo.id}`);
+      return;
+    }
     if (this.idTorneo) {
       this.router.navigateByUrl(`/auth/torneos/torneo/${this.idTorneo}/solicitar-equipo`);
       return;
@@ -202,6 +241,10 @@ export class EquipoConfigurarPage{
   }
 
   onSubmit(form: NgForm) {
+    if (this.perfilTorneo) {
+      this.guardarPerfilTorneo(form);
+      return;
+    }
     if (form.invalid || !this.equipo.delegado?.id) {
       this.mensajeError = 'No se pudo identificar al delegado autenticado.';
       this.setOpen(true);
@@ -231,12 +274,34 @@ export class EquipoConfigurarPage{
           this.router.navigateByUrl(`/auth/torneos/torneo/${this.idTorneo}/solicitar-equipo`);
           return;
         }
-        this.location.back();
+        this.router.navigateByUrl(`/auth/equipo/${resp.id}`);
       }, err=>{
         this.mensajeError = err.error.message;
         this.setOpen(true);
       });
     }
+  }
+
+  private guardarPerfilTorneo(form: NgForm): void {
+    const equipoId = Number(this.equipo.id);
+    const delegadoId = Number(this.nuevoDelegadoId);
+    if (form.invalid || !Number.isFinite(equipoId) || equipoId <= 0 ||
+        !Number.isFinite(delegadoId) || delegadoId <= 0) {
+      this.mensajeError = 'Selecciona un delegado válido antes de guardar.';
+      this.setOpen(true);
+      return;
+    }
+    this.crud.actualizarPerfilEquipoTorneo(equipoId, delegadoId,
+      this.escudoEquipo instanceof Blob ? this.escudoEquipo : undefined).subscribe({
+      next: () => {
+        const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
+        this.router.navigateByUrl(returnUrl || `/auth/equipo/${equipoId}`);
+      },
+      error: err => {
+        this.mensajeError = err?.error?.message || 'No se pudo actualizar el escudo y el delegado.';
+        this.setOpen(true);
+      }
+    });
   }
   setOpen(isOpen: boolean) {
     this.isAlertOpen = isOpen;

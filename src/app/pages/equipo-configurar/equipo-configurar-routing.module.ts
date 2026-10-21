@@ -9,6 +9,14 @@ const routes: Routes = [
     component: EquipoConfigurarPage
   },
   {
+    path: ':idEquipo',
+    component: EquipoConfigurarPage
+  },
+  {
+    path: ':idEquipo/perfil-torneo',
+    component: EquipoConfigurarPage
+  },
+  {
     path: 'crear-delegado',
     loadChildren: () => import('../participantes-configurar/participante-configurar.module').then( m => m.ParticipantesConfigurarPageModule)
   },
