@@ -409,6 +409,8 @@ export class PartidoPage implements OnInit {
     if (this.partido.estadoPartido === 'PROGRAMADO' ||
         (this.partido.estadoPartido === 'EN_PROCESO' && this.modoCambiarPosiciones)) {
       this.seleccionarPosicion(convocatoria);
+    } else if (this.partido.estadoPartido === 'EN_PROCESO' && this.validarOrganizador) {
+      this.abrirAccionesAlineacion(convocatoria);
     } else {
       this.abrirPerfilJugador(convocatoria.jugador);
     }
