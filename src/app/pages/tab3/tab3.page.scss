@@ -7,10 +7,12 @@
 }
 
 .profile-page {
+	--background: linear-gradient(180deg, #00172a, #10191d 48%);
 	color: var(--profile-ink);
 }
 
 .profile-header ion-toolbar {
+	--background: linear-gradient(110deg, #06233d, #00345c);
 	--color: #fff;
 }
 
@@ -19,7 +21,7 @@
 	overflow: hidden;
 	padding: 34px clamp(20px, 6vw, 72px) 28px;
 	color: #fff;
-	background: var(--ion-card-background);
+	background: linear-gradient(110deg, #06233d, #00345c);
 }
 
 .hero-glow {
@@ -29,7 +31,7 @@
 	right: -90px;
 	top: -120px;
 	border-radius: 50%;
-	background: rgba(215, 238, 229, .15);
+	background: rgba(8, 124, 240, .16);
 }
 
 .profile-identity {
@@ -53,7 +55,7 @@
 .avatar-button ion-avatar {
 	width: 92px;
 	height: 92px;
-	border: 4px solid var(--profile-mint);
+	border: 4px solid #087cf0;
 	box-shadow: 0 8px 24px rgba(0, 0, 0, .2);
 }
 
@@ -70,8 +72,8 @@
 	width: 30px;
 	height: 30px;
 	border-radius: 50%;
-	color: var(--profile-ink);
-	background: var(--profile-mint);
+	color: #fff;
+	background: #087cf0;
 }
 
 .identity-copy h1,
@@ -89,7 +91,7 @@
 
 .eyebrow {
 	display: block;
-	color: var(--profile-coral);
+	color: #91c4ff;
 	font-size: 14px;
 	font-weight: 800;
 	letter-spacing: 1.5px;
@@ -123,7 +125,7 @@
 .register-hero {
 	padding: 36px clamp(20px, 6vw, 72px);
 	color: #fff;
-	background: var(--ion-card-background);
+	background: linear-gradient(110deg, #06233d, #00345c);
 }
 
 .profile-form,
@@ -134,9 +136,10 @@
 
 .section-block {
 	padding: 22px;
-	border: 1px solid var(--profile-line);
+	border: 1px solid #075e7e;
 	border-radius: 16px;
-	box-shadow: 0 8px 24px rgba(23, 36, 45, .05);
+	background: linear-gradient(145deg, #06263a, #041b2b);
+	box-shadow: 0 8px 24px rgba(0, 0, 0, .16);
 }
 
 .section-heading {
@@ -202,11 +205,16 @@
 	display: flex;
 	align-items: center;
 	gap: 14px;
+	width: 100%;
 	margin: 0;
 	padding: 15px;
 	border: 1px solid var(--profile-line);
 	border-radius: 14px;
-	box-shadow: 0 6px 18px rgba(23, 36, 45, .05);
+	background: var(--ion-card-background);
+	color: var(--profile-ink);
+	font: inherit;
+	text-align: left;
+	box-shadow: 0 6px 18px rgba(0, 0, 0, .16);
 	cursor: pointer;
 	transition: transform .18s ease, box-shadow .18s ease;
 }
@@ -227,12 +235,15 @@
 
 .team-shield {
 	overflow: hidden;
+	color: #91c4ff;
+	font-size: 28px;
 }
 
 .team-shield img {
 	width: 100%;
 	height: 100%;
-	object-fit: cover;
+	object-fit: contain;
+	padding: 5px;
 }
 
 .card-content {
@@ -311,7 +322,22 @@
 
 .activity-header h2 {
 	margin: 4px 0 0;
+	color: var(--profile-ink);
 	font-size: 24px;
+}
+
+.profile-actions-inline {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin-left: auto;
+}
+
+.profile-actions-inline ion-button,
+.delegado-actions ion-button {
+	--border-radius: 10px;
+	text-transform: none;
+	font-weight: 700;
 }
 
 .activity-total,
@@ -369,6 +395,12 @@
 .info-card:focus-visible {
 	outline: 2px solid var(--ion-color-primary);
 	outline-offset: 2px;
+}
+
+.info-card:hover {
+	border-color: var(--ion-color-primary);
+	transform: translateY(-2px);
+	box-shadow: 0 8px 20px rgba(0, 0, 0, .24);
 }
 
 .card-mark,
@@ -558,6 +590,15 @@
 }
 
 @media (max-width: 640px) {
+	.profile-actions-inline {
+		width: 100%;
+		margin-left: 0;
+	}
+
+	.profile-actions-inline ion-button {
+		flex: 1;
+	}
+
 	.activity-header {
 		align-items: center;
 	}
@@ -607,14 +648,15 @@
 }
 
 .profile-accordions ion-accordion {
-	border: 1px solid var(--profile-line);
-	border-radius: 8px;
-	background: var(--ion-card-background);
+	border: 1px solid #075e7e;
+	border-radius: 14px;
+	background: linear-gradient(145deg, #06263a, #041b2b);
 	overflow: hidden;
 }
 
 .profile-accordion-header {
-	--background: var(--ion-card-background);
+	--background: transparent;
+	--background-hover: rgb(8 124 240 / 8%);
 	--color: var(--profile-ink);
 	--min-height: 68px;
 	--padding-start: 15px;
@@ -638,8 +680,8 @@
 }
 
 .profile-accordion-header .list-count {
-	--background: var(--ion-color-step-100, #ededed);
-	--color: var(--profile-ink);
+	--background: #087cf0;
+	--color: #fff;
 	min-width: 28px;
 	min-height: 28px;
 	margin-inline-end: 6px;
@@ -648,11 +690,15 @@
 .profile-accordion-content {
 	display: block;
 	padding: 14px;
-	border-top: 1px solid var(--profile-line);
+	border-top: 1px solid #075e7e;
 }
 
 .profile-accordion-content .content-grid {
 	margin: 0;
+}
+
+.profile-context {
+	padding-bottom: calc(48px + env(safe-area-inset-bottom));
 }
 
 @media (max-width: 640px) {

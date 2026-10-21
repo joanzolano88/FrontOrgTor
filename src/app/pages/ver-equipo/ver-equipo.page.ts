@@ -146,8 +146,8 @@ export class VerEquipoPage {
   }
 
   editar() {
-    if (!this.torneoSeleccionadoId || !this.equipo.id) return;
-    this.router.navigateByUrl('/auth/torneos/torneo/' + this.torneoSeleccionadoId + '/tabla-equipos/crear-equipo/' + this.equipo.id);
+    if (!this.equipo.id || !this.esDelegado) return;
+    this.router.navigateByUrl('/auth/equipo-configurar/' + this.equipo.id);
   }
 
   abrirWhatsapp(numero?: string, mensaje = '') {

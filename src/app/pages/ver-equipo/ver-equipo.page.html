@@ -29,9 +29,9 @@
           Unirme
         </ion-button>
 
-        <ion-button *ngIf="esDelegado && (torneoSeleccionado()?.estadoTorneo === 'INSCRIPCIONES' || torneoSeleccionado()?.estadoTorneo === 'INSCRIPCIONES_ACTIVO')" expand="block" color="primary" (click)="editar()">
+        <ion-button *ngIf="esDelegado && (!torneoSeleccionado() || torneoSeleccionado()?.estadoTorneo === 'INSCRIPCIONES' || torneoSeleccionado()?.estadoTorneo === 'INSCRIPCIONES_ACTIVO')" expand="block" color="primary" (click)="editar()">
           <ion-icon slot="start" name="create-outline"></ion-icon>
-          Editar equipo
+          Editar información
         </ion-button>
       </div>
     </section>

@@ -95,6 +95,11 @@
   object-fit: contain;
 }
 
+.team-badge > ion-icon {
+  color: #91c4ff;
+  font-size: 58px;
+}
+
 .eyebrow {
   display: inline-block;
   padding: 4px 10px;
@@ -305,6 +310,41 @@
   margin: 0 0 12px;
   text-transform: none;
   font-weight: 700;
+}
+
+.accordion-header {
+  --background: transparent;
+  --background-hover: rgb(8 124 240 / 8%);
+  --color: var(--team-text);
+  --padding-start: 0;
+  --inner-padding-end: 0;
+  --min-height: 68px;
+  --border-color: transparent;
+}
+
+.accordion-header h2 {
+  margin: 0;
+  color: var(--team-text);
+  font-size: 17px;
+  font-weight: 800;
+}
+
+.accordion-header p {
+  margin: 4px 0 0;
+  color: var(--team-muted);
+  font-size: 12px;
+}
+
+.accordion-header ion-badge {
+  --background: #087cf0;
+  --color: #fff;
+  min-width: 38px;
+  padding: 8px 11px;
+  border-radius: 20px;
+}
+
+.accordion-content {
+  padding: 4px 0 2px;
 }
 
 .status-note {

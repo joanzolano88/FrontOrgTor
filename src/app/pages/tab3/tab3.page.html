@@ -148,8 +148,11 @@
         </ion-item>
         <div slot="content" class="profile-accordion-content">
           <div class="content-grid" *ngIf="!cargandoActividadPerfil && !errorActividadPerfil && equiposDelegado.length">
-            <ion-card class="info-card team-card" button *ngFor="let equipo of equiposDelegado" (click)="abrirEquipo(equipo)">
-              <div class="team-shield"><img appImageFallback="assets/images/shield-placeholder.svg" [src]="equipo.escudo ? 'data:image/png;base64,' + equipo.escudo : ''" alt="Escudo del equipo"></div>
+            <button class="info-card team-card" type="button" *ngFor="let equipo of equiposDelegado" (click)="abrirEquipo(equipo)">
+              <div class="team-shield">
+                <img *ngIf="equipo.escudo; else equipoDelegadoDefaultShield" [src]="'data:image/png;base64,' + equipo.escudo" alt="Escudo del equipo">
+                <ng-template #equipoDelegadoDefaultShield><ion-icon name="shield-outline" aria-hidden="true"></ion-icon></ng-template>
+              </div>
               <div class="card-content">
                 <div class="card-overline"><span>Equipo delegado</span><ion-badge color="primary">Plantel</ion-badge></div>
                 <h3>{{ equipo.nombre }}</h3>
@@ -157,7 +160,7 @@
                 <small><ion-icon name="location-outline"></ion-icon>{{ equipo.ciudad?.nombre || 'Ciudad no registrada' }}</small>
               </div>
               <ion-icon class="card-arrow" name="chevron-forward-outline"></ion-icon>
-            </ion-card>
+            </button>
           </div>
           <div class="empty-state" *ngIf="!cargandoActividadPerfil && !errorActividadPerfil && !equiposDelegado.length">
             <span class="empty-icon"><ion-icon name="shield-outline"></ion-icon></span><strong>No hay equipos creados</strong><p>Crea un equipo para administrar su plantel y sus torneos.</p>
@@ -173,8 +176,11 @@
         </ion-item>
         <div slot="content" class="profile-accordion-content">
           <div class="content-grid" *ngIf="!cargandoActividadPerfil && !errorActividadPerfil && equiposJugador.length">
-            <ion-card class="info-card team-card player-team-card" button *ngFor="let equipo of equiposJugador" (click)="abrirEquipo(equipo)">
-              <div class="team-shield"><img appImageFallback="assets/images/shield-placeholder.svg" [src]="equipo.escudo ? 'data:image/png;base64,' + equipo.escudo : ''" alt="Escudo del equipo"></div>
+            <button class="info-card team-card player-team-card" type="button" *ngFor="let equipo of equiposJugador" (click)="abrirEquipo(equipo)">
+              <div class="team-shield">
+                <img *ngIf="equipo.escudo; else equipoJugadorDefaultShield" [src]="'data:image/png;base64,' + equipo.escudo" alt="Escudo del equipo">
+                <ng-template #equipoJugadorDefaultShield><ion-icon name="shield-outline" aria-hidden="true"></ion-icon></ng-template>
+              </div>
               <div class="card-content">
                 <div class="card-overline"><span>Participación</span><ion-badge [color]="participacionDeEquipo(equipo)?.participando ? 'success' : 'primary'">{{ participacionDeEquipo(equipo)?.participando ? 'En juego' : 'Inscrito' }}</ion-badge></div>
                 <h3>{{ equipo.nombre }}</h3>
@@ -182,7 +188,7 @@
                 <small>{{ equipo.torneo?.ubicacion || 'Ubicación pendiente' }} <span *ngIf="participacionDeEquipo(equipo)?.cambioEquipo">· Cambio registrado</span></small>
               </div>
               <ion-icon class="card-arrow" name="chevron-forward-outline"></ion-icon>
-            </ion-card>
+            </button>
           </div>
           <div class="empty-state" *ngIf="!cargandoActividadPerfil && !errorActividadPerfil && usuario.tipoUsuario == 'JUGADOR' && !equiposJugador.length">
             <span class="empty-icon"><ion-icon name="people-outline"></ion-icon></span><strong>Aún no perteneces a un equipo</strong><p>Cuando te unas a un plantel, encontrarás aquí sus datos.</p>

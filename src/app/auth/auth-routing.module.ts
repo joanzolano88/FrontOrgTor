@@ -47,6 +47,16 @@ const routes: Routes = [
         loadChildren: () => import('../pages/equipo-configurar/equipo-configurar.module').then(m => m.EquipoConfigurarPageModule)
       },
       {
+        path: 'equipo-configurar/:idEquipo',
+        canActivate: [SesionService],
+        loadChildren: () => import('../pages/equipo-configurar/equipo-configurar.module').then(m => m.EquipoConfigurarPageModule)
+      },
+      {
+        path: 'equipo-configurar/:idEquipo',
+        canActivate: [SesionService],
+        loadChildren: () => import('../pages/equipo-configurar/equipo-configurar.module').then(m => m.EquipoConfigurarPageModule)
+      },
+      {
         path: 'equipo/:idEquipo',
         canActivate: [SesionService],
         loadChildren: () => import('../pages/ver-equipo/ver-equipo.module').then(m => m.VerEquipoPageModule)

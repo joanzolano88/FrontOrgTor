@@ -148,10 +148,7 @@ export class Tab3Page implements OnInit {
 
   abrirEquipo(equipo?: Equipo) {
     if (!equipo?.id) return;
-    const rutaEquipo = equipo.torneo?.id
-      ? `/auth/torneos/torneo/${equipo.torneo.id}/equipo/${equipo.id}`
-      : `/auth/equipo/${equipo.id}`;
-    this.router.navigateByUrl(rutaEquipo);
+    this.router.navigateByUrl(`/auth/equipo/${equipo.id}`);
   }
 
   abrirTorneo(torneo?: Torneo) {
