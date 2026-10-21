@@ -214,9 +214,13 @@
                   <span>{{ convocatoria.numeroUniforme ?? convocatoria.jugador?.numeroCamiseta ?? '' }}</span>
                   <small class="goalkeeper-label" *ngIf="posicion.portero">PORTERO</small>
                   <small>{{ convocatoria.jugador?.nombre }}</small>
-                  <span class="pitch-event-icons">
-                    <ng-container *ngFor="let evento of eventosIconosJugador(convocatoria.jugador?.id)">
-                      <ion-icon *ngIf="evento.tipo === 'GOL' || evento.tipo === 'AUTOGOL' || evento.tipo === 'ASISTENCIA'" name="football-outline"></ion-icon>
+                  <span class="pitch-event-icons" *ngIf="golesJugador(convocatoria.jugador?.id) || eventosNoGolJugador(convocatoria.jugador?.id).length">
+                    <span class="pitch-goal-indicator" *ngIf="golesJugador(convocatoria.jugador?.id)">
+                      <ion-icon name="football-outline"></ion-icon>
+                      <small *ngIf="golesJugador(convocatoria.jugador?.id) > 1">x{{ golesJugador(convocatoria.jugador?.id) }}</small>
+                    </span>
+                    <ng-container *ngFor="let evento of eventosNoGolJugador(convocatoria.jugador?.id)">
+                      <ion-icon *ngIf="evento.tipo === 'ASISTENCIA'" name="football-outline"></ion-icon>
                       <ion-icon *ngIf="evento.tipo === 'ENTRA_TITULAR' || evento.tipo === 'SALE_TITULAR'" name="repeat-outline"></ion-icon>
                       <span *ngIf="evento.tipo === 'TARJETA_AMARILLA'" class="event-card card-yellow"></span>
                       <span *ngIf="evento.tipo === 'TARJETA_ROJA'" class="event-card" [class.card-double]="evento.dobleAmarilla" [class.card-red]="!evento.dobleAmarilla"></span>
@@ -249,9 +253,13 @@
                   <span>{{ convocatoria.numeroUniforme ?? convocatoria.jugador?.numeroCamiseta ?? '' }}</span>
                   <small class="goalkeeper-label" *ngIf="posicion.portero">PORTERO</small>
                   <small>{{ convocatoria.jugador?.nombre }}</small>
-                  <span class="pitch-event-icons">
-                    <ng-container *ngFor="let evento of eventosIconosJugador(convocatoria.jugador?.id)">
-                      <ion-icon *ngIf="evento.tipo === 'GOL' || evento.tipo === 'AUTOGOL' || evento.tipo === 'ASISTENCIA'" name="football-outline"></ion-icon>
+                  <span class="pitch-event-icons" *ngIf="golesJugador(convocatoria.jugador?.id) || eventosNoGolJugador(convocatoria.jugador?.id).length">
+                    <span class="pitch-goal-indicator" *ngIf="golesJugador(convocatoria.jugador?.id)">
+                      <ion-icon name="football-outline"></ion-icon>
+                      <small *ngIf="golesJugador(convocatoria.jugador?.id) > 1">x{{ golesJugador(convocatoria.jugador?.id) }}</small>
+                    </span>
+                    <ng-container *ngFor="let evento of eventosNoGolJugador(convocatoria.jugador?.id)">
+                      <ion-icon *ngIf="evento.tipo === 'ASISTENCIA'" name="football-outline"></ion-icon>
                       <ion-icon *ngIf="evento.tipo === 'ENTRA_TITULAR' || evento.tipo === 'SALE_TITULAR'" name="repeat-outline"></ion-icon>
                       <span *ngIf="evento.tipo === 'TARJETA_AMARILLA'" class="event-card card-yellow"></span>
                       <span *ngIf="evento.tipo === 'TARJETA_ROJA'" class="event-card" [class.card-double]="evento.dobleAmarilla" [class.card-red]="!evento.dobleAmarilla"></span>

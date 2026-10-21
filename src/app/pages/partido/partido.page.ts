@@ -599,6 +599,15 @@ export class PartidoPage implements OnInit {
       .filter(evento => Number(evento.jugadorId) === Number(jugadorId))
       .sort((a, b) => (a.minuto ?? 0) - (b.minuto ?? 0));
   }
+  golesJugador(jugadorId?: number): number {
+    return this.eventos.filter(evento =>
+      Number(evento.jugadorId) === Number(jugadorId) &&
+      (evento.tipo === 'GOL' || evento.tipo === 'AUTOGOL')).length;
+  }
+  eventosNoGolJugador(jugadorId?: number): EventoPartido[] {
+    return this.eventosIconosJugador(jugadorId)
+      .filter(evento => evento.tipo !== 'GOL' && evento.tipo !== 'AUTOGOL');
+  }
   nombreJugadorEvento(jugadorId?: number): string {
     return this.convocatorias.find(item => Number(item.jugador?.id) === Number(jugadorId))?.jugador?.nombre || 'Jugador';
   }
