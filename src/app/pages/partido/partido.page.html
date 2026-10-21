@@ -1,4 +1,4 @@
-<ion-header [translucent]="true">
+<ion-header class="match-header" [translucent]="true">
   <ion-toolbar>
     <ion-buttons slot="start">
       <ion-back-button text="" defaultHref="{{urlBack}}"></ion-back-button>
@@ -7,7 +7,7 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
+<ion-content class="match-page" [fullscreen]="true">
   <ion-button class="action-button" (click)="eventosPartido(btnModalPenaltis)" expand="block" shape="round" 
   *ngIf="validarOrganizador && (partido.estadoPartido == 'EN_PROCESO' || partido.estadoPartido == 'PROGRAMADO')">
     {{textoBtnoPartido()}}

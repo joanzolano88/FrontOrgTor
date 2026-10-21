@@ -1,0 +1,158 @@
+.match-header.match-header {
+  ion-toolbar {
+    --background: linear-gradient(110deg, #06233d, #00345c);
+    --color: #eaf4ff;
+    --border-color: #075e7e;
+  }
+}
+
+ion-content.match-page.match-page {
+  --match-border: #075e7e;
+  --match-text: #eaf4ff;
+  --match-muted: #9bbbd5;
+  --match-accent: #087cf0;
+  --background: linear-gradient(180deg, #00172a, #001b2e 42%);
+  --color: var(--match-text);
+
+  > .action-button,
+  .lineup-button {
+    width: min(980px, calc(100% - 32px));
+    margin: 14px auto;
+    --background: var(--match-accent);
+    --border-radius: 11px;
+    font-weight: 700;
+    text-transform: none;
+  }
+
+  .match-hero,
+  .match-stats,
+  .match-carousel,
+  .live-lineup-card {
+    width: min(980px, calc(100% - 32px));
+    margin: 14px auto;
+    border: 1px solid var(--match-border);
+    border-radius: 16px;
+    background: linear-gradient(145deg, #06263a, #041b2b);
+    color: var(--match-text);
+    box-shadow: 0 12px 28px rgb(0 0 0 / 14%);
+  }
+
+  .match-hero { padding: 20px; border-radius: 20px; }
+  .match-meta { color: #91c4ff; }
+  .match-meta ion-badge { padding: 7px 10px; border-radius: 999px; }
+  .match-teams { gap: clamp(8px, 3vw, 28px); margin: 24px 0; }
+  .detail-team { cursor: pointer; }
+  .detail-team img { width: 76px; height: 76px; border: 1px solid var(--match-border); border-radius: 18px; background: #00304a; }
+  .detail-team strong,
+  .lineup-toolbar strong,
+  .match-stats strong,
+  .venue strong { color: var(--match-text); }
+  .detail-score { gap: 10px; padding: 10px 16px; border: 1px solid var(--match-border); border-radius: 14px; background: #001b2e; }
+  .detail-score span { color: white; font-size: clamp(30px, 5vw, 42px); }
+  .venue { gap: 10px; padding: 14px 0 0; border-top-color: var(--match-border); color: var(--match-muted); }
+  .venue > ion-icon,
+  .lineup-toolbar > div:first-child ion-icon { color: #91c4ff; }
+  .match-edit { color: #91c4ff; font-weight: 700; cursor: pointer; }
+  .match-stats { padding: 8px; }
+  .match-stats ion-col { border-right-color: var(--match-border); }
+  .match-stats span,
+  .live-lineup-card > header span { color: var(--match-muted); }
+  .match-carousel { gap: 14px; padding: 14px; }
+  .match-carousel > ion-segment { padding: 4px; border: 1px solid var(--match-border); border-radius: 12px; background: #001b2e; }
+  .match-carousel ion-segment-button {
+    --color: var(--match-muted);
+    --color-checked: white;
+    --indicator-color: var(--match-accent);
+    --border-radius: 9px;
+    font-weight: 700;
+    text-transform: none;
+  }
+
+  .lineup-toolbar { padding-bottom: 10px; border-bottom: 1px solid var(--match-border); }
+  .lineup-toolbar > div:first-child { color: var(--match-text); }
+  .lineup-toolbar strong { font-size: 1rem; font-weight: 800; }
+  .formation-select { color: var(--match-muted); }
+  .formation-select ion-select { border-color: var(--match-border); border-radius: 9px; background: #00253d; color: var(--match-text); }
+  .position-swap-hint { margin: 0; padding: 9px 12px; border: 1px solid var(--match-border); border-radius: 11px; background: #001b2e; color: var(--match-muted); }
+
+  .pitch {
+    min-height: 370px;
+    border: 1px solid #168d63;
+    border-radius: 16px;
+    background: linear-gradient(90deg, transparent 49.7%, rgb(225 255 237 / 30%) 50%, transparent 50.3%), repeating-linear-gradient(180deg, #087344 0 46px, #06683e 46px 92px);
+    box-shadow: inset 0 0 0 5px rgb(225 255 237 / 10%);
+  }
+
+  .pitch-home { border-bottom: 1px solid rgb(225 255 237 / 35%); }
+  .pitch-team-name { color: #f1fff6; }
+  .pitch-team-name small { color: #b5ebcb; }
+  .pitch-player > span:first-child { border-color: white; background: var(--match-accent); box-shadow: 0 2px 5px rgb(0 0 0 / 20%); }
+  .pitch-player.goalkeeper > span:first-child { background: #e6a700; }
+
+  .lineup-column,
+  .bench-team,
+  .event-team-column,
+  .inline-player-picker,
+  .pending-substitution-panel {
+    border: 1px solid var(--match-border);
+    border-radius: 14px;
+    background: linear-gradient(145deg, #06263a, #041b2b);
+    color: var(--match-text);
+  }
+
+  .lineup-column h3,
+  .bench-team h3,
+  .event-team-column h3,
+  .pending-substitution-panel h3,
+  .player-info strong,
+  .bench-player-info { color: var(--match-text); }
+  .lineup-column h3,
+  .bench-team h3,
+  .event-team-column h3 { padding-bottom: 10px; border-bottom: 1px solid var(--match-border); }
+  .roster-player-row,
+  .bench-player,
+  .match-event { border-bottom-color: rgb(7 94 126 / 55%); color: var(--match-text); }
+  .player-info small,
+  .bench-player-info small,
+  .match-event time { color: var(--match-muted); }
+  .player-number { border-color: #168bff; background: linear-gradient(145deg, #087cf0, #064b9d); }
+  .inline-player-picker,
+  .pending-substitution-panel { padding: 14px; }
+  .inline-player-options button { border-color: var(--match-border); border-radius: 11px; background: #00253d; color: var(--match-text); }
+  .inline-player-options button.selected { border-color: var(--match-accent); background: #063d63; }
+  .event-goal ion-icon { color: #56c996; }
+  .event-substitution ion-icon { color: #91c4ff; }
+  ion-note { color: var(--match-muted); }
+  .action-minute,
+  .uniform-number-entry,
+  .inline-player-confirm ion-item,
+  .substitution-shell ion-item {
+    --background: #00253d;
+    --color: var(--match-text);
+    --border-color: var(--match-border);
+    border: 1px solid var(--match-border);
+    border-radius: 11px;
+  }
+
+  .player-action-buttons ion-button { --border-radius: 10px; text-transform: none; font-weight: 700; }
+
+  @media (max-width: 680px) {
+    .match-hero,
+    .match-stats,
+    .match-carousel,
+    .live-lineup-card { width: calc(100% - 24px); }
+    .match-hero { margin-top: 10px; padding: 16px 12px; }
+    .match-teams { gap: 5px; margin: 18px 0; }
+    .detail-team img { width: 58px; height: 58px; }
+    .detail-score { gap: 6px; padding: 8px; }
+    .match-carousel { padding: 10px; }
+    .pitch { min-height: 340px; }
+  }
+
+  @media (max-width: 380px) {
+    .match-stats ion-col { padding-inline: 4px; }
+    .match-stats span { font-size: 10px; }
+    .match-stats strong { font-size: 12px; }
+    .detail-team strong { max-width: 96px; font-size: 12px; }
+  }
+}
