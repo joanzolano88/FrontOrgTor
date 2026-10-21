@@ -79,11 +79,11 @@ ion-content.match-page.match-page {
     min-height: 370px;
     border: 1px solid #168d63;
     border-radius: 16px;
-    background: linear-gradient(90deg, transparent 49.7%, rgb(225 255 237 / 30%) 50%, transparent 50.3%), repeating-linear-gradient(180deg, #087344 0 46px, #06683e 46px 92px);
+    background: linear-gradient(180deg, #087344, #06683e);
     box-shadow: inset 0 0 0 5px rgb(225 255 237 / 10%);
   }
 
-  .pitch-home { border-bottom: 1px solid rgb(225 255 237 / 35%); }
+  .pitch-home { border-bottom: 1px solid rgb(225 255 237 / 55%); }
   .pitch.futsal-pitch { min-height: 270px; }
   .futsal-pitch .pitch-half { min-height: 130px; }
   .futsal-pitch .pitch-rows { min-height: 100px; gap: 8px; }
