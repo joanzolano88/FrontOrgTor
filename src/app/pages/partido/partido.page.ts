@@ -172,7 +172,7 @@ export class PartidoPage implements OnInit {
         this.crud.puedeGestionarPartido(resp.id, usuarioId).subscribe({
           next: permitido => {
             this.validarOrganizador = permitido;
-            if (permitido || this.esDelegado()) this.cargarSolicitudesCambio();
+            if (permitido || this.esDelegadoDeEstePartido()) this.cargarSolicitudesCambio();
           },
           error: error => this.mostrarError(error)
         });
@@ -198,7 +198,7 @@ export class PartidoPage implements OnInit {
     this.crud.obtener(`partido/${this.partido.id}/convocados`).subscribe((resp: ConvocatoriaPartido[]) => this.convocatorias = resp || [], error => this.mostrarError(error));
   }
   cargarSolicitudesCambio() {
-    if (!this.partido.id || (!this.validarOrganizador && !this.esDelegado())) return;
+    if (!this.partido.id || (!this.validarOrganizador && !this.esDelegadoDeEstePartido())) return;
     this.crud.obtener(`partido/${this.partido.id}/solicitudes-sustitucion`).subscribe({
       next: (resp: SolicitudCambioPartido[]) => {
         this.solicitudesCambio = resp || [];
@@ -264,6 +264,12 @@ export class PartidoPage implements OnInit {
   }
   esDelegado(): boolean {
     return this.crud.obtenerUsuario().tipoUsuario === TipoUsuario.DELEGADO;
+  }
+  esDelegadoDeEstePartido(): boolean {
+    const usuario = this.crud.obtenerUsuario();
+    if (!usuario.numeroCelular || !this.esDelegado()) return false;
+    return this.equiposDelPartido().some(equipo =>
+      equipo.delegado?.numeroCelular === usuario.numeroCelular);
   }
   seleccionarFormacion(equipo: Equipo | undefined, formacion: string) {
     const usuarioId = this.crud.obtenerUsuario().id;
