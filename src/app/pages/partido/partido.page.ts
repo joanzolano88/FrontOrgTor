@@ -243,7 +243,11 @@ export class PartidoPage implements OnInit {
     if (!this.partido.id) return;
     this.crud.obtener(`partido/${this.partido.id}/formaciones`).subscribe((resp: FormacionPartido[]) => {
       this.formacionesPorEquipo = {};
-      (resp || []).forEach(item => this.formacionesPorEquipo[item.equipoId] = item.formacion);
+      (resp || []).forEach(item => {
+        if (this.formacionValida(item.formacion)) {
+          this.formacionesPorEquipo[item.equipoId] = item.formacion;
+        }
+      });
     }, error => this.mostrarError(error));
   }
   cargarJugadoresDeAmbosEquipos() {
@@ -269,9 +273,14 @@ export class PartidoPage implements OnInit {
   private formacionInicial(): string {
     return this.esFutbolSala() ? '2-2' : '4-4-2';
   }
+  private formacionValida(formacion?: string): formacion is string {
+    return !!formacion && this.formacionesDisponibles.includes(formacion) &&
+      [1, ...formacion.split('-').map(Number)].reduce((total, jugadores) => total + jugadores, 0) === this.maximoTitulares();
+  }
   formacionEquipo(equipo?: Equipo): string {
     const equipoId = this.idRelacion(equipo);
-    return equipoId ? this.formacionesPorEquipo[equipoId] || this.formacionInicial() : this.formacionInicial();
+    const formacionGuardada = equipoId ? this.formacionesPorEquipo[equipoId] : undefined;
+    return this.formacionValida(formacionGuardada) ? formacionGuardada : this.formacionInicial();
   }
   esDelegado(): boolean {
     return this.crud.obtenerUsuario().tipoUsuario === TipoUsuario.DELEGADO;
