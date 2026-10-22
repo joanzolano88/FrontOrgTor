@@ -89,31 +89,38 @@ ion-content.match-page.match-page {
   .futsal-pitch .pitch-rows { min-height: 100px; gap: 8px; }
   .pitch-team-name { color: #f1fff6; }
   .pitch-team-name small { color: #b5ebcb; }
-  .pitch-player > span:first-child { border-color: white; background: var(--match-accent); box-shadow: 0 2px 5px rgb(0 0 0 / 20%); }
-  .pitch-player.goalkeeper > span:first-child { background: #e6a700; }
-  .pitch-player:not(.pitch-player-empty) { position: relative; }
+  .pitch-player:not(.pitch-player-empty) { grid-template-columns: 1fr; }
+  .pitch-player.has-events:not(.pitch-player-empty) { width: 88px; flex-basis: 88px; grid-template-columns: 26px 1fr; align-items: center; column-gap: 3px; }
+  .pitch-player-info { grid-column: 1 / -1; }
+  .pitch-player.has-events .pitch-player-info { grid-column: 2; grid-row: 1 / span 2; }
+  .pitch-player > .pitch-player-info > .pitch-player-number { border-color: white; background: var(--match-accent); box-shadow: 0 2px 5px rgb(0 0 0 / 20%); }
+  .pitch-player.goalkeeper > .pitch-player-info > .pitch-player-number { background: #e6a700; }
+  .pitch-player.has-events .pitch-player-number { grid-column: 1; grid-row: 1; }
+  .pitch-player-info > small { max-width: 100%; }
+  .pitch-player.has-events .pitch-player-info > small { grid-column: 1 / -1; }
+  .pitch-player .goalkeeper-label { display: block; color: #ffe08a; font-size: .45rem; font-weight: 800; letter-spacing: .04em; }
+  .pitch-player.has-events .goalkeeper-label { grid-row: 2; }
   .pitch-player > .pitch-event-icons {
-    position: absolute;
-    top: 7px;
-    left: -20px;
     display: flex;
-    width: max-content;
-    min-width: 18px;
-    min-height: 18px;
+    width: 26px;
+    min-height: 20px;
     height: auto;
-    flex-direction: column;
+    grid-column: 1;
+    grid-row: 1;
+    flex-wrap: wrap;
     align-items: center;
     justify-content: center;
-    gap: 3px;
-    padding: 4px 5px;
+    align-content: center;
+    gap: 2px;
+    padding: 3px;
     border: 0;
     border-radius: 4px;
     background: #111;
   }
-  .pitch-event-icons ion-icon { font-size: .72rem; }
-  .pitch-event-icons .pitch-goal-indicator { display: inline-flex; align-items: center; justify-content: center; gap: 3px; }
-  .pitch-event-icons .pitch-goal-indicator small { display: inline; max-width: none; color: #fff; font-size: .55rem; font-weight: 800; line-height: 1; white-space: nowrap; }
-  .pitch-event-icons .event-card { width: 9px; height: 13px; flex-basis: 13px; }
+  .pitch-event-icons ion-icon { font-size: .68rem; }
+  .pitch-event-icons .pitch-goal-indicator { position: relative; display: inline-flex; align-items: center; justify-content: center; }
+  .pitch-event-icons .pitch-goal-indicator small { position: absolute; top: -5px; right: -4px; display: inline; max-width: none; padding: 0 1px; color: #fff; background: #111; font-size: .43rem; font-weight: 800; line-height: 1; }
+  .pitch-event-icons .event-card { width: 7px; height: 11px; flex-basis: 7px; }
 
   .lineup-column,
   .bench-team,
