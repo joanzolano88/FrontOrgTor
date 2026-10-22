@@ -97,21 +97,22 @@ ion-content.match-page.match-page {
     top: 7px;
     left: -20px;
     display: flex;
-    width: 18px;
+    width: max-content;
+    min-width: 18px;
     min-height: 18px;
     height: auto;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     gap: 3px;
-    padding: 3px 2px;
+    padding: 4px 5px;
     border: 0;
     border-radius: 4px;
     background: #111;
   }
   .pitch-event-icons ion-icon { font-size: .72rem; }
-  .pitch-event-icons .pitch-goal-indicator { display: inline-flex; align-items: center; justify-content: center; gap: 1px; }
-  .pitch-event-icons .pitch-goal-indicator small { display: inline; max-width: none; color: #fff; font-size: .48rem; font-weight: 800; line-height: 1; }
+  .pitch-event-icons .pitch-goal-indicator { display: inline-flex; align-items: center; justify-content: center; gap: 3px; }
+  .pitch-event-icons .pitch-goal-indicator small { display: inline; max-width: none; color: #fff; font-size: .55rem; font-weight: 800; line-height: 1; white-space: nowrap; }
   .pitch-event-icons .event-card { width: 9px; height: 13px; flex-basis: 13px; }
 
   .lineup-column,

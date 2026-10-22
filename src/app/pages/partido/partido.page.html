@@ -83,35 +83,6 @@
         <span *ngIf="convocatoriaPosicionSeleccionada">Seleccionado: {{ convocatoriaPosicionSeleccionada.jugador?.nombre }}.</span>
       </p>
       <ng-container *ngTemplateOutlet="alineacionCancha"></ng-container>
-      <section class="inline-player-picker" *ngIf="posicionVaciaModalOpen">
-        <header>
-          <strong>{{ posicionVaciaEquipo?.nombre }} · Seleccionar titular</strong>
-          <ion-button fill="clear" size="small" (click)="cerrarPosicionVacia()">Cancelar</ion-button>
-        </header>
-        <ion-note>Elige un suplente para esta posición y confirma su número de uniforme (único en el equipo).</ion-note>
-        <div class="substitution-loading" *ngIf="cargandoJugadoresPosicionVacia">
-          <ion-spinner name="crescent"></ion-spinner><span>Cargando jugadores...</span>
-        </div>
-        <div class="inline-player-options" *ngIf="!cargandoJugadoresPosicionVacia">
-          <button type="button" *ngFor="let jugador of jugadoresParaPosicionVacia()"
-            [class.selected]="jugadorPosicionVaciaSeleccionado?.id === jugador.id"
-            (click)="seleccionarJugadorPosicionVacia(jugador)">
-            <span>{{ jugador.nombre }}</span><ion-icon [name]="jugadorPosicionVaciaSeleccionado?.id === jugador.id ? 'radio-button-on' : 'radio-button-off'"></ion-icon>
-          </button>
-          <ion-note *ngIf="!jugadoresParaPosicionVacia().length">No hay suplentes elegibles disponibles.</ion-note>
-        </div>
-        <div class="inline-player-confirm" *ngIf="jugadorPosicionVaciaSeleccionado">
-          <strong>{{ jugadorPosicionVaciaSeleccionado.nombre }}</strong>
-          <ion-item>
-            <ion-input type="number" label="Número de uniforme" labelPlacement="stacked" min="0" max="99"
-              [(ngModel)]="numeroUniformePosicionVacia"></ion-input>
-          </ion-item>
-          <ion-note color="danger" *ngIf="numeroUniformePosicionVacia !== null && !numeroUniformePosicionVaciaValido()">
-            El número debe ser único y estar entre 0 y 99.
-          </ion-note>
-          <ion-button [disabled]="!numeroUniformePosicionVaciaValido()" (click)="agregarJugadorEnPosicionVacia()">Agregar titular</ion-button>
-        </div>
-      </section>
       <section class="bench-columns">
         <article class="bench-team">
           <h3>{{ partido.equipoLocal?.nombre }} · Suplentes</h3>
@@ -478,7 +449,7 @@
       </ion-content>
     </ng-template>
   </ion-modal>
-  <ion-modal class="substitution-modal" [isOpen]="false" (didDismiss)="cerrarPosicionVacia()">
+  <ion-modal class="substitution-modal" [isOpen]="posicionVaciaModalOpen" (didDismiss)="cerrarPosicionVacia()">
     <ng-template>
       <ion-header>
         <ion-toolbar>
