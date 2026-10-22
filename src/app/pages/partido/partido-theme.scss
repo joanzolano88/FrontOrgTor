@@ -96,7 +96,7 @@ ion-content.match-page.match-page {
   .pitch-player > .pitch-player-info > .pitch-player-number { border-color: white; background: var(--match-accent); box-shadow: 0 2px 5px rgb(0 0 0 / 20%); }
   .pitch-player.goalkeeper > .pitch-player-info > .pitch-player-number { background: #e6a700; }
   .pitch-player.has-events .pitch-player-number { grid-column: 1; grid-row: 1; }
-  .pitch-player-info > small { max-width: 100%; }
+  .pitch-player-info > small { max-width: 100%; padding: 1px 3px; border-radius: 3px; background: #111; }
   .pitch-player.has-events .pitch-player-info > small { grid-column: 1 / -1; }
   .pitch-player .goalkeeper-label { display: block; color: #ffe08a; font-size: .45rem; font-weight: 800; letter-spacing: .04em; }
   .pitch-player.has-events .goalkeeper-label { grid-row: 2; }
@@ -118,8 +118,8 @@ ion-content.match-page.match-page {
     background: #111;
   }
   .pitch-event-icons ion-icon { font-size: .68rem; }
-  .pitch-event-icons .pitch-goal-indicator { position: relative; display: inline-flex; align-items: center; justify-content: center; }
-  .pitch-event-icons .pitch-goal-indicator small { position: absolute; top: -5px; right: -4px; display: inline; max-width: none; padding: 0 1px; color: #fff; background: #111; font-size: .43rem; font-weight: 800; line-height: 1; }
+  .pitch-event-icons .pitch-goal-indicator { position: relative; display: inline-flex; align-items: center; justify-content: center; padding: 2px 3px 1px 1px; }
+  .pitch-event-icons .pitch-goal-indicator small { position: absolute; top: -3px; right: -1px; display: inline; max-width: none; padding: 0 1px; border-radius: 2px; color: #fff; background: #111; font-size: .43rem; font-weight: 800; line-height: 1; }
   .pitch-event-icons .event-card { width: 7px; height: 11px; flex-basis: 7px; }
 
   .lineup-column,
