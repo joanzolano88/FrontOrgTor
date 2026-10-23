@@ -778,8 +778,10 @@ export class PartidoPage implements OnInit, OnDestroy {
     });
   }
   clickPosicionVacia(equipo: Equipo | undefined, posicion: number) {
-    if ((this.partido.estadoPartido === 'PROGRAMADO' || this.partido.estadoPartido === 'EN_PROCESO') &&
-        this.modoCambiarPosiciones && this.convocatoriaPosicionSeleccionada) {
+    const movimientoSeleccionado =
+      this.partido.estadoPartido === 'PROGRAMADO' ||
+      (this.partido.estadoPartido === 'EN_PROCESO' && this.modoCambiarPosiciones);
+    if (movimientoSeleccionado && this.convocatoriaPosicionSeleccionada) {
       this.moverAlineacionAVacia(equipo, posicion);
       return;
     }

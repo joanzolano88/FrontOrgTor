@@ -117,6 +117,23 @@ ion-content.match-page.match-page {
   .pitch-player-info > small { max-width: 100%; padding: 1px 3px; border-radius: 3px; background: #111; }
   .pitch-player.has-events .pitch-player-info > small { grid-column: 1 / -1; }
   .pitch-player .goalkeeper-label { display: block; color: #ffe08a; font-size: .45rem; font-weight: 800; letter-spacing: .04em; }
+  .pitch-player-empty > span {
+    display: grid;
+    width: 30px;
+    height: 30px;
+    flex: 0 0 30px;
+    box-sizing: border-box;
+    place-items: center;
+    border: 1px dashed rgba(255,255,255,.5);
+    border-radius: 50%;
+    background: rgba(0, 40, 25, .28);
+    color: #eafff1;
+    font-size: .9rem;
+  }
+  .pitch-player-empty.goalkeeper > span {
+    border-color: rgba(255,224,138,.72);
+    color: #ffe08a;
+  }
   .pitch-player.has-events .goalkeeper-label { grid-row: 2; }
   .pitch-player > .pitch-event-icons {
     display: flex;
