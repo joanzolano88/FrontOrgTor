@@ -555,6 +555,17 @@ export class PartidoPage implements OnInit {
   jugadoresSuplentesEquipo(equipo?: Equipo): JugadorDisponiblePartido[] {
     const equipoId = this.idRelacion(equipo);
     if (!equipoId) return [];
+    if (this.partido.estadoPartido === 'EN_PROCESO') {
+      return this.convocatoriasEquipo(equipo)
+        .filter(item => !item.titular && !!item.jugador?.id)
+        .map(item => ({
+          id: item.jugador!.id,
+          nombre: item.jugador!.nombre,
+          identificacion: item.jugador!.identificacion,
+          numeroCamiseta: item.numeroUniforme ?? item.jugador!.numeroCamiseta
+        }))
+        .sort((a, b) => (a.nombre || '').localeCompare(b.nombre || ''));
+    }
     const titulares = new Set(this.titularesEquipo(equipo).map(item => Number(item.jugador?.id)));
     const disponibles = this.jugadoresPorEquipo[equipoId] || [];
     const suplentesConvocados = this.convocatoriasEquipo(equipo)
