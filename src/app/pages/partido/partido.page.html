@@ -8,11 +8,6 @@
 </ion-header>
 
 <ion-content class="match-page" [fullscreen]="true">
-  <section class="match-clock" *ngIf="partido.estadoPartido === 'EN_PROCESO' && partido.controlTiempoActivo">
-    <div><small>{{ periodoNombre() }}</small><strong>{{ minutoReloj }}′</strong></div>
-    <span *ngIf="esAlargueActivo()">{{ textoAlargueActivo() }} · el organizador controla el final</span>
-    <span *ngIf="partido.modoRegistroEventos === 'PROFESIONAL'">Seguimiento profesional · eventos de titulares</span>
-  </section>
   <ion-button class="action-button" (click)="eventosPartido(btnModalPenaltis)" expand="block" shape="round" 
   *ngIf="validarOrganizador && (partido.estadoPartido == 'EN_PROCESO' || partido.estadoPartido == 'PROGRAMADO')">
     {{textoBtnoPartido()}}
@@ -33,45 +28,7 @@
               <ion-select-option value="SIMPLE">Simple: eventos para titulares y suplentes</ion-select-option>
             </ion-select>
           </ion-item>
-          <ion-item>
-            <ion-toggle [(ngModel)]="controlTiempoSeleccionado">Controlar tiempos con cronómetro</ion-toggle>
-          </ion-item>
-          <ion-note *ngIf="controlTiempoSeleccionado">
-            Cada tiempo usará la duración definida en la información del torneo. Al cumplirse, el reloj seguirá contando el alargue hasta que el organizador o un ayudante cierre el periodo.
-          </ion-note>
           <ion-button expand="block" (click)="iniciarPartidoConfigurado()">Iniciar partido</ion-button>
-        </div>
-      </ion-content>
-    </ng-template>
-  </ion-modal>
-  <ion-modal class="substitution-modal" [isOpen]="cerrarPeriodoModalOpen" (didDismiss)="cerrarPeriodoModalOpen = false">
-    <ng-template>
-      <ion-header>
-        <ion-toolbar>
-          <ion-title>Finalizar {{ periodoNombre() }}</ion-title>
-          <ion-buttons slot="end"><ion-button (click)="cerrarPeriodoModalOpen = false">Cancelar</ion-button></ion-buttons>
-        </ion-toolbar>
-      </ion-header>
-      <ion-content class="substitution-modal-content">
-        <div class="substitution-shell">
-          <ion-item>
-            <ion-input type="number" min="0" step="1" label="Minutos de alargue registrados" labelPlacement="stacked" [(ngModel)]="alarguePeriodo" readonly></ion-input>
-          </ion-item>
-          <ion-item *ngIf="partido.periodoActual === 'SEGUNDO_TIEMPO' && partido.anotacionesEquipoLocal === partido.anotacionesEquipoVisitante">
-            <ion-select label="Continuación en empate" labelPlacement="stacked" [(ngModel)]="continuacionTiempo">
-              <ion-select-option value="PRORROGA">Jugar prórroga</ion-select-option>
-              <ion-select-option value="PENALTIS">Ir a penaltis</ion-select-option>
-              <ion-select-option value="EMPATE">Terminar empatado</ion-select-option>
-            </ion-select>
-          </ion-item>
-          <ion-item *ngIf="partido.periodoActual === 'SEGUNDO_TIEMPO_EXTRA' && partido.anotacionesEquipoLocal === partido.anotacionesEquipoVisitante">
-            <ion-select label="Continuación en empate" labelPlacement="stacked" [(ngModel)]="continuacionTiempo">
-              <ion-select-option value="PENALTIS">Ir a penaltis</ion-select-option>
-              <ion-select-option value="EMPATE">Terminar empatado</ion-select-option>
-            </ion-select>
-          </ion-item>
-          <ion-note>El minuto del evento se calcula automáticamente usando el cronómetro del partido.</ion-note>
-          <ion-button expand="block" (click)="guardarCierrePeriodo()">Confirmar final del periodo</ion-button>
         </div>
       </ion-content>
     </ng-template>
@@ -670,7 +627,7 @@
             <span class="player-number">{{ convocatoria.numeroUniforme ?? convocatoria.jugador?.numeroCamiseta ?? '–' }}</span>
             <div><strong>{{ convocatoria.jugador?.nombre }}</strong><small>{{ equipoDeConvocatoria(convocatoria)?.nombre }}</small></div>
           </div>
-          <ion-item class="action-minute" *ngIf="validarOrganizador"><ion-input type="number" label="Minuto del evento" min="0" [readonly]="partido.controlTiempoActivo" [ngModel]="partido.controlTiempoActivo ? minutoPartidoActual() : minutoEvento" (ngModelChange)="minutoEvento = $event"></ion-input></ion-item>
+          <ion-item class="action-minute" *ngIf="validarOrganizador"><ion-input type="number" label="Minuto del evento" min="0" [(ngModel)]="minutoEvento"></ion-input></ion-item>
           <div class="player-action-buttons">
             <ion-button *ngIf="puedeCambiarPosicionesEnJuego() && puedeModificarTactica(equipoDeConvocatoria(convocatoria))"
               expand="block" fill="outline" (click)="seleccionarJugadorParaCambiarPosicion(convocatoria)">

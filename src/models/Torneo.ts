@@ -25,8 +25,6 @@ export class Torneo {
     faseInicioEliminatorias?: FaseActual;
     cantidadEquiposEliminatoriaGrupos?: number;
     duracionMinutos?: number;
-    duracionTiempoMinutos?: number;
-    duracionTiempoExtraMinutos?: number;
     cantidadGruposEliminatoriaGrupos?: number;
     modalidadEliminatoriasGrupos?: ModalidadFase;
     deporte?: Deporte;
