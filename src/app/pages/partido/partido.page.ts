@@ -322,6 +322,27 @@ export class PartidoPage implements OnInit {
       this.titularesEquipoActual() < this.maximoTitulares() &&
       this.convocadosEquipoActual() < this.maximoConvocados();
   }
+  puedeConvocarJugador(): boolean {
+    return (this.puedeEditarConvocatoria() || this.puedeAgregarSuplenteTardio()) &&
+      !!this.equipoConvocatoria &&
+      this.puedeGestionarEquipo(this.equipoConvocatoria) &&
+      this.convocadosEquipoActual() < this.maximoConvocados();
+  }
+  puedeAgregarSuplenteTardio(): boolean {
+    return this.partido.estadoPartido === 'EN_PROCESO' &&
+      !!this.equipoConvocatoria &&
+      this.puedeGestionarEquipo(this.equipoConvocatoria) &&
+      this.convocadosEquipoActual() < this.maximoConvocados();
+  }
+  puedeAbrirGestionConvocados(): boolean {
+    return this.puedeEditarConvocatoria() ||
+      (this.partido.estadoPartido === 'EN_PROCESO' &&
+        this.equiposDelPartido().some(equipo => this.puedeGestionarEquipo(equipo)));
+  }
+  puedeEditarConvocatoria(): boolean {
+    return (this.partido.estadoPartido === 'PENDIENTE' || this.partido.estadoPartido === 'PROGRAMADO') &&
+      this.equiposDelPartido().some(equipo => this.puedeGestionarEquipo(equipo));
+  }
   modificarSancionJugador(levantar: boolean, jugador = this.jugadorEvento) {
     const usuarioId = this.crud.obtenerUsuario().id;
     const jugadorId = jugador?.id;
@@ -340,6 +361,7 @@ export class PartidoPage implements OnInit {
     this.listasTitularesModalOpen = false;
   }
   abrirListasTitulares() {
+    if (!this.puedeAbrirGestionConvocados()) return;
     this.listasTitularesModalOpen = true;
     this.cambiarEquipoConvocatoria();
   }
@@ -710,7 +732,7 @@ export class PartidoPage implements OnInit {
     return this.numeroUniformeValido(numero) ? Number(numero) : undefined;
   }
   pasarATitular(jugador?: Jugador) {
-    if (!jugador?.id || !this.validarOrganizador || this.partido.estadoPartido !== 'PROGRAMADO') return;
+    if (!jugador?.id || !this.puedeConvocarJugador()) return;
     const numeroUniforme = this.numeroUniformeDisponible(jugador);
     if (!this.numeroUniformeValido(numeroUniforme) || numeroUniforme === null) {
       this.mostrarError({ error: { message: 'Asigna un número de uniforme entero entre 0 y 99 antes de titularizar al jugador.' } });
@@ -724,7 +746,7 @@ export class PartidoPage implements OnInit {
     this.agregarJugador(jugador, true, numeroUniforme);
   }
   pasarASuplente(convocatoria: ConvocatoriaPartido) {
-    if (!this.validarOrganizador || this.partido.estadoPartido !== 'PROGRAMADO') return;
+    if (!this.puedeEditarConvocatoria() || !this.puedeGestionarEquipo(this.equipoDeConvocatoria(convocatoria))) return;
     this.cambiarTitular(convocatoria, false);
   }
   filasAlineacion(equipo?: Equipo): PosicionAlineacion[][] {
@@ -1045,13 +1067,19 @@ export class PartidoPage implements OnInit {
   }
   agregarJugador(jugador: Jugador, titular = false, numeroUniforme?: number) {
     const usuarioId = this.crud.obtenerUsuario().id;
-    if (!usuarioId || !this.partido.id || !jugador.id) return;
+    if (!usuarioId || !this.partido.id || !jugador.id || !this.puedeConvocarJugador()) return;
     if (titular && !this.numeroUniformeValido(numeroUniforme)) {
       this.mostrarError({ error: { message: 'El número de uniforme es obligatorio y debe estar entre 0 y 99.' } });
       return;
     }
     const numero = titular ? `&numeroUniforme=${numeroUniforme}` : '';
-    this.crud.crear({}, `partido/${this.partido.id}/convocados?jugadorId=${jugador.id}&titular=${titular}${numero}&usuarioId=${usuarioId}`).subscribe(() => this.cargarConvocatorias(), error => this.mostrarError(error));
+    this.crud.crear({}, `partido/${this.partido.id}/convocados?jugadorId=${jugador.id}&titular=${titular}${numero}&usuarioId=${usuarioId}`).subscribe({
+      next: () => {
+        this.cargarConvocatorias();
+        if (this.partido.estadoPartido === 'EN_PROCESO') this.cargarJugadoresDeAmbosEquipos();
+      },
+      error: error => this.mostrarError(error)
+    });
   }
   estaConvocado(jugador?: Jugador): boolean {
     return !!jugador?.id && this.convocatorias.some(convocatoria =>
