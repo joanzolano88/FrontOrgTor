@@ -109,7 +109,7 @@
           <h3>{{ partido.equipoLocal?.nombre }} · Suplentes</h3>
           <div class="bench-player" *ngFor="let jugador of jugadoresSuplentesEquipo(partido.equipoLocal)">
             <span class="player-number">{{ jugador.numeroCamiseta ?? '–' }}</span>
-            <button type="button" class="bench-player-info" (click)="abrirPerfilPorId(jugador.id)">
+            <button type="button" class="bench-player-info" (click)="clickJugadorSuplente(jugador.id)">
               <strong>{{ jugador.nombre }}</strong><small>{{ jugador.identificacion }}</small>
             </button>
             <span class="player-event-icons" *ngIf="jugador.id">
@@ -127,7 +127,7 @@
           <h3>{{ partido.equipoVisitante?.nombre }} · Suplentes</h3>
           <div class="bench-player" *ngFor="let jugador of jugadoresSuplentesEquipo(partido.equipoVisitante)">
             <span class="player-number">{{ jugador.numeroCamiseta ?? '–' }}</span>
-            <button type="button" class="bench-player-info" (click)="abrirPerfilPorId(jugador.id)">
+            <button type="button" class="bench-player-info" (click)="clickJugadorSuplente(jugador.id)">
               <strong>{{ jugador.nombre }}</strong><small>{{ jugador.identificacion }}</small>
             </button>
             <span class="player-event-icons" *ngIf="jugador.id">

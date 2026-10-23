@@ -566,12 +566,50 @@ export class PartidoPage implements OnInit {
         numeroCamiseta: item.numeroUniforme ?? item.jugador!.numeroCamiseta
       }));
     const jugadores = new Map<number, JugadorDisponiblePartido>();
-    [...suplentesConvocados, ...disponibles].forEach(jugador => {
+    [...disponibles, ...suplentesConvocados].forEach(jugador => {
       if (jugador.id && !titulares.has(Number(jugador.id))) {
         jugadores.set(Number(jugador.id), jugador);
       }
     });
     return [...jugadores.values()].sort((a, b) => (a.nombre || '').localeCompare(b.nombre || ''));
+  }
+  clickJugadorSuplente(jugadorId?: number) {
+    if (!jugadorId) return;
+    const convocatoria = this.convocatorias.find(item =>
+      Number(item.jugador?.id) === Number(jugadorId) && !item.titular);
+    if (this.partido.estadoPartido !== 'EN_PROCESO' || !this.validarOrganizador || !convocatoria) {
+      this.abrirPerfilPorId(jugadorId);
+      return;
+    }
+    if (this.numeroUniformeConvocatoria(convocatoria) !== undefined) {
+      this.abrirAccionesAlineacion(convocatoria);
+      return;
+    }
+    this.asignarNumeroSuplenteYabrirAcciones(convocatoria);
+  }
+  private asignarNumeroSuplenteYabrirAcciones(convocatoria: ConvocatoriaPartido) {
+    const equipo = this.equipoDeConvocatoria(convocatoria);
+    const usuarioId = this.crud.obtenerUsuario().id;
+    if (!equipo || !usuarioId || !convocatoria.id) return;
+    let numeroDisponible = 0;
+    while (numeroDisponible <= 99 && this.numeroUniformeEnUso(
+      equipo, numeroDisponible, convocatoria.jugador?.id
+    )) {
+      numeroDisponible++;
+    }
+    if (numeroDisponible > 99) {
+      this.mostrarError({ error: { message: `No hay números de uniforme disponibles para ${equipo.nombre}.` } });
+      return;
+    }
+    this.crud.actualizar(null,
+      `partido/convocados/${convocatoria.id}/numero?numero=${numeroDisponible}&usuarioId=${usuarioId}`)
+      .subscribe({
+        next: (actualizada: ConvocatoriaPartido) => {
+          convocatoria.numeroUniforme = actualizada.numeroUniforme ?? numeroDisponible;
+          this.abrirAccionesAlineacion(convocatoria);
+        },
+        error: error => this.mostrarError(error)
+      });
   }
   numeroUniformeEnUso(equipo: Equipo | undefined, numero: number, jugadorId?: number): boolean {
     return this.convocatoriasEquipo(equipo).some(item =>
