@@ -26,6 +26,15 @@ export class Partido {
     torneo?: Torneo;
     grupo?: number;
     estadoPartido?: EstadoPartido;
+    modoRegistroEventos?: 'PROFESIONAL' | 'SIMPLE';
+    controlTiempoActivo?: boolean;
+    periodoActual?: 'PRIMER_TIEMPO' | 'DESCANSO' | 'SEGUNDO_TIEMPO' | 'DESCANSO_EXTRA' | 'PRIMER_TIEMPO_EXTRA' | 'SEGUNDO_TIEMPO_EXTRA' | 'PENALES' | 'FINALIZADO';
+    inicioPeriodoActual?: string;
+    minutoBasePeriodo?: number;
+    alarguePrimerTiempo?: number;
+    alargueSegundoTiempo?: number;
+    alarguePrimerTiempoExtra?: number;
+    alargueSegundoTiempoExtra?: number;
     penaltisEquipoVisitante?: number;
     penaltisEquipoLocal?: number;
     listaArbitros?: Arbitro[];

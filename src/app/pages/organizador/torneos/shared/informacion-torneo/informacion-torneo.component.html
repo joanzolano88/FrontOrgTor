@@ -24,6 +24,7 @@
     <div class="detail-row"><ion-icon name="location-outline"></ion-icon><span>{{ torneo.ubicacion || 'Ubicación pendiente' }}</span></div>
     <div class="detail-row"><ion-icon name="people-outline"></ion-icon><span>{{ cantidadEquipos() }} equipos participantes</span></div>
     <div class="detail-row"><ion-icon name="cash-outline"></ion-icon><span>{{ torneo.valorInscripcion | currency:'COP':'symbol-narrow':'3.0' }} de inscripción</span></div>
+    <div class="detail-row"><ion-icon name="time-outline"></ion-icon><span>{{ torneo.duracionTiempoMinutos || 45 }} min por tiempo · {{ torneo.duracionTiempoExtraMinutos || 15 }} min por tiempo extra</span></div>
     <ng-container *ngIf="torneo.deporte?.reglas as reglasDeporte">
       <div class="detail-row"><ion-icon name="document-text-outline"></ion-icon><span>{{ reglasDeporte }}</span></div>
     </ng-container>

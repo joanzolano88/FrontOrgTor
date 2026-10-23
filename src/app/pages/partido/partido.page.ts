@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CrudService } from 'src/app/services/crud.service';
 import { EstadoPartido } from 'src/enums/EstadoPartido';
@@ -54,7 +54,7 @@ interface SancionPartido {
   styleUrls: ['./partido.page.scss'],
   standalone: false
 })
-export class PartidoPage implements OnInit {
+export class PartidoPage implements OnInit, OnDestroy {
   partido: Partido = new Partido();
   ubucacionCancha: string = "";
   estadoTiempoPArtido: string = "";
@@ -152,6 +152,14 @@ export class PartidoPage implements OnInit {
   modoCambiarPosiciones = false;
   golPenalti = false;
   tarjetaRojaDobleAmarilla = false;
+  partidoStartModalOpen = false;
+  cerrarPeriodoModalOpen = false;
+  modoRegistroSeleccionado: 'PROFESIONAL' | 'SIMPLE' = 'SIMPLE';
+  controlTiempoSeleccionado = false;
+  alarguePeriodo = 0;
+  continuacionTiempo: 'PRORROGA' | 'PENALTIS' | 'EMPATE' = 'PRORROGA';
+  minutoReloj = 0;
+  private timerId?: ReturnType<typeof setInterval>;
 
   constructor(private crud: CrudService, private route: ActivatedRoute,
     private router: Router, private sesionService: SesionService, private alertController: AlertController) {
@@ -164,9 +172,11 @@ export class PartidoPage implements OnInit {
     }
   }
   ngOnInit() {
+    this.timerId = setInterval(() => this.actualizarMinutoReloj(), 1000);
     let idPartido = this.route.snapshot.paramMap.get('idPartido');
     this.crud.obtenerParametro(idPartido,"partido").subscribe((resp: Partido) =>{
       this.partido = resp;
+      this.actualizarMinutoReloj();
       const usuarioId = this.crud.obtenerUsuario().id;
       this.validarOrganizador = false;
       if (usuarioId && resp.id) {
@@ -193,6 +203,9 @@ export class PartidoPage implements OnInit {
       this.alertInputs[0].value = this.partido.anotacionesEquipoLocal!;
       this.alertInputs[1].value = this.partido.anotacionesEquipoVisitante!;
     }, error => this.mostrarError(error));
+  }
+  ngOnDestroy() {
+    if (this.timerId) clearInterval(this.timerId);
   }
   cargarConvocatorias() {
     if (!this.partido.id) return;
@@ -1063,11 +1076,114 @@ export class PartidoPage implements OnInit {
     if (!this.validarOrganizador || this.partido.estadoPartido !== 'EN_PROCESO' ||
         !usuarioId || !this.partido.id || !this.jugadorEvento?.id) return;
     const dobleAmarilla = tipo === 'TARJETA_ROJA' && this.tarjetaRojaDobleAmarilla;
-    this.crud.crear({}, `partido/${this.partido.id}/eventos?jugadorId=${this.jugadorEvento.id}&tipo=${tipo}&minuto=${this.minutoEvento}&dobleAmarilla=${dobleAmarilla}&usuarioId=${usuarioId}`).subscribe({
+    this.crud.crear({}, `partido/${this.partido.id}/eventos?jugadorId=${this.jugadorEvento.id}&tipo=${tipo}&minuto=${this.minutoPartidoActual()}&dobleAmarilla=${dobleAmarilla}&usuarioId=${usuarioId}`).subscribe({
       next: () => {
         this.cargarEventos();
         this.cargarSanciones();
         this.cerrarAccionesAlineacion();
+      },
+      error: error => this.mostrarError(error)
+    });
+  }
+  puedeRegistrarGolJugador(convocatoria?: ConvocatoriaPartido): boolean {
+    return this.partido.modoRegistroEventos !== 'PROFESIONAL' || !!convocatoria?.titular;
+  }
+  minutoPartidoActual(): number {
+    if (!this.partido.controlTiempoActivo) return this.minutoEvento;
+    const inicio = this.partido.inicioPeriodoActual
+      ? new Date(this.partido.inicioPeriodoActual).getTime()
+      : NaN;
+    if (!Number.isFinite(inicio) || !this.partido.periodoActual) {
+      return this.partido.minutoBasePeriodo || 0;
+    }
+    const periodoActivo = ['PRIMER_TIEMPO', 'SEGUNDO_TIEMPO', 'PRIMER_TIEMPO_EXTRA', 'SEGUNDO_TIEMPO_EXTRA']
+      .includes(this.partido.periodoActual);
+    const transcurridos = periodoActivo ? Math.max(0, Math.floor((Date.now() - inicio) / 60000)) : 0;
+    return (this.partido.minutoBasePeriodo || 0) + transcurridos;
+  }
+  esAlargueActivo(): boolean {
+    if (!this.partido.inicioPeriodoActual || !this.partido.periodoActual) return false;
+    const duracion = this.partido.periodoActual === 'PRIMER_TIEMPO' ||
+      this.partido.periodoActual === 'SEGUNDO_TIEMPO'
+      ? this.partido.torneo?.duracionTiempoMinutos || 45
+      : this.partido.periodoActual === 'PRIMER_TIEMPO_EXTRA' ||
+        this.partido.periodoActual === 'SEGUNDO_TIEMPO_EXTRA'
+        ? this.partido.torneo?.duracionTiempoExtraMinutos || 15
+        : 0;
+    const transcurridos = Math.max(0, Math.floor(
+      (Date.now() - new Date(this.partido.inicioPeriodoActual).getTime()) / 60000
+    ));
+    return duracion > 0 && transcurridos >= duracion;
+  }
+  textoAlargueActivo(): string {
+    if (!this.esAlargueActivo()) return '';
+    return this.partido.periodoActual === 'PRIMER_TIEMPO' ? 'Alargue del primer tiempo'
+      : this.partido.periodoActual === 'SEGUNDO_TIEMPO' ? 'Alargue del segundo tiempo'
+        : 'Alargue de la prórroga';
+  }
+  private minutosAlargueActual(): number {
+    const duracion = this.partido.periodoActual === 'PRIMER_TIEMPO' ||
+      this.partido.periodoActual === 'SEGUNDO_TIEMPO'
+      ? this.partido.torneo?.duracionTiempoMinutos || 45
+      : this.partido.torneo?.duracionTiempoExtraMinutos || 15;
+    const transcurridos = Math.max(0, this.minutoPartidoActual() - (this.partido.minutoBasePeriodo || 0));
+    return Math.max(0, transcurridos - duracion);
+  }
+  private actualizarMinutoReloj() {
+    this.minutoReloj = this.minutoPartidoActual();
+  }
+  periodoNombre(): string {
+    switch (this.partido.periodoActual) {
+      case 'PRIMER_TIEMPO': return 'Primer tiempo';
+      case 'DESCANSO': return 'Descanso';
+      case 'SEGUNDO_TIEMPO': return 'Segundo tiempo';
+      case 'DESCANSO_EXTRA': return 'Descanso antes de la prórroga';
+      case 'PRIMER_TIEMPO_EXTRA': return 'Primer tiempo extra';
+      case 'SEGUNDO_TIEMPO_EXTRA': return 'Segundo tiempo extra';
+      case 'PENALES': return 'Penaltis';
+      case 'FINALIZADO': return 'Finalizado';
+      default: return '';
+    }
+  }
+  abrirControlCierrePeriodo() {
+    this.alarguePeriodo = this.minutosAlargueActual();
+    this.continuacionTiempo = this.partido.periodoActual === 'SEGUNDO_TIEMPO_EXTRA'
+      ? 'PENALTIS'
+      : 'PRORROGA';
+    this.cerrarPeriodoModalOpen = true;
+  }
+  guardarCierrePeriodo() {
+    if (!this.partido.id) return;
+    if (!Number.isInteger(Number(this.alarguePeriodo)) || Number(this.alarguePeriodo) < 0) {
+      this.mostrarError({ error: { message: 'Los minutos de alargue deben ser un entero igual o mayor a cero.' } });
+      return;
+    }
+    const empate = this.partido.anotacionesEquipoLocal === this.partido.anotacionesEquipoVisitante;
+    const esSegundoTiempo = this.partido.periodoActual === 'SEGUNDO_TIEMPO';
+    const esSegundoExtra = this.partido.periodoActual === 'SEGUNDO_TIEMPO_EXTRA';
+    const continuacion = empate && (esSegundoTiempo || esSegundoExtra)
+      ? this.continuacionTiempo
+      : '';
+    this.crud.actualizar(null,
+      `partido/${this.partido.id}/periodo/cerrar?alargue=${Math.max(0, Number(this.alarguePeriodo) || 0)}&continuacion=${continuacion}`)
+      .subscribe({
+        next: (partido: Partido) => {
+          this.partido = partido;
+          this.cerrarPeriodoModalOpen = false;
+          this.actualizarMinutoReloj();
+          if (partido.periodoActual === 'PENALES') {
+            document.getElementById('penaltis-alert')?.click();
+          }
+        },
+        error: error => this.mostrarError(error)
+      });
+  }
+  iniciarSiguientePeriodo() {
+    if (!this.partido.id) return;
+    this.crud.actualizar(null, `partido/${this.partido.id}/periodo/iniciar`).subscribe({
+      next: (partido: Partido) => {
+        this.partido = partido;
+        this.actualizarMinutoReloj();
       },
       error: error => this.mostrarError(error)
     });
@@ -1093,11 +1209,20 @@ export class PartidoPage implements OnInit {
       return;
     }
     if (this.partido?.estadoPartido == EstadoPartido.PROGRAMADO) {
-      const usuarioId = this.crud.obtenerUsuario().id;
-      this.crud.actualizar(this.partido, `partido/iniciar/${this.partido.id}?usuarioId=${usuarioId}`).subscribe((resp: Partido) =>{
-        this.partido = resp;
-      }, error => this.mostrarError(error));
+      this.modoRegistroSeleccionado = 'SIMPLE';
+      this.controlTiempoSeleccionado = false;
+      this.partidoStartModalOpen = true;
     } else if (this.partido?.estadoPartido == EstadoPartido.EN_PROCESO) {
+      if (this.partido.controlTiempoActivo) {
+        if (this.partido.periodoActual === 'DESCANSO' || this.partido.periodoActual === 'DESCANSO_EXTRA') {
+          this.iniciarSiguientePeriodo();
+        } else if (this.partido.periodoActual === 'PENALES') {
+          document.getElementById('penaltis-alert')?.click();
+        } else if (this.partido.inicioPeriodoActual) {
+          this.abrirControlCierrePeriodo();
+        }
+        return;
+      }
       if (this.partido.torneo?.modalidadEliminatorias == ModalidadFase.PARTIDO_UNICO && this.partido.anotacionesEquipoLocal == this.partido.anotacionesEquipoVisitante && 
         this.partido.penaltisEquipoLocal == this.partido.penaltisEquipoVisitante && this.partido.torneo.faseTorneo != FaseActual.FASE_GRUPOS && this.partido.torneo.faseTorneo != FaseActual.ELIMINATORIAS_GRUPOS) {
         btn['el'].click();
@@ -1109,11 +1234,31 @@ export class PartidoPage implements OnInit {
       }
     }
   }
+  iniciarPartidoConfigurado() {
+    if (!this.partido.id) return;
+    this.crud.actualizar(
+      this.partido,
+      `partido/iniciar/${this.partido.id}?modoRegistroEventos=${this.modoRegistroSeleccionado}&controlTiempoActivo=${this.controlTiempoSeleccionado}`
+    ).subscribe({
+      next: (partido: Partido) => {
+        this.partido = partido;
+        this.partidoStartModalOpen = false;
+        this.actualizarMinutoReloj();
+      },
+      error: error => this.mostrarError(error)
+    });
+  }
   textoBtnoPartido() {
     if (this.partido?.estadoPartido == EstadoPartido.PROGRAMADO) {
-      return 'Iniciar Partido'
+      return 'Configurar e iniciar partido';
     }
-    return 'Terminar Partido'
+    if (this.partido?.controlTiempoActivo) {
+      if (this.partido.periodoActual === 'DESCANSO') return 'Iniciar segundo tiempo';
+      if (this.partido.periodoActual === 'DESCANSO_EXTRA') return 'Iniciar tiempo extra';
+      if (this.partido.periodoActual === 'PENALES') return 'Registrar penaltis';
+      return 'Finalizar periodo';
+    }
+    return 'Terminar Partido';
   }
   
   colorEstadoPartido(partido: Partido){
@@ -1150,11 +1295,13 @@ export class PartidoPage implements OnInit {
     const equipoId = this.tipoGol === 'AUTOGOL'
       ? this.equiposDelPartido().find(equipo => equipo.id !== this.equipoObjetivoGol?.id)?.id
       : this.equipoObjetivoGol?.id;
-    return this.convocatoriasEquipo(this.equiposDelPartido().find(equipo => equipo.id === equipoId));
+    return this.convocatoriasEquipo(this.equiposDelPartido().find(equipo => equipo.id === equipoId))
+      .filter(convocatoria => this.puedeRegistrarGolJugador(convocatoria));
   }
   jugadoresParaAsistencia(): ConvocatoriaPartido[] {
     return this.convocatoriasEquipo(this.equipoObjetivoGol)
-      .filter(convocatoria => convocatoria.jugador?.id !== this.jugadorGolId);
+      .filter(convocatoria => convocatoria.jugador?.id !== this.jugadorGolId &&
+        this.puedeRegistrarGolJugador(convocatoria));
   }
   registrarGol() {
     const usuarioId = this.crud.obtenerUsuario().id;
@@ -1173,7 +1320,7 @@ export class PartidoPage implements OnInit {
       asistenciaId: this.tipoGol === 'GOL' ? this.asistenciaGolId || null : null,
       autogol: this.tipoGol === 'AUTOGOL',
       penalti: this.tipoGol === 'GOL' && this.golPenalti,
-      minuto: this.minutoEvento
+      minuto: this.minutoPartidoActual()
     };
     this.crud.crear(solicitud, `partido/${this.partido.id}/goles`).subscribe((resp: Partido) => {
       this.partido = resp;

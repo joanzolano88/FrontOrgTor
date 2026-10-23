@@ -8,15 +8,79 @@
 </ion-header>
 
 <ion-content class="match-page" [fullscreen]="true">
+  <section class="match-clock" *ngIf="partido.estadoPartido === 'EN_PROCESO' && partido.controlTiempoActivo">
+    <div><small>{{ periodoNombre() }}</small><strong>{{ minutoReloj }}′</strong></div>
+    <span *ngIf="esAlargueActivo()">{{ textoAlargueActivo() }} · el organizador controla el final</span>
+    <span *ngIf="partido.modoRegistroEventos === 'PROFESIONAL'">Seguimiento profesional · eventos de titulares</span>
+  </section>
   <ion-button class="action-button" (click)="eventosPartido(btnModalPenaltis)" expand="block" shape="round" 
   *ngIf="validarOrganizador && (partido.estadoPartido == 'EN_PROCESO' || partido.estadoPartido == 'PROGRAMADO')">
     {{textoBtnoPartido()}}
   </ion-button>
+  <ion-modal class="substitution-modal" [isOpen]="partidoStartModalOpen" (didDismiss)="partidoStartModalOpen = false">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>Configurar partido</ion-title>
+          <ion-buttons slot="end"><ion-button (click)="partidoStartModalOpen = false">Cancelar</ion-button></ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="substitution-modal-content">
+        <div class="substitution-shell">
+          <ion-item>
+            <ion-select label="Registro de eventos" labelPlacement="stacked" [(ngModel)]="modoRegistroSeleccionado">
+              <ion-select-option value="PROFESIONAL">Profesional: eventos para titulares; tarjetas también a suplentes</ion-select-option>
+              <ion-select-option value="SIMPLE">Simple: eventos para titulares y suplentes</ion-select-option>
+            </ion-select>
+          </ion-item>
+          <ion-item>
+            <ion-toggle [(ngModel)]="controlTiempoSeleccionado">Controlar tiempos con cronómetro</ion-toggle>
+          </ion-item>
+          <ion-note *ngIf="controlTiempoSeleccionado">
+            Cada tiempo usará la duración definida en la información del torneo. Al cumplirse, el reloj seguirá contando el alargue hasta que el organizador o un ayudante cierre el periodo.
+          </ion-note>
+          <ion-button expand="block" (click)="iniciarPartidoConfigurado()">Iniciar partido</ion-button>
+        </div>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+  <ion-modal class="substitution-modal" [isOpen]="cerrarPeriodoModalOpen" (didDismiss)="cerrarPeriodoModalOpen = false">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>Finalizar {{ periodoNombre() }}</ion-title>
+          <ion-buttons slot="end"><ion-button (click)="cerrarPeriodoModalOpen = false">Cancelar</ion-button></ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="substitution-modal-content">
+        <div class="substitution-shell">
+          <ion-item>
+            <ion-input type="number" min="0" step="1" label="Minutos de alargue registrados" labelPlacement="stacked" [(ngModel)]="alarguePeriodo" readonly></ion-input>
+          </ion-item>
+          <ion-item *ngIf="partido.periodoActual === 'SEGUNDO_TIEMPO' && partido.anotacionesEquipoLocal === partido.anotacionesEquipoVisitante">
+            <ion-select label="Continuación en empate" labelPlacement="stacked" [(ngModel)]="continuacionTiempo">
+              <ion-select-option value="PRORROGA">Jugar prórroga</ion-select-option>
+              <ion-select-option value="PENALTIS">Ir a penaltis</ion-select-option>
+              <ion-select-option value="EMPATE">Terminar empatado</ion-select-option>
+            </ion-select>
+          </ion-item>
+          <ion-item *ngIf="partido.periodoActual === 'SEGUNDO_TIEMPO_EXTRA' && partido.anotacionesEquipoLocal === partido.anotacionesEquipoVisitante">
+            <ion-select label="Continuación en empate" labelPlacement="stacked" [(ngModel)]="continuacionTiempo">
+              <ion-select-option value="PENALTIS">Ir a penaltis</ion-select-option>
+              <ion-select-option value="EMPATE">Terminar empatado</ion-select-option>
+            </ion-select>
+          </ion-item>
+          <ion-note>El minuto del evento se calcula automáticamente usando el cronómetro del partido.</ion-note>
+          <ion-button expand="block" (click)="guardarCierrePeriodo()">Confirmar final del periodo</ion-button>
+        </div>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
   <ion-card class="match-hero">
     <div class="match-meta"><span>{{ partido.faseEncuentro }}</span><ion-badge color="{{colorEstadoPartido(partido)}}">{{ partido.estadoPartido }}</ion-badge></div>
     <div class="match-teams">
       <div class="detail-team" (click)="abrirEquipo(partido.equipoLocal)"><img appImageFallback="assets/images/shield-placeholder.svg" [src]="mostrarEscudo(partido.equipoLocal?.escudo)" [alt]="'Escudo de ' + (partido.equipoLocal?.nombre || 'equipo local')"><strong>{{ partido.equipoLocal?.nombre }}</strong></div>
-      <div class="detail-score"><span>{{ partido.anotacionesEquipoLocal ?? 0 }}</span><small>FINAL</small><span>{{ partido.anotacionesEquipoVisitante ?? 0 }}</span></div>
+      <div class="detail-score"><span>{{ partido.anotacionesEquipoLocal ?? 0 }}</span><small>{{ partido.estadoPartido === 'EN_PROCESO' ? 'EN VIVO' : 'FINAL' }}</small><span>{{ partido.anotacionesEquipoVisitante ?? 0 }}</span></div>
       <div class="detail-team" (click)="abrirEquipo(partido.equipoVisitante)"><img appImageFallback="assets/images/shield-placeholder.svg" [src]="mostrarEscudo(partido.equipoVisitante?.escudo)" [alt]="'Escudo de ' + (partido.equipoVisitante?.nombre || 'equipo visitante')"><strong>{{ partido.equipoVisitante?.nombre }}</strong></div>
     </div>
     <div class="penalty-score" *ngIf="(partido.penaltisEquipoLocal ?? 0) > 0 || (partido.penaltisEquipoVisitante ?? 0) > 0">
@@ -606,15 +670,16 @@
             <span class="player-number">{{ convocatoria.numeroUniforme ?? convocatoria.jugador?.numeroCamiseta ?? '–' }}</span>
             <div><strong>{{ convocatoria.jugador?.nombre }}</strong><small>{{ equipoDeConvocatoria(convocatoria)?.nombre }}</small></div>
           </div>
-          <ion-item class="action-minute" *ngIf="validarOrganizador"><ion-input type="number" label="Minuto del evento" min="0" [(ngModel)]="minutoEvento"></ion-input></ion-item>
+          <ion-item class="action-minute" *ngIf="validarOrganizador"><ion-input type="number" label="Minuto del evento" min="0" [readonly]="partido.controlTiempoActivo" [ngModel]="partido.controlTiempoActivo ? minutoPartidoActual() : minutoEvento" (ngModelChange)="minutoEvento = $event"></ion-input></ion-item>
           <div class="player-action-buttons">
             <ion-button *ngIf="puedeCambiarPosicionesEnJuego() && puedeModificarTactica(equipoDeConvocatoria(convocatoria))"
               expand="block" fill="outline" (click)="seleccionarJugadorParaCambiarPosicion(convocatoria)">
               <ion-icon slot="start" name="swap-horizontal-outline"></ion-icon>Seleccionar para cambiar posición
             </ion-button>
             <ng-container *ngIf="validarOrganizador">
-              <ion-button expand="block" color="success" (click)="anotarGolDeJugador(false)"><ion-icon slot="start" name="football-outline"></ion-icon>Gol</ion-button>
-              <ion-button expand="block" color="warning" (click)="anotarGolDeJugador(true)"><ion-icon slot="start" name="football-outline"></ion-icon>Autogol</ion-button>
+              <ion-button *ngIf="puedeRegistrarGolJugador(convocatoria)" expand="block" color="success" (click)="anotarGolDeJugador(false)"><ion-icon slot="start" name="football-outline"></ion-icon>Gol</ion-button>
+              <ion-button *ngIf="puedeRegistrarGolJugador(convocatoria)" expand="block" color="warning" (click)="anotarGolDeJugador(true)"><ion-icon slot="start" name="football-outline"></ion-icon>Autogol</ion-button>
+              <ion-note *ngIf="!puedeRegistrarGolJugador(convocatoria)">En modo profesional, los goles solo se registran a titulares. Las tarjetas también pueden aplicarse a suplentes.</ion-note>
               <ion-button expand="block" color="warning" (click)="registrarEvento('TARJETA_AMARILLA')"><ion-icon slot="start" name="warning-outline"></ion-icon>Tarjeta amarilla</ion-button>
               <ion-button expand="block" color="danger" (click)="tarjetaRojaDobleAmarilla = false; registrarEvento('TARJETA_ROJA')"><ion-icon slot="start" name="card-outline"></ion-icon>Roja directa</ion-button>
               <ion-button expand="block" color="danger" fill="outline" (click)="tarjetaRojaDobleAmarilla = true; registrarEvento('TARJETA_ROJA')"><ion-icon slot="start" name="card-outline"></ion-icon>Roja por doble amarilla</ion-button>

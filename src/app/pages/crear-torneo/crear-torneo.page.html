@@ -93,6 +93,16 @@
               name="duracion" min="1" required></ion-input>
           </ion-item>
 
+          <ion-item class="form-field">
+            <ion-input [(ngModel)]="torneo.duracionTiempoMinutos" type="number" label="Duración de cada tiempo (min)" labelPlacement="floating"
+              name="duracionTiempo" min="1" step="1" required></ion-input>
+          </ion-item>
+
+          <ion-item class="form-field">
+            <ion-input [(ngModel)]="torneo.duracionTiempoExtraMinutos" type="number" label="Duración de cada tiempo extra (min)" labelPlacement="floating"
+              name="duracionTiempoExtra" min="1" step="1" required></ion-input>
+          </ion-item>
+
           <ion-item class="form-field" [ngClass]="{'error-input': tieneError(f, 'deporte')}"
             [ngStyle]="{'--border-color': tieneError(f, 'deporte') ? '#f44336' : '#404040'}">
             <ion-select interface="popover" [(ngModel)]="torneo.deporte" label="Deporte" labelPlacement="floating" name="deporte" required>

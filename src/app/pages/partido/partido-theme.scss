@@ -14,6 +14,24 @@ ion-content.match-page.match-page {
   --background: linear-gradient(180deg, #00172a, #001b2e 42%);
   --color: var(--match-text);
 
+  .match-clock {
+    display: flex;
+    width: min(980px, calc(100% - 32px));
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin: 14px auto;
+    padding: 12px 16px;
+    border: 1px solid var(--match-border);
+    border-radius: 14px;
+    background: linear-gradient(145deg, #06263a, #041b2b);
+  }
+
+  .match-clock > div { display: grid; gap: 2px; }
+  .match-clock small { color: var(--match-muted); }
+  .match-clock strong { color: #fff; font-size: 1.7rem; font-variant-numeric: tabular-nums; }
+  .match-clock > span { color: #91c4ff; font-size: .8rem; text-align: right; }
+
   > .action-button,
   .lineup-button {
     width: min(980px, calc(100% - 32px));

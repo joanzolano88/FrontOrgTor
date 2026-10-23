@@ -41,9 +41,13 @@ export class CrearTorneoPage {
     this.cargarPaises();
     this.crud.obtener('deporte').subscribe((resp: Deporte[]) => this.deportes = resp || []);
     let idTorneo = route.snapshot.paramMap.get('idTorneo');
+    this.torneo.duracionTiempoMinutos = 45;
+    this.torneo.duracionTiempoExtraMinutos = 15;
     if (idTorneo) {
       crud.obtenerParametro(idTorneo, "torneo").subscribe((respT: Torneo) =>{
         this.torneo = respT;
+        if (!this.torneo.duracionTiempoMinutos) this.torneo.duracionTiempoMinutos = 45;
+        if (!this.torneo.duracionTiempoExtraMinutos) this.torneo.duracionTiempoExtraMinutos = 15;
       });
     }
   }
@@ -154,6 +158,13 @@ export class CrearTorneoPage {
   }
 
   private guardarTorneo(form: NgForm, usuario: Usuario) {
+    if (!Number.isInteger(Number(this.torneo.duracionTiempoMinutos)) ||
+        Number(this.torneo.duracionTiempoMinutos) < 1 ||
+        !Number.isInteger(Number(this.torneo.duracionTiempoExtraMinutos)) ||
+        Number(this.torneo.duracionTiempoExtraMinutos) < 1) {
+      this.mostrarAlerta('Duración inválida', 'Indica duraciones enteras mayores a cero para cada tiempo y cada tiempo extra.');
+      return;
+    }
     if (!usuario?.ubicacion?.trim()) {
       this.mostrarAlerta('Ubicación requerida', 'Registra y guarda la ubicación del organizador en Mi perfil antes de crear un torneo.');
       return;
