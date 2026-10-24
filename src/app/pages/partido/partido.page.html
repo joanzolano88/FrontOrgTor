@@ -388,6 +388,27 @@
               <ion-input [(ngModel)]="busquedaAlineacion" [placeholder]="puedeAgregarSuplenteTardio() ? 'Buscar jugador inscrito o identificación' : 'Buscar jugador o identificación'" aria-label="Buscar jugador o identificación"></ion-input>
               <ion-button fill="clear" (click)="buscarPorIdentificacionDesdeBusqueda()">Buscar ID</ion-button>
             </div>
+            <div class="roster-registration" *ngIf="puedeEditarConvocatoria() || puedeAgregarSuplenteTardio()">
+              <ion-button fill="outline" size="small" (click)="registroJugadorOpen = !registroJugadorOpen">
+                <ion-icon slot="start" name="person-add-outline"></ion-icon>
+                {{ registroJugadorOpen ? 'Cerrar registro' : 'Registrar jugador nuevo' }}
+              </ion-button>
+              <form *ngIf="registroJugadorOpen" class="roster-registration-form" (ngSubmit)="registrarJugadorEquipo()">
+                <ion-item>
+                  <ion-input label="Nombre completo" labelPlacement="stacked" name="nombreNuevoJugador"
+                    [(ngModel)]="nombreNuevoJugador" required maxlength="120"></ion-input>
+                </ion-item>
+                <ion-item>
+                  <ion-input label="Cédula" labelPlacement="stacked" name="identificacionNuevoJugador"
+                    [(ngModel)]="identificacionNuevoJugador" required maxlength="40"></ion-input>
+                </ion-item>
+                <ion-note>Se creará su cuenta de jugador; su contraseña inicial será la cédula.</ion-note>
+                <ion-button type="submit" expand="block" [disabled]="registrandoJugador || !puedeGestionarEquipo(equipoConvocatoria)">
+                  {{ registrandoJugador ? 'Registrando...' : 'Registrar en este equipo' }}
+                </ion-button>
+              </form>
+              <ion-note color="success" *ngIf="mensajeRegistroJugador">{{ mensajeRegistroJugador }}</ion-note>
+            </div>
           </section>
           <div class="lineup-columns roster-columns">
             <section class="lineup-column">

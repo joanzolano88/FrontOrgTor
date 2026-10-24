@@ -112,6 +112,11 @@ export class PartidoPage implements OnInit {
   equipoConvocatoria?: Equipo;
   identificacionJugador = '';
   busquedaAlineacion = '';
+  registroJugadorOpen = false;
+  nombreNuevoJugador = '';
+  identificacionNuevoJugador = '';
+  registrandoJugador = false;
+  mensajeRegistroJugador = '';
   enlaceInvitacion = '';
   convocatoriaModalOpen = false;
   listasTitularesModalOpen = false;
@@ -1065,6 +1070,37 @@ export class PartidoPage implements OnInit {
       this.jugadoresDisponibles = [];
       this.crud.obtener(`partido/${this.partido.id}/jugadores-disponibles/${this.equipoConvocatoria.id}`).subscribe((resp: JugadorDisponiblePartido[]) => this.jugadoresDisponibles = resp || [], error => this.mostrarError(error));
     }
+  }
+  registrarJugadorEquipo() {
+    const nombre = this.nombreNuevoJugador.trim();
+    const identificacion = this.identificacionNuevoJugador.trim();
+    const equipoId = this.equipoConvocatoria?.id;
+    if (!nombre || !identificacion || !equipoId || !this.partido.id ||
+        !this.puedeGestionarEquipo(this.equipoConvocatoria) ||
+        (!this.puedeEditarConvocatoria() && !this.puedeAgregarSuplenteTardio())) {
+      this.mostrarError({ error: { message: 'Ingresa el nombre y la cédula, y selecciona un equipo que puedas gestionar.' } });
+      return;
+    }
+    this.registrandoJugador = true;
+    this.mensajeRegistroJugador = '';
+    this.crud.crear(
+      { nombre, identificacion },
+      `partido/${this.partido.id}/equipos/${equipoId}/jugadores`
+    ).subscribe({
+      next: () => {
+        this.registrandoJugador = false;
+        this.nombreNuevoJugador = '';
+        this.identificacionNuevoJugador = '';
+        this.registroJugadorOpen = false;
+        this.mensajeRegistroJugador = 'Jugador registrado en el plantel. La contraseña inicial de su cuenta es su cédula.';
+        this.cambiarEquipoConvocatoria();
+        this.cargarJugadoresDeAmbosEquipos();
+      },
+      error: error => {
+        this.registrandoJugador = false;
+        this.mostrarError(error);
+      }
+    });
   }
   agregarJugador(jugador: Jugador, titular = false, numeroUniforme?: number) {
     const usuarioId = this.crud.obtenerUsuario().id;

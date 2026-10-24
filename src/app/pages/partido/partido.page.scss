@@ -252,7 +252,7 @@ ion-modal.rosters-modal::part(content) { border: 1px solid #075e7e; background: 
 
 .lineup-column h3 { display: flex; align-items: center; gap: 7px; margin: 0; padding: 9px; border-bottom: 1px solid #075e7e; color: #eaf4ff; font-size: .82rem; }
 
-.roster-drop-list {
+.roster-drop-list { 
   min-height: 50px;
   background: rgba(0, 22, 37, .55);
 }
