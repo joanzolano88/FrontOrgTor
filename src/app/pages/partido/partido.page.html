@@ -461,7 +461,7 @@
                       </ion-button>
                       <ion-button *ngIf="puedeConvocarJugador()" size="small" fill="outline" color="success"
                         [disabled]="!!sancionActiva(jugador) && sancionActiva(jugador)?.exencionPartidoId !== partido.id"
-                        (click)="agregarJugador(jugador)">Convocar suplente</ion-button>
+                        (click)="agregarJugador(jugador, false, numeroUniformeDisponible(jugador) ?? undefined)">Convocar suplente</ion-button>
                       <ion-button *ngIf="puedeGestionarEquipo(equipoConvocatoria) && puedeEditarConvocatoria()" size="small" fill="outline" color="primary"
                         [disabled]="!puedeTitularizar(jugador) || !numeroUniformeValido(numeroUniformeDisponible(jugador))"
                         (click)="pasarATitular(jugador)">Convocar titular</ion-button>
