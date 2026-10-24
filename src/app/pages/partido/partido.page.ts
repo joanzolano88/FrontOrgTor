@@ -1185,16 +1185,47 @@ export class PartidoPage implements OnInit {
       this.modoRegistroSeleccionado = 'SIMPLE';
       this.partidoStartModalOpen = true;
     } else if (this.partido?.estadoPartido == EstadoPartido.EN_PROCESO) {
-      if (this.partido.torneo?.modalidadEliminatorias == ModalidadFase.PARTIDO_UNICO && this.partido.anotacionesEquipoLocal == this.partido.anotacionesEquipoVisitante && 
-        this.partido.penaltisEquipoLocal == this.partido.penaltisEquipoVisitante && this.partido.torneo.faseTorneo != FaseActual.FASE_GRUPOS && this.partido.torneo.faseTorneo != FaseActual.ELIMINATORIAS_GRUPOS) {
+      const faseGrupos = this.partido.torneo?.faseTorneo === FaseActual.FASE_GRUPOS ||
+        this.partido.torneo?.faseTorneo === FaseActual.ELIMINATORIAS_GRUPOS;
+      const empateMarcador = (this.partido.anotacionesEquipoLocal ?? 0) ===
+        (this.partido.anotacionesEquipoVisitante ?? 0);
+      const empatePenaltis = (this.partido.penaltisEquipoLocal ?? 0) ===
+        (this.partido.penaltisEquipoVisitante ?? 0);
+      const eliminatoriaPartidoUnico = !faseGrupos &&
+        this.partido.torneo?.modalidadEliminatorias === ModalidadFase.PARTIDO_UNICO;
+
+      if (eliminatoriaPartidoUnico && empateMarcador && empatePenaltis) {
         btn['el'].click();
-      } else if (this.partido.torneo?.modalidadEliminatorias == ModalidadFase.IDA_VUELTA && this.partido.anotacionesEquipoLocal == this.partido.anotacionesEquipoVisitante) {
-        this.mostrarError({ error: { message: 'No se puede terminar una eliminatoria ida y vuelta empatada desde este partido.' } });
-      } else if (this.partido.torneo?.modalidadEliminatorias == ModalidadFase.PARTIDO_UNICO && (this.partido.anotacionesEquipoLocal != this.partido.anotacionesEquipoVisitante || 
-        this.partido.penaltisEquipoLocal != this.partido.penaltisEquipoVisitante)) {
-          this.terminarPartido();
+      } else {
+        this.terminarPartido();
       }
     }
+  }
+
+  async eliminarEvento(evento: EventoPartido) {
+    if (!this.validarOrganizador || this.partido.estadoPartido !== EstadoPartido.EN_PROCESO ||
+        !evento.id || !this.partido.id) return;
+    const confirmacion = await this.alertController.create({
+      header: 'Eliminar evento',
+      message: '¿Quieres eliminar este evento del partido?',
+      buttons: [
+        { text: 'Cancelar', role: 'cancel' },
+        { text: 'Eliminar', role: 'confirm' }
+      ]
+    });
+    await confirmacion.present();
+    const resultado = await confirmacion.onDidDismiss();
+    if (resultado.role !== 'confirm') return;
+
+    const usuarioId = this.crud.obtenerUsuario().id;
+    if (!usuarioId) return;
+    this.crud.borrarConUsuario(evento.id, 'partido/eventos', usuarioId).subscribe({
+      next: (partido: Partido) => {
+        this.partido = partido;
+        this.cargarEventos();
+      },
+      error: error => this.mostrarError(error)
+    });
   }
   iniciarPartidoConfigurado() {
     if (!this.partido.id) return;
