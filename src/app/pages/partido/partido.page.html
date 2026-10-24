@@ -382,15 +382,15 @@
           <div class="lineup-columns roster-columns">
             <section class="lineup-column">
               <h3><ion-icon name="checkmark-circle" color="success"></ion-icon> Titulares ({{ titularesEquipoActual() }})</h3>
-              <div class="roster-drop-list" cdkDropList [cdkDropListDisabled]="partido.estadoPartido === 'EN_PROCESO'" [id]="'titulares-' + equipoConvocatoria?.id" [cdkDropListData]="titularesEquipo(equipoConvocatoria)" [cdkDropListConnectedTo]="['jugadores-' + equipoConvocatoria?.id]" (cdkDropListDropped)="moverJugador($event, true)">
-                <article class="roster-player-row" *ngFor="let convocatoria of titularesEquipo(equipoConvocatoria)" cdkDrag [cdkDragData]="convocatoria">
-                  <span class="player-number">{{ convocatoria.numeroUniforme || convocatoria.jugador?.numeroCamiseta || '–' }}</span>
+              <div class="roster-drop-list">
+                <article class="roster-player-row" *ngFor="let convocatoria of titularesEquipo(equipoConvocatoria)">
+                  <span class="player-number">{{ numeroUniformeConvocatoria(convocatoria) ?? '–' }}</span>
                   <button type="button" class="player-info" (click)="$event.stopPropagation(); abrirPerfilJugador(convocatoria.jugador)">
                     <strong>{{ convocatoria.jugador?.nombre }}</strong><small>{{ convocatoria.jugador?.identificacion }}</small>
                   </button>
-                  <ion-input *ngIf="puedeGestionarEquipo(equipoConvocatoria)" class="uniform-input" type="number" min="0" max="99" aria-label="Número de uniforme" [(ngModel)]="convocatoria.numeroUniforme" (click)="$event.stopPropagation()" (ionBlur)="cambiarNumeroUniforme(convocatoria)"></ion-input>
+                  <ion-input *ngIf="puedeGestionarEquipo(equipoConvocatoria)" class="uniform-input" type="number" min="0" max="99" label="N.º" labelPlacement="start" placeholder="0" aria-label="Número de uniforme" [ngModel]="numeroUniformeConvocatoria(convocatoria)" (ionChange)="cambiarNumeroUniforme(convocatoria, $event.detail.value)" (click)="$event.stopPropagation()"></ion-input>
                   <div class="roster-actions" *ngIf="puedeGestionarEquipo(equipoConvocatoria)">
-                    <ion-button *ngIf="puedeEditarConvocatoria()" class="roster-icon-button" fill="clear" color="medium" aria-label="Pasar a suplentes" title="Pasar a suplentes" (click)="$event.stopPropagation(); pasarASuplente(convocatoria)"><ion-icon slot="icon-only" name="swap-vertical-outline"></ion-icon></ion-button>
+                    <ion-button *ngIf="puedeEditarConvocatoria()" class="roster-icon-button" fill="clear" color="medium" aria-label="Pasar a suplentes" title="Pasar a suplentes" (click)="$event.stopPropagation(); pasarASuplente(convocatoria)">Suplente</ion-button>
                     <ion-button *ngIf="partido.estadoPartido !== 'EN_PROCESO'" class="roster-icon-button" fill="clear" color="danger" aria-label="Quitar del partido" title="Quitar del partido" (click)="$event.stopPropagation(); eliminarConvocatoria(convocatoria)"><ion-icon slot="icon-only" name="trash-outline"></ion-icon></ion-button>
                   </div>
                 </article>
@@ -399,15 +399,15 @@
             </section>
             <section class="lineup-column">
               <h3><ion-icon name="people-outline"></ion-icon> Suplentes convocados ({{ suplentesEquipoActual() }})</h3>
-              <div class="roster-drop-list" cdkDropList [cdkDropListDisabled]="partido.estadoPartido === 'EN_PROCESO'" [id]="'jugadores-' + equipoConvocatoria?.id" [cdkDropListData]="jugadoresEquipo(equipoConvocatoria)" [cdkDropListConnectedTo]="['titulares-' + equipoConvocatoria?.id]" (cdkDropListDropped)="moverJugador($event, false)">
-                <article class="roster-player-row" *ngFor="let convocatoria of jugadoresEquipo(equipoConvocatoria)" cdkDrag [cdkDragData]="convocatoria">
-                  <span class="player-number">{{ convocatoria.numeroUniforme || convocatoria.jugador?.numeroCamiseta || '–' }}</span>
+              <div class="roster-drop-list">
+                <article class="roster-player-row" *ngFor="let convocatoria of jugadoresEquipo(equipoConvocatoria)">
+                  <span class="player-number">{{ numeroUniformeConvocatoria(convocatoria) ?? '–' }}</span>
                   <button type="button" class="player-info" (click)="$event.stopPropagation(); abrirPerfilJugador(convocatoria.jugador)">
                     <strong>{{ convocatoria.jugador?.nombre }}</strong><small>{{ convocatoria.jugador?.identificacion }}</small>
                   </button>
-                  <ion-input *ngIf="puedeGestionarEquipo(equipoConvocatoria)" class="uniform-input" type="number" min="0" max="99" aria-label="Número de uniforme" [(ngModel)]="convocatoria.numeroUniforme" (click)="$event.stopPropagation()" (ionBlur)="cambiarNumeroUniforme(convocatoria)"></ion-input>
+                  <ion-input *ngIf="puedeGestionarEquipo(equipoConvocatoria)" class="uniform-input" type="number" min="0" max="99" label="N.º" labelPlacement="start" placeholder="0" aria-label="Número de uniforme" [ngModel]="numeroUniformeConvocatoria(convocatoria)" (ionChange)="cambiarNumeroUniforme(convocatoria, $event.detail.value)" (click)="$event.stopPropagation()"></ion-input>
                   <div class="roster-actions" *ngIf="puedeGestionarEquipo(equipoConvocatoria)">
-                    <ion-button *ngIf="puedeEditarConvocatoria()" class="roster-icon-button" fill="clear" color="primary" aria-label="Pasar a titulares" title="Pasar a titulares" [disabled]="titularesEquipoActual() >= maximoTitulares() || !numeroUniformeConvocatoria(convocatoria)" (click)="$event.stopPropagation(); cambiarTitular(convocatoria, true, numeroUniformeConvocatoria(convocatoria))"><ion-icon slot="icon-only" name="swap-vertical-outline"></ion-icon></ion-button>
+                    <ion-button *ngIf="puedeEditarConvocatoria()" class="roster-icon-button" fill="clear" color="primary" aria-label="Pasar a titulares" title="Pasar a titulares" [disabled]="titularesEquipo(equipoConvocatoria).length >= maximoTitulares() || numeroUniformeConvocatoria(convocatoria) === undefined" (click)="$event.stopPropagation(); pasarATitularConvocatoria(convocatoria)">Titular</ion-button>
                     <ion-button *ngIf="partido.estadoPartido !== 'EN_PROCESO'" class="roster-icon-button" fill="clear" color="danger" aria-label="Quitar del partido" title="Quitar del partido" (click)="$event.stopPropagation(); eliminarConvocatoria(convocatoria)"><ion-icon slot="icon-only" name="trash-outline"></ion-icon></ion-button>
                   </div>
                 </article>

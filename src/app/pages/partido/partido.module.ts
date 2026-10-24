@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 import { IonicModule } from '@ionic/angular';
-import { DragDropModule } from '@angular/cdk/drag-drop';
 
 import { PartidoPageRoutingModule } from './partido-routing.module';
 
@@ -15,7 +14,6 @@ import { SharedModule } from 'src/app/shared/shared.module';
     CommonModule,
     FormsModule,
     IonicModule,
-    DragDropModule,
     SharedModule,
     PartidoPageRoutingModule
   ],

@@ -12,7 +12,6 @@ import { Equipo } from 'src/models/Equipo';
 import { Jugador } from 'src/models/Jugador';
 import { JugadorDisponiblePartido } from 'src/models/JugadorDisponiblePartido';
 import { TipoUsuario } from 'src/enums/TipoUsuario';
-import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { EventoPartido, TipoEventoPartido } from 'src/models/EventoPartido';
 
 interface FormacionPartido {
@@ -749,6 +748,20 @@ export class PartidoPage implements OnInit {
     if (!this.puedeEditarConvocatoria() || !this.puedeGestionarEquipo(this.equipoDeConvocatoria(convocatoria))) return;
     this.cambiarTitular(convocatoria, false);
   }
+  pasarATitularConvocatoria(convocatoria: ConvocatoriaPartido) {
+    if (!this.puedeEditarConvocatoria() ||
+        !this.puedeGestionarEquipo(this.equipoDeConvocatoria(convocatoria))) return;
+    const numeroUniforme = this.numeroUniformeConvocatoria(convocatoria);
+    if (numeroUniforme === undefined) {
+      this.mostrarError({ error: { message: 'Asigna un número de uniforme entero entre 0 y 99 antes de titularizar al jugador.' } });
+      return;
+    }
+    if (this.titularesEquipo(this.equipoDeConvocatoria(convocatoria)).length >= this.maximoTitulares()) {
+      this.mostrarError({ error: { message: `No se pueden registrar más de ${this.maximoTitulares()} titulares.` } });
+      return;
+    }
+    this.cambiarTitular(convocatoria, true, numeroUniforme);
+  }
   filasAlineacion(equipo?: Equipo): PosicionAlineacion[][] {
     const lineas = [1, ...this.formacionEquipo(equipo).split('-').map(Number)].filter(cantidad => cantidad > 0);
     const totalPosiciones = lineas.reduce((total, cantidad) => total + cantidad, 0);
@@ -995,10 +1008,6 @@ export class PartidoPage implements OnInit {
       }
     });
   }
-  moverJugador(evento: CdkDragDrop<ConvocatoriaPartido[]>, titular: boolean) {
-    const convocatoria = evento.item.data as ConvocatoriaPartido;
-    if (convocatoria.titular !== titular) this.cambiarTitular(convocatoria, titular);
-  }
   abrirPerfilJugador(jugador?: Jugador) {
     if (!jugador?.id) return;
     this.perfilJugador = jugador;
@@ -1042,10 +1051,19 @@ export class PartidoPage implements OnInit {
   abrirEquipo(equipo?: Equipo) {
     if (equipo?.id && this.partido.torneo?.id) this.router.navigateByUrl(`/auth/torneos/torneo/${this.partido.torneo.id}/equipo/${equipo.id}`);
   }
-  cambiarNumeroUniforme(convocatoria: ConvocatoriaPartido) {
+  cambiarNumeroUniforme(convocatoria: ConvocatoriaPartido, valor: number | string | null | undefined) {
     const usuarioId = this.crud.obtenerUsuario().id;
-    if (!usuarioId || !convocatoria.id || convocatoria.numeroUniforme === undefined) return;
-    this.crud.actualizar(null, `partido/convocados/${convocatoria.id}/numero?numero=${convocatoria.numeroUniforme}&usuarioId=${usuarioId}`).subscribe(resp => convocatoria.numeroUniforme = (resp as ConvocatoriaPartido).numeroUniforme, error => this.mostrarError(error));
+    const numero = valor === null || valor === undefined || valor === '' ? NaN : Number(valor);
+    if (!this.numeroUniformeValido(numero)) {
+      this.mostrarError({ error: { message: 'El número de uniforme debe ser un entero entre 0 y 99.' } });
+      return;
+    }
+    if (!usuarioId || !convocatoria.id) return;
+    this.crud.actualizar(null, `partido/convocados/${convocatoria.id}/numero?numero=${numero}&usuarioId=${usuarioId}`)
+      .subscribe({
+        next: (actualizada: ConvocatoriaPartido) => convocatoria.numeroUniforme = actualizada.numeroUniforme ?? numero,
+        error: error => this.mostrarError(error)
+      });
   }
   equiposDelPartido(): Equipo[] {
     return [this.partido.equipoLocal, this.partido.equipoVisitante].filter((equipo): equipo is Equipo => !!equipo);
