@@ -430,6 +430,7 @@ export class PartidoPage implements OnInit {
     this.convocatoriaAcciones = undefined;
     if (this.abrirCambioDespuesDeAcciones) {
       this.abrirCambioDespuesDeAcciones = false;
+      
       this.cambioModalOpen = true;
     }
   }
