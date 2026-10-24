@@ -259,20 +259,68 @@ ion-modal.rosters-modal::part(content) { border: 1px solid #075e7e; background: 
 
 .roster-player-row {
   display: grid;
-  grid-template-columns: 30px minmax(0, 1fr) auto;
+  grid-template-columns: 36px minmax(0, 1fr);
   align-items: center;
-  gap: 6px;
-  min-height: 45px;
-  padding: 5px 7px;
+  gap: 8px;
+  min-width: 0;
+  padding: 10px;
   border-bottom: 1px solid rgba(7, 94, 126, .4);
-  cursor: pointer;
 }
 
-.available-roster-row { grid-template-columns: 30px minmax(0, 1fr) auto auto; }
-.roster-player-row .player-number { width: 28px; height: 28px; font-size: .78rem; }
-.roster-actions { display: flex; align-items: center; justify-content: flex-end; gap: 0; }
-.roster-player-row .roster-icon-button { width: 30px; height: 34px; --padding-start: 0; --padding-end: 0; margin: 0; }
-.roster-icon-button ion-icon { font-size: 1.1rem; }
+.roster-player-row .player-number {
+  width: 34px;
+  height: 34px;
+  font-size: .82rem;
+}
+
+.roster-player-row .player-info {
+  grid-column: 2;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.roster-player-controls {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.jersey-number-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #91adc3;
+}
+
+.jersey-number-control .uniform-input {
+  width: 58px;
+  max-width: 58px;
+  min-height: 34px;
+  margin: 0;
+  --background: #001b2e;
+  --color: #f4f9ff;
+  --padding-start: 7px;
+  --padding-end: 7px;
+  --border-radius: 7px;
+  border: 1px solid #075e7e;
+  text-align: center;
+}
+
+.roster-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.roster-actions ion-button {
+  min-height: 34px;
+  margin: 0;
+  --border-radius: 8px;
+}
 
 .pitch-wrap {
   padding: 9px;
@@ -598,11 +646,9 @@ ion-modal.player-actions-modal { --width: min(100%, 460px); --height: min(90%, 7
   .pitch-player { width: 52px; flex-basis: 52px; }
   .pitch-player small { max-width: 52px; font-size: .5rem; }
   .lineup-columns { grid-template-columns: minmax(0, 1fr); gap: 8px; }
-  .roster-player-row { display: flex; flex-wrap: wrap; gap: 5px; }
-  .roster-player-row .player-info { flex: 1 1 calc(100% - 40px); }
-  .roster-player-row .roster-icon-button { width: 26px; height: 30px; }
-  .roster-icon-button ion-icon { font-size: 1rem; }
-  .uniform-input { max-width: 40px; }
+  .roster-player-controls { align-items: flex-start; flex-direction: column; gap: 8px; }
+  .roster-actions { width: 100%; justify-content: flex-start; flex-wrap: wrap; }
+  .roster-actions ion-button { font-size: .7rem; }
 }
 
 .match-carousel {
