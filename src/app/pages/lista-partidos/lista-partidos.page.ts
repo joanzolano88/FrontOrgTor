@@ -61,9 +61,17 @@ export class ListaPartidosPage implements OnInit{
     });
   }
   listaPartidos() {
-    const estado = this.filtroPartidos === 'TODOS' || this.filtroPartidos === 'SIN_PROGRAMAR'
-      ? 'TODOS'
-      : EstadoPartido.PENDIENTE;
+    const estadosEspecificos = [
+      EstadoPartido.PENDIENTE,
+      EstadoPartido.PROGRAMADO,
+      EstadoPartido.EN_PROCESO,
+      EstadoPartido.TERMINADO,
+      EstadoPartido.APLASADO,
+      EstadoPartido.SUSPENDIDO
+    ];
+    const estado = estadosEspecificos.includes(this.filtroPartidos as EstadoPartido)
+      ? this.filtroPartidos
+      : 'TODOS';
     const sinProgramar = this.filtroPartidos === 'SIN_PROGRAMAR';
     const equipo = encodeURIComponent(this.palabraBuscador || '');
     const url = `partido/torneo/fase/${this.idTorneo}/${this.fasePartido}?estado=${estado}&sinProgramar=${sinProgramar}&equipo=${equipo}`;

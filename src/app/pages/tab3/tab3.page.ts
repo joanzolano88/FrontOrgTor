@@ -28,6 +28,7 @@ export class Tab3Page implements OnInit {
   departamentoSeleccionado?: number;
   ciudadSeleccionada?: number;
   torneosCreados: Torneo[] = [];
+  torneosAyudante: Torneo[] = [];
   equiposDelegado: Equipo[] = [];
   equiposJugador: Equipo[] = [];
   participacionesJugador: any[] = [];
@@ -96,6 +97,7 @@ export class Tab3Page implements OnInit {
     this.crud.obtenerPerfilCompleto(id).subscribe({
       next: perfil => {
         this.torneosCreados = perfil.torneosCreados || [];
+        this.torneosAyudante = perfil.torneosAyudante || [];
         this.equiposDelegado = perfil.equiposDelegado || [];
         this.equiposJugador = perfil.equiposJugador || [];
         this.participacionesJugador = perfil.participaciones || [];

@@ -140,6 +140,28 @@
         </div>
       </ion-accordion>
 
+      <ion-accordion value="torneos-ayudante" *ngIf="torneosAyudante.length">
+        <ion-item slot="header" class="profile-accordion-header" lines="none">
+          <ion-icon slot="start" name="people-circle-outline"></ion-icon>
+          <ion-label><span class="eyebrow">Colaboración</span><h2>Torneos en los que ayudas</h2></ion-label>
+          <ion-badge slot="end" class="list-count">{{ torneosAyudante.length }}</ion-badge>
+        </ion-item>
+        <div slot="content" class="profile-accordion-content">
+          <div class="content-grid">
+            <ion-card class="info-card tournament-card" button *ngFor="let torneo of torneosAyudante" (click)="abrirTorneo(torneo)">
+              <div class="card-mark tournament-mark"><ion-icon name="trophy-outline"></ion-icon></div>
+              <div class="card-content">
+                <div class="card-overline"><span>Torneo</span><ion-badge [color]="torneo.estadoTorneo == 'FINALIZADO' ? 'medium' : 'success'">{{ torneo.estadoTorneo == 'INSCRIPCIONES_ACTIVO' ? 'Inscripciones activas' : (torneo.estadoTorneo | titlecase) }}</ion-badge></div>
+                <h3>{{ torneo.nombre }}</h3>
+                <p><ion-icon name="location-outline"></ion-icon>{{ torneo.ubicacion || 'Ubicación pendiente' }}</p>
+                <small>{{ torneo.modalidadTorneo?.replace('_', ' ') | titlecase }}</small>
+              </div>
+              <ion-icon class="card-arrow" name="chevron-forward-outline"></ion-icon>
+            </ion-card>
+          </div>
+        </div>
+      </ion-accordion>
+
       <ion-accordion value="equipos-delegado" *ngIf="usuario.tipoUsuario == 'DELEGADO' || usuario.tipoUsuario == 'ORGANIZADOR'">
         <ion-item slot="header" class="profile-accordion-header" lines="none">
           <ion-icon slot="start" name="shield-outline"></ion-icon>
