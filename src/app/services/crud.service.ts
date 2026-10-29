@@ -274,8 +274,8 @@ export class CrudService {
   obtenerParametro(parametro: any, tipo: string) {
       return this.http.get(`${ this.url }${ tipo }/${ parametro }`);
   }
-  obtener(tipo: string) {
-    return this.http.get<[]>(`${ this.url }${ tipo }`);
+  obtener<T = []>(tipo: string) {
+    return this.http.get<T>(`${ this.url }${ tipo }`);
   }
   obtenerPaises() {
     return this.http.get<any[]>(`${this.url}pais`);

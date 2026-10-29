@@ -49,6 +49,55 @@
       }
     </div>
   </ion-card>
+  <ion-card class="statistics-panel">
+    <div class="section-heading">
+      <div>
+        <strong>Estadísticas del torneo</strong>
+        <small>Solo se incluyen partidos terminados.</small>
+      </div>
+    </div>
+    <ion-segment *ngIf="esTorneoConFasesGrupos()" [(ngModel)]="alcanceEstadisticas">
+      <ion-segment-button value="FASE_GRUPOS"><ion-label>Fase de grupos</ion-label></ion-segment-button>
+      <ion-segment-button value="ELIMINATORIAS"><ion-label>Eliminatorias</ion-label></ion-segment-button>
+      <ion-segment-button value="TORNEO"><ion-label>Todo el torneo</ion-label></ion-segment-button>
+    </ion-segment>
+    <div class="statistics-loading" *ngIf="cargandoEstadisticas">
+      <ion-spinner name="crescent"></ion-spinner>
+      <span>Cargando estadísticas...</span>
+    </div>
+    <p class="statistics-error" *ngIf="!cargandoEstadisticas && errorEstadisticas">{{ errorEstadisticas }}</p>
+    <ng-container *ngIf="!cargandoEstadisticas && !errorEstadisticas && estadisticasSeleccionadas() as tablas">
+      <section class="statistics-table">
+        <h3>Tabla de goleadores</h3>
+        <div class="table-scroll" *ngIf="tablas.goleadores.length; else sinGoleadores">
+          <table>
+            <thead><tr><th>#</th><th>Jugador</th><th>Equipo</th><th>Goles</th></tr></thead>
+            <tbody>
+              <tr *ngFor="let goleador of tablas.goleadores; let i = index">
+                <td>{{ i + 1 }}</td><td>{{ goleador.jugador }}</td><td>{{ goleador.equipo || '—' }}</td><td>{{ goleador.goles }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <ng-template #sinGoleadores><p class="statistics-empty">Aún no hay goles registrados en este ámbito.</p></ng-template>
+      </section>
+      <section class="statistics-table">
+        <h3>Valla menos vencida</h3>
+        <div class="table-scroll" *ngIf="tablas.vallasMenosVencidas.length; else sinArqueros">
+          <table>
+            <thead><tr><th>#</th><th>Arquero</th><th>Equipo</th><th>Partidos</th><th>Goles recibidos</th></tr></thead>
+            <tbody>
+              <tr *ngFor="let arquero of tablas.vallasMenosVencidas; let i = index">
+                <td>{{ i + 1 }}</td><td>{{ arquero.arquero }}</td><td>{{ arquero.equipo || '—' }}</td>
+                <td>{{ arquero.partidosJugados }}</td><td>{{ arquero.golesRecibidos }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <ng-template #sinArqueros><p class="statistics-empty">Aún no hay arqueros con participación registrada.</p></ng-template>
+      </section>
+    </ng-container>
+  </ion-card>
   <ion-card class="tournament-actions" *ngIf="esPropietario">
     <div class="section-heading"><div><strong>Ayudantes para gestionar partidos</strong><small>Podrán gestionar encuentros, excepto aquellos en los que participen.</small></div></div>
     <ion-item lines="none">

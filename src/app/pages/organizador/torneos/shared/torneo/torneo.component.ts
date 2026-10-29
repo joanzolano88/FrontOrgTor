@@ -11,6 +11,34 @@ import { Torneo } from 'src/models/Torneo';
 import { Equipo } from 'src/models/Equipo';
 import { TipoUsuario } from 'src/enums/TipoUsuario';
 
+interface EstadisticaGoleador {
+  jugadorId: number;
+  jugador: string;
+  equipoId: number | null;
+  equipo: string | null;
+  goles: number;
+}
+
+interface EstadisticaArquero {
+  jugadorId: number;
+  arquero: string;
+  equipoId: number | null;
+  equipo: string | null;
+  partidosJugados: number;
+  golesRecibidos: number;
+}
+
+interface TablaEstadisticasTorneo {
+  goleadores: EstadisticaGoleador[];
+  vallasMenosVencidas: EstadisticaArquero[];
+}
+
+interface EstadisticasTorneo {
+  faseGrupos: TablaEstadisticasTorneo | null;
+  eliminatorias: TablaEstadisticasTorneo | null;
+  torneoCompleto: TablaEstadisticasTorneo;
+}
+
 @Component({
   selector: 'app-torneo',
   templateUrl: './torneo.component.html',
@@ -32,6 +60,10 @@ export class TorneoComponent {
   ayudantes: any[] = [];
   cargandoAyudantes = false;
   generandoPartidos = false;
+  estadisticas: EstadisticasTorneo | null = null;
+  cargandoEstadisticas = false;
+  errorEstadisticas = '';
+  alcanceEstadisticas: 'FASE_GRUPOS' | 'ELIMINATORIAS' | 'TORNEO' = 'FASE_GRUPOS';
   constructor(private crud: CrudService, private route: ActivatedRoute,
     private router: Router, private alertController: AlertController) {
   }
@@ -39,6 +71,7 @@ export class TorneoComponent {
     this.crud.obtenerParametro(this.route.snapshot.paramMap.get('idTorneo'), "torneo").subscribe((respT: Torneo) =>{
       this.torneo = respT;
       this.estadoSeleccionado = respT.estadoTorneo || EstadoTorneo.INSCRIPCIONES;
+      this.cargarEstadisticas();
       const usuario = this.crud.obtenerUsuario();
       this.esPropietario = this.validarOrganizador && this.torneo.encargadoTorneo?.id === usuario?.id;
       if (this.esPropietario) {
@@ -57,6 +90,34 @@ export class TorneoComponent {
         this.documento = resp.reglamento!;
       });*/
     });
+  }
+  esTorneoConFasesGrupos(): boolean {
+    return this.torneo.modalidadTorneo === ModalidadTorneo.GRUPOS
+      || this.torneo.modalidadTorneo === ModalidadTorneo.ELIMINATORIAS_GRUPOS;
+  }
+  cargarEstadisticas(): void {
+    if (!this.torneo.id) return;
+    this.cargandoEstadisticas = true;
+    this.errorEstadisticas = '';
+    this.crud.obtener<EstadisticasTorneo>(`torneo/${this.torneo.id}/estadisticas`).subscribe({
+      next: (respuesta: EstadisticasTorneo) => {
+        this.estadisticas = respuesta;
+        this.cargandoEstadisticas = false;
+      },
+      error: () => {
+        this.errorEstadisticas = 'No se pudieron cargar las estadísticas del torneo.';
+        this.cargandoEstadisticas = false;
+      }
+    });
+  }
+  estadisticasSeleccionadas(): TablaEstadisticasTorneo | null {
+    if (!this.estadisticas) return null;
+    if (!this.esTorneoConFasesGrupos() || this.alcanceEstadisticas === 'TORNEO') {
+      return this.estadisticas.torneoCompleto;
+    }
+    return this.alcanceEstadisticas === 'FASE_GRUPOS'
+      ? this.estadisticas.faseGrupos
+      : this.estadisticas.eliminatorias;
   }
   configurarTorneo() {
     this.router.navigateByUrl('/auth/torneos/torneo/' + this.torneo.id + '/configuracion-torneo');
