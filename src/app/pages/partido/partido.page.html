@@ -73,10 +73,16 @@
     </ion-button>
   </section>
   <section class="match-carousel" *ngIf="partido.estadoPartido !== 'PENDIENTE'">
-    <ion-segment [(ngModel)]="vistaPartido" aria-label="Secciones del partido">
-      <ion-segment-button value="alineacion"><ion-label>Alineación</ion-label></ion-segment-button>
-      <ion-segment-button value="eventos"><ion-label>Eventos</ion-label></ion-segment-button>
-    </ion-segment>
+    <div class="match-view-tabs" role="tablist" aria-label="Secciones del partido">
+      <button type="button" role="tab" [attr.aria-selected]="vistaPartido === 'alineacion'"
+        (pointerdown)="iniciarCambioVista($event)" (click)="seleccionarVistaPartido('alineacion', $event)">
+        Alineación
+      </button>
+      <button type="button" role="tab" [attr.aria-selected]="vistaPartido === 'eventos'"
+        (pointerdown)="iniciarCambioVista($event)" (click)="seleccionarVistaPartido('eventos', $event)">
+        Eventos
+      </button>
+    </div>
     <ng-container *ngIf="vistaPartido === 'alineacion'">
       <header class="lineup-toolbar">
         <div><ion-icon name="football-outline"></ion-icon><strong>Alineación del partido</strong></div>

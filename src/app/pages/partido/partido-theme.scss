@@ -14,6 +14,21 @@ ion-content.match-page.match-page {
   --background: linear-gradient(180deg, #00172a, #001b2e 42%);
   --color: var(--match-text);
 
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  .match-hero,
+  .match-stats,
+  .match-carousel,
+  .live-lineup-card,
+  .lineup-footer-actions {
+    min-width: 0;
+    max-width: 100%;
+  }
+
   > .action-button,
   .lineup-button {
     width: min(980px, calc(100% - 32px));
@@ -58,14 +73,34 @@ ion-content.match-page.match-page {
   .match-stats span,
   .live-lineup-card > header span { color: var(--match-muted); }
   .match-carousel { gap: 14px; padding: 14px; }
-  .match-carousel > ion-segment { padding: 4px; border: 1px solid var(--match-border); border-radius: 12px; background: #001b2e; }
-  .match-carousel ion-segment-button {
-    --color: var(--match-muted);
-    --color-checked: white;
-    --indicator-color: var(--match-accent);
-    --border-radius: 9px;
+  .match-view-tabs {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    min-width: 0;
+    padding: 4px;
+    border: 1px solid var(--match-border);
+    border-radius: 12px;
+    background: #001b2e;
+    touch-action: pan-y;
+  }
+  .match-view-tabs button {
+    min-width: 0;
+    min-height: 52px;
+    padding: 10px 6px;
+    border: 0;
+    border-bottom: 3px solid transparent;
+    border-radius: 9px;
+    background: transparent;
+    color: var(--match-muted);
+    font: inherit;
     font-weight: 700;
-    text-transform: none;
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+    touch-action: pan-y;
+  }
+  .match-view-tabs button[aria-selected="true"] {
+    border-bottom-color: var(--match-accent);
+    color: white;
   }
 
   .lineup-toolbar { padding-bottom: 10px; border-bottom: 1px solid var(--match-border); }
@@ -150,6 +185,38 @@ ion-content.match-page.match-page {
     color: var(--match-text);
   }
 
+  .bench-team,
+  .event-team-column,
+  .lineup-column,
+  .inline-player-picker,
+  .pending-substitution-panel {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .bench-player-info,
+  .match-event,
+  .lineup-toolbar,
+  .formation-controls {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .bench-team h3,
+  .event-team-column h3,
+  .pending-substitution-panel h3,
+  .venue strong,
+  .venue span,
+  .match-stats strong {
+    overflow-wrap: anywhere;
+    word-break: normal;
+  }
+
+  .match-event > span:last-child {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
   .lineup-column h3,
   .bench-team h3,
   .event-team-column h3,
@@ -195,7 +262,18 @@ ion-content.match-page.match-page {
     .match-teams { gap: 5px; margin: 18px 0; }
     .detail-team img { width: 58px; height: 58px; }
     .detail-score { gap: 6px; padding: 8px; }
-    .match-carousel { padding: 10px; }
+    .match-carousel { width: calc(100% - 24px); margin: 12px auto; padding: 10px; }
+    .lineup-footer-actions { grid-template-columns: minmax(0, 1fr); }
+    .lineup-footer-actions ion-button { width: 100%; min-height: 52px; white-space: normal; }
+    .match-hero { width: calc(100% - 24px); }
+    .match-stats { width: calc(100% - 24px); margin-inline: auto; }
+    .match-stats ion-col { min-width: 0; overflow-wrap: anywhere; }
+    .match-stats span,
+    .match-stats strong { line-height: 1.25; }
+    .venue { align-items: flex-start; }
+    .venue > div { min-width: 0; }
+    .venue strong,
+    .venue span { white-space: normal; }
     .pitch { min-height: 340px; }
     .pitch.futsal-pitch { min-height: 250px; }
     .futsal-pitch .pitch-half { min-height: 120px; }

@@ -153,6 +153,7 @@ export class PartidoPage implements OnInit {
   convocatoriaPosicionSeleccionada?: ConvocatoriaPartido;
   intercambiandoPosiciones = false;
   vistaPartido: VistaPartido = 'alineacion';
+  private inicioToquePestana?: { x: number; y: number };
   modoCambiarPosiciones = false;
   golPenalti = false;
   tarjetaRojaDobleAmarilla = false;
@@ -168,6 +169,19 @@ export class PartidoPage implements OnInit {
     } else {
       this.urlBack = "/auth/partidos"
     }
+  }
+  iniciarCambioVista(event: PointerEvent): void {
+    this.inicioToquePestana = { x: event.clientX, y: event.clientY };
+  }
+  seleccionarVistaPartido(vista: VistaPartido, event: MouseEvent): void {
+    const inicio = this.inicioToquePestana;
+    this.inicioToquePestana = undefined;
+    if (event.detail !== 0 && inicio
+        && (Math.abs(event.clientX - inicio.x) > 10 || Math.abs(event.clientY - inicio.y) > 10)) {
+      event.preventDefault();
+      return;
+    }
+    this.vistaPartido = vista;
   }
   ngOnInit() {
     let idPartido = this.route.snapshot.paramMap.get('idPartido');

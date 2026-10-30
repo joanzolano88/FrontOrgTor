@@ -45,6 +45,7 @@ export class ListaPartidosPage implements OnInit{
   horaProgramacionAutomatica = '18:00';
   cantidadPartidosDia = 1;
   diasSemanaProgramacion: number[] = [2, 3, 4, 5, 6, 7, 1];
+  puedeProgramarPartidos = false;
 
   constructor(private crud: CrudService, private route: ActivatedRoute, private router: Router,
     private sesionService: SesionService) { }
@@ -55,6 +56,14 @@ export class ListaPartidosPage implements OnInit{
       this.fasePartido = this.torneo.faseTorneo!.toString();
       this.llenarListaFases();
       this.listaPartidos();
+      const usuarioId = this.crud.obtenerUsuario().id;
+      this.puedeProgramarPartidos = !!usuarioId && this.torneo.encargadoTorneo?.id === usuarioId;
+      if (usuarioId && this.torneo.id && !this.puedeProgramarPartidos) {
+        this.crud.obtener(`torneo/${this.torneo.id}/puede-registrar-equipos`).subscribe({
+          next: (puede: unknown) => this.puedeProgramarPartidos = puede === true,
+          error: () => this.puedeProgramarPartidos = false
+        });
+      }
     });
     this.crud.obtener("cancha/torneo/" + this.idTorneo).subscribe((resp: Cancha[]) => {
       this.listaCanchas = resp;
@@ -123,7 +132,7 @@ export class ListaPartidosPage implements OnInit{
     if (!usuarioId || !partido.id) return;
     this.crud.puedeGestionarPartido(partido.id, usuarioId).subscribe(permitido => {
       if (!permitido) {
-        this.mensajeError = 'No puedes gestionar un partido en el que participas. Debe hacerlo otro ayudante.';
+        this.mensajeError = 'No tienes permiso para programar este partido.';
         this.setOpen(true);
         return;
       }
@@ -220,8 +229,8 @@ export class ListaPartidosPage implements OnInit{
     this.programacionAutomaticaOpen = false;
   }
   generarProgramacionAutomatica() {
-    if (!this.idTorneo) {
-      this.mensajeError = 'No se pudo identificar el torneo.';
+    if (!this.idTorneo || !this.puedeProgramarPartidos) {
+      this.mensajeError = 'No tienes permiso para programar los partidos de este torneo.';
       this.setOpen(true);
       return;
     }

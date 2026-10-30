@@ -23,7 +23,7 @@
       </ion-select>
     </div>
     <ion-button class="filter-button" (click)="listaPartidos()" expand="block" fill="solid">Actualizar partidos</ion-button>
-    <ion-button class="filter-button" (click)="abrirProgramacionAutomatica()" expand="block" fill="outline">Programación automática</ion-button>
+    <ion-button *ngIf="puedeProgramarPartidos" class="filter-button" (click)="abrirProgramacionAutomatica()" expand="block" fill="outline">Programación automática</ion-button>
   </section>
   <ion-list  *ngFor="let listaPartidos of listaGruposPartidos; let i = index">
     <ion-accordion-group *ngIf="listaPartidos.length > 0 && validacionEstadoPartido(listaPartidos)">
