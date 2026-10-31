@@ -162,7 +162,7 @@
       <ion-accordion value="equipos-delegado" *ngIf="usuario.tipoUsuario == 'DELEGADO' || usuario.tipoUsuario == 'ORGANIZADOR'">
         <ion-item slot="header" class="profile-accordion-header" lines="none">
           <ion-icon slot="start" name="shield-outline"></ion-icon>
-          <ion-label><span class="eyebrow">Planteles</span><h2>Equipos creados</h2></ion-label>
+          <ion-label><span class="eyebrow">Administracion</span><h2>Equipos que gestionas</h2></ion-label>
           <ion-badge slot="end" class="list-count">{{ equiposDelegado.length }}</ion-badge>
         </ion-item>
         <div slot="content" class="profile-accordion-content">
@@ -190,7 +190,7 @@
       <ion-accordion value="equipos-jugador" *ngIf="usuario.tipoUsuario == 'JUGADOR' || equiposJugador.length">
         <ion-item slot="header" class="profile-accordion-header" lines="none">
           <ion-icon slot="start" name="people-outline"></ion-icon>
-          <ion-label><span class="eyebrow">Como jugador</span><h2>Mis equipos de juego</h2></ion-label>
+          <ion-label><span class="eyebrow">Mis equipos</span><h2>Equipos donde juego</h2></ion-label>
           <ion-badge slot="end" class="list-count">{{ equiposJugador.length }}</ion-badge>
         </ion-item>
         <div slot="content" class="profile-accordion-content">
