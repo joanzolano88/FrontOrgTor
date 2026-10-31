@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { AlertController, IonInput } from '@ionic/angular';
 import { ExtraerInfService } from 'src/app/services/extraer-inf.service';
 import { Router } from '@angular/router';
@@ -27,7 +27,7 @@ interface PartidoProgramadoPerfil {
   styleUrls: ['tab3.page.scss'],
   standalone: false
 })
-export class Tab3Page implements OnInit {
+export class Tab3Page {
   imagenDef = "assets/images/avatar-placeholder.svg";
   foto: any;
   identificacion: any;
@@ -62,10 +62,6 @@ export class Tab3Page implements OnInit {
           private alertController: AlertController) {
     this.url =  router.url
   }
-  ngOnInit() {
-    this.cargarPerfil();
-  }
-
   ionViewWillEnter() {
     this.cargarPerfil();
   }
