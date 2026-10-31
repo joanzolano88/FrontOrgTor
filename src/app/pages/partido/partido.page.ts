@@ -861,7 +861,8 @@ export class PartidoPage implements OnInit {
       this.moverAlineacionAVacia(equipo, posicion);
       return;
     }
-    if (this.partido.estadoPartido !== 'PROGRAMADO' || !this.puedeGestionarEquipo(equipo) ||
+    if ((this.partido.estadoPartido !== 'PROGRAMADO' && this.partido.estadoPartido !== 'EN_PROCESO') ||
+        !this.puedeGestionarEquipo(equipo) ||
         !this.partido.id || !equipo?.id) return;
     this.posicionVaciaEquipo = equipo;
     this.posicionVaciaIndice = posicion;

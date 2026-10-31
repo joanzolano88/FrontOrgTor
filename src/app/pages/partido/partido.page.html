@@ -246,7 +246,8 @@
                 </button>
                 <ng-template #emptyLocalPosition>
                   <button type="button" class="pitch-player pitch-player-empty" [class.goalkeeper]="posicion.portero"
-                    [disabled]="partido.estadoPartido !== 'PROGRAMADO' && !(modoCambiarPosiciones && convocatoriaPosicionSeleccionada) ||
+                    [disabled]="(partido.estadoPartido !== 'PROGRAMADO' && partido.estadoPartido !== 'EN_PROCESO') ||
+                      (partido.estadoPartido === 'EN_PROCESO' && modoCambiarPosiciones && !convocatoriaPosicionSeleccionada) ||
                       !puedeGestionarEquipo(partido.equipoLocal) || intercambiandoPosiciones"
                     [attr.aria-label]="posicion.portero ? 'Posición vacía de portero' : 'Posición vacía para titular'"
                     (click)="clickPosicionVacia(partido.equipoLocal, posicion.indice)"><span>{{ partido.estadoPartido === 'EN_PROCESO' ? '+' : '' }}</span></button>
@@ -288,7 +289,8 @@
                 </button>
                 <ng-template #emptyAwayPosition>
                   <button type="button" class="pitch-player pitch-player-empty" [class.goalkeeper]="posicion.portero"
-                    [disabled]="partido.estadoPartido !== 'PROGRAMADO' && !(modoCambiarPosiciones && convocatoriaPosicionSeleccionada) ||
+                    [disabled]="(partido.estadoPartido !== 'PROGRAMADO' && partido.estadoPartido !== 'EN_PROCESO') ||
+                      (partido.estadoPartido === 'EN_PROCESO' && modoCambiarPosiciones && !convocatoriaPosicionSeleccionada) ||
                       !puedeGestionarEquipo(partido.equipoVisitante) || intercambiandoPosiciones"
                     [attr.aria-label]="posicion.portero ? 'Posición vacía de portero' : 'Posición vacía para titular'"
                     (click)="clickPosicionVacia(partido.equipoVisitante, posicion.indice)"><span>{{ partido.estadoPartido === 'EN_PROCESO' ? '+' : '' }}</span></button>
