@@ -13,6 +13,8 @@ import { AlertController } from '@ionic/angular';
 export class VerEquipoPage {
   equipo: Equipo = new Equipo();
   esDelegado = false;
+  agregandoseComoJugador = false;
+  usuarioIdentificacion?: string;
   idTorneo = '';
   mensajeJugadores = '';
   identificacionJugador = '';
@@ -32,6 +34,7 @@ export class VerEquipoPage {
       this.equipo = equipo;
       const usuario = this.crud.obtenerUsuario();
       this.esDelegado = !!usuario.numeroCelular && usuario.numeroCelular === equipo.delegado?.numeroCelular;
+      this.usuarioIdentificacion = usuario.identificacion;
       this.esJugador = usuario.tipoUsuario === 'JUGADOR';
       if (this.esDelegado && equipo.id && usuario.id) this.cargarSolicitudesJugadores(equipo.id, usuario.id);
       if (equipo.id) {
@@ -183,6 +186,32 @@ export class VerEquipoPage {
       error: err => {
         this.mensajeJugadores = err?.error?.message || 'No se pudo enviar la solicitud.';
         this.solicitandoUnirse = false;
+      }
+    });
+  }
+
+  yaEstoyEnPlantilla(): boolean {
+    return !!this.usuarioIdentificacion &&
+      (this.equipo.listaJugadoresActivos || []).some(jugador =>
+        jugador.identificacion === this.usuarioIdentificacion);
+  }
+
+  agregarmeComoJugador() {
+    if (!this.esDelegado || !this.equipo.id || this.agregandoseComoJugador || this.yaEstoyEnPlantilla()) return;
+    this.agregandoseComoJugador = true;
+    this.mensajeJugadores = '';
+    this.crud.agregarDelegadoComoJugador(this.equipo.id).subscribe({
+      next: jugador => {
+        const plantilla = this.equipo.listaJugadoresActivos || [];
+        if (!plantilla.some(item => item.id === jugador.id)) {
+          this.equipo.listaJugadoresActivos = [...plantilla, jugador];
+        }
+        this.mensajeJugadores = 'Ya estás agregado como jugador del equipo.';
+        this.agregandoseComoJugador = false;
+      },
+      error: err => {
+        this.mensajeJugadores = err?.error?.message || 'No se pudo agregar tu perfil a la plantilla.';
+        this.agregandoseComoJugador = false;
       }
     });
   }

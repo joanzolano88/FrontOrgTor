@@ -24,6 +24,12 @@
       </div>
 
       <div class="team-actions" *ngIf="esJugador && !esDelegado || esDelegado">
+        <ion-button *ngIf="esDelegado && !yaEstoyEnPlantilla()" expand="block" color="success"
+          [disabled]="agregandoseComoJugador" (click)="agregarmeComoJugador()">
+          <ion-spinner *ngIf="agregandoseComoJugador" slot="start" name="crescent"></ion-spinner>
+          <ion-icon *ngIf="!agregandoseComoJugador" slot="start" name="person-add-outline"></ion-icon>
+          {{ agregandoseComoJugador ? 'Agregando...' : 'Agregarme como jugador' }}
+        </ion-button>
         <ion-button *ngIf="esJugador && !esDelegado" expand="block" color="success" [disabled]="solicitandoUnirse" (click)="solicitarUnirse()">
           <ion-icon slot="start" name="person-add-outline"></ion-icon>
           Unirme

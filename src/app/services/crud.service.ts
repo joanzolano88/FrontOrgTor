@@ -137,6 +137,10 @@ export class CrudService {
     return this.http.post(`${this.url}equipo/${idEquipo}/solicitud-jugador?usuarioId=${usuarioId}`, {});
   }
 
+  agregarDelegadoComoJugador(idEquipo: number) {
+    return this.http.post<any>(`${this.url}equipo/${idEquipo}/delegado/jugador`, {});
+  }
+
   buscarJugadorEquipo(idEquipo: number, identificacion: string, usuarioId: number) {
     return this.http.get<any>(`${this.url}equipo/${idEquipo}/jugadores/buscar?identificacion=${encodeURIComponent(identificacion)}&usuarioId=${usuarioId}`);
   }
