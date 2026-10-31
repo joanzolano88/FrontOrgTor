@@ -3,10 +3,23 @@ import { AlertController, IonInput } from '@ionic/angular';
 import { ExtraerInfService } from 'src/app/services/extraer-inf.service';
 import { Router } from '@angular/router';
 import { NgForm } from '@angular/forms';
+import { forkJoin } from 'rxjs';
 import { CrudService } from 'src/app/services/crud.service';
 import { Usuario } from 'src/models/Usuario';
 import { Equipo } from 'src/models/Equipo';
 import { Torneo } from 'src/models/Torneo';
+
+interface PartidoProgramadoPerfil {
+  id?: number;
+  fechaPartido?: string | Date;
+  estadoPartido?: string;
+  equipoLocal?: { id?: number; nombre?: string };
+  equipoVisitante?: { id?: number; nombre?: string };
+  cancha?: { nombre?: string };
+  torneoId: number;
+  torneoNombre: string;
+  roles: string[];
+}
 
 @Component({
   selector: 'app-tab3',
@@ -32,6 +45,10 @@ export class Tab3Page implements OnInit {
   equiposDelegado: Equipo[] = [];
   equiposJugador: Equipo[] = [];
   participacionesJugador: any[] = [];
+  participacionesDelegado: any[] = [];
+  partidosProgramadosPerfil: PartidoProgramadoPerfil[] = [];
+  cargandoPartidosPerfil = false;
+  errorPartidosPerfil = '';
   cargandoActividadPerfil = false;
   errorActividadPerfil = '';
   invitacionesEquipoJugador: any[] = [];
@@ -101,6 +118,8 @@ export class Tab3Page implements OnInit {
         this.equiposDelegado = perfil.equiposDelegado || [];
         this.equiposJugador = perfil.equiposJugador || [];
         this.participacionesJugador = perfil.participaciones || [];
+        this.participacionesDelegado = perfil.participacionesDelegado || [];
+        this.cargarPartidosProgramadosPerfil();
         this.cargandoActividadPerfil = false;
       },
       error: err => {
@@ -108,6 +127,79 @@ export class Tab3Page implements OnInit {
         this.cargandoActividadPerfil = false;
       }
     });
+  }
+
+  private cargarPartidosProgramadosPerfil() {
+    const torneos = new Map<number, any>();
+    const agregarTorneo = (torneo: any) => {
+      const id = Number(torneo?.id);
+      if (!Number.isInteger(id) || id <= 0) return;
+      const existente = torneos.get(id);
+      if (!existente || (!existente.nombre && torneo?.nombre)) torneos.set(id, torneo);
+    };
+    this.torneosCreados.forEach(agregarTorneo);
+    this.torneosAyudante.forEach(agregarTorneo);
+    this.equiposDelegado.forEach(equipo => agregarTorneo(equipo.torneo));
+    this.participacionesDelegado.forEach(item => agregarTorneo(item.torneo));
+    this.equiposJugador.forEach(equipo => agregarTorneo(equipo.torneo));
+    this.participacionesJugador.forEach(item => agregarTorneo(item.torneo));
+
+    if (!torneos.size) {
+      this.partidosProgramadosPerfil = [];
+      this.cargandoPartidosPerfil = false;
+      return;
+    }
+
+    this.cargandoPartidosPerfil = true;
+    this.errorPartidosPerfil = '';
+    const idsTorneos = [...torneos.keys()];
+    forkJoin(idsTorneos.map(id => this.crud.obtenerPartidosProgramadosYTerminados(id))).subscribe({
+      next: respuestas => {
+        const partidosPerfil: PartidoProgramadoPerfil[] = [];
+        respuestas.forEach((partidos: any[], indice: number) => {
+          (partidos || []).forEach((partido: any) => {
+            if (partido.estadoPartido !== 'PROGRAMADO') return;
+            const roles = this.rolesEnPartido(idsTorneos[indice], partido);
+            if (!roles.length) return;
+            partidosPerfil.push({
+              ...partido,
+              torneoId: idsTorneos[indice],
+              torneoNombre: torneos.get(idsTorneos[indice])?.nombre || 'Torneo',
+              roles
+            });
+          });
+        });
+        this.partidosProgramadosPerfil = partidosPerfil.sort((a, b) =>
+          Date.parse(String(a.fechaPartido || '')) - Date.parse(String(b.fechaPartido || '')));
+        this.cargandoPartidosPerfil = false;
+      },
+      error: err => {
+        this.errorPartidosPerfil = err?.error?.message || 'No se pudieron cargar los partidos programados del perfil.';
+        this.cargandoPartidosPerfil = false;
+      }
+    });
+  }
+
+  private rolesEnPartido(torneoId: number, partido: any): string[] {
+    const equipoIds = [Number(partido.equipoLocal?.id), Number(partido.equipoVisitante?.id)];
+    const roles: string[] = [];
+    if (this.torneosCreados.some(torneo => Number(torneo.id) === torneoId)) roles.push('Organizador');
+    if (this.torneosAyudante.some(torneo => Number(torneo.id) === torneoId)) roles.push('Ayudante');
+    if (this.equiposDelegado.some(equipo =>
+      Number(equipo.torneo?.id) === torneoId && equipoIds.includes(Number(equipo.id)))) roles.push('Delegado');
+    const esDelegado = this.participacionesDelegado.some(item =>
+      Number(item.torneo?.id) === torneoId && equipoIds.includes(Number(item.equipo?.id)));
+    if (esDelegado && !roles.includes('Delegado')) roles.push('Delegado');
+    const esJugador = this.participacionesJugador.some(item =>
+      Number(item.torneo?.id) === torneoId && equipoIds.includes(Number(item.equipo?.id)))
+      || this.equiposJugador.some(equipo =>
+        Number(equipo.torneo?.id) === torneoId && equipoIds.includes(Number(equipo.id)));
+    if (esJugador) roles.push('Jugador');
+    return roles;
+  }
+
+  abrirPartidoProgramado(partido: any) {
+    if (partido?.id) this.router.navigateByUrl(`/auth/partidos/partido/${partido.id}`);
   }
 
   private cargarInvitacionesEquipo(usuarioId: number) {

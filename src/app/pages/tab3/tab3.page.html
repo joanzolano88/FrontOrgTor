@@ -45,9 +45,6 @@
           </ion-row>
         </ion-grid>
       </ion-item>
-      <!--<ion-item class="ion-padding-horizontal" [ngClass]="{'error-input': f.submitted && f.controls['nombre-usuario'].errors}" title="{{extraer.erroresForm(f.controls['nombre-usuario'])}}">
-        <ion-input label="Nombre Usuario" labelPlacement="floating" required name="nombre-usuario" [(ngModel)]="usuario.nombreUsuario" minlength="6"></ion-input>
-      </ion-item>-->
       <ion-item [ngClass]="{'error-input': f.submitted && f.controls['nombre'].errors}" title="{{extraer.erroresForm(f.controls['nombre'])}}">
         <ion-input label="Nombre" labelPlacement="floating" required name="nombre" [(ngModel)]="usuario.nombre" minlength="6"></ion-input>
       </ion-item>
@@ -239,6 +236,39 @@
           </div>
           <div class="empty-state invitation-empty" *ngIf="!cargandoInvitacionesEquipo && !errorInvitacionesEquipo && !invitacionesEquipoJugador.length">
             <span class="empty-icon"><ion-icon name="mail-open-outline"></ion-icon></span><strong>Sin invitaciones pendientes</strong><p>Las nuevas invitaciones de equipo aparecerán aquí.</p>
+          </div>
+        </div>
+      </ion-accordion>
+
+      <ion-accordion value="partidos-programados">
+        <ion-item slot="header" class="profile-accordion-header" lines="none">
+          <ion-icon slot="start" name="calendar-outline"></ion-icon>
+          <ion-label><span class="eyebrow">Agenda deportiva</span><h2>Mis partidos programados</h2></ion-label>
+          <ion-badge slot="end" class="list-count">{{ partidosProgramadosPerfil.length }}</ion-badge>
+        </ion-item>
+        <div slot="content" class="profile-accordion-content">
+          <div class="activity-feedback" *ngIf="cargandoPartidosPerfil">
+            <ion-spinner name="crescent"></ion-spinner><span>Cargando partidos...</span>
+          </div>
+          <ion-note color="danger" class="activity-error" *ngIf="errorPartidosPerfil">{{ errorPartidosPerfil }}</ion-note>
+          <div class="scheduled-match-list" *ngIf="!cargandoPartidosPerfil && !errorPartidosPerfil">
+            <button class="scheduled-match" type="button" *ngFor="let partido of partidosProgramadosPerfil"
+              (click)="abrirPartidoProgramado(partido)">
+              <span class="scheduled-match-date">{{ partido.fechaPartido | date:'EEE d MMM, HH:mm' }}</span>
+              <span class="scheduled-match-copy">
+                <strong>{{ partido.equipoLocal?.nombre || 'Local' }} vs {{ partido.equipoVisitante?.nombre || 'Visitante' }}</strong>
+                <small>{{ partido.torneoNombre }} · {{ partido.cancha?.nombre || 'Cancha pendiente' }}</small>
+                <span class="scheduled-match-roles">
+                  <ion-badge color="primary" *ngFor="let rol of partido.roles">{{ rol }}</ion-badge>
+                </span>
+              </span>
+              <ion-icon name="chevron-forward-outline"></ion-icon>
+            </button>
+            <div class="empty-state" *ngIf="!partidosProgramadosPerfil.length">
+              <span class="empty-icon"><ion-icon name="calendar-outline"></ion-icon></span>
+              <strong>No tienes partidos programados</strong>
+              <p>Los partidos asociados a tus equipos y torneos aparecerán aquí.</p>
+            </div>
           </div>
         </div>
       </ion-accordion>

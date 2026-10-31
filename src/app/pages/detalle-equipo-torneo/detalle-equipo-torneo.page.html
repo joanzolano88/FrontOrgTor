@@ -24,6 +24,9 @@
           <span class="eyebrow">Participación del equipo</span>
           <h1>{{ equipo.nombre || 'Equipo' }}</h1>
           <p><ion-icon name="trophy-outline"></ion-icon>{{ participacion.torneo?.nombre || 'Torneo' }}</p>
+          <ion-button class="tournament-link" fill="outline" size="small" (click)="abrirTorneo()">
+            <ion-icon slot="start" name="open-outline"></ion-icon>Ir al torneo
+          </ion-button>
         </div>
       </div>
       <ion-badge class="participation-badge" color="success">{{ participacion.estado }}</ion-badge>
@@ -45,6 +48,32 @@
         <strong>{{ jugadores.length }}</strong>
         <span class="stat-label">Jugadores inscritos</span>
       </div>
+    </section>
+
+    <section class="panel matches-panel">
+      <div class="panel-header icon-heading">
+        <span class="heading-icon"><ion-icon name="calendar-outline"></ion-icon></span>
+        <div><h2>Partidos del equipo</h2><p>Programados y terminados en este torneo</p></div>
+      </div>
+      <div class="match-list" *ngIf="partidos.length">
+        <button class="match-item" type="button" *ngFor="let partido of partidos" (click)="abrirPartido(partido)">
+          <span class="match-date">{{ partido.fechaPartido | date:'EEE d MMM, HH:mm' }}</span>
+          <span class="match-teams">
+            <strong>{{ partido.equipoLocal?.nombre || 'Local' }}</strong>
+            <span>{{ partido.anotacionesEquipoLocal ?? '–' }} : {{ partido.anotacionesEquipoVisitante ?? '–' }}</span>
+            <strong>{{ partido.equipoVisitante?.nombre || 'Visitante' }}</strong>
+          </span>
+          <ion-badge [color]="partido.estadoPartido === 'TERMINADO' ? 'medium' : 'primary'">
+            {{ partido.estadoPartido === 'TERMINADO' ? 'Terminado' : 'Programado' }}
+          </ion-badge>
+          <ion-icon name="chevron-forward-outline"></ion-icon>
+        </button>
+      </div>
+      <div class="empty-state" *ngIf="!cargandoPartidos && !partidos.length">
+        <ion-icon name="calendar-outline"></ion-icon>
+        <span>Este equipo aún no tiene partidos programados ni terminados en el torneo.</span>
+      </div>
+      <div class="matches-loading" *ngIf="cargandoPartidos"><ion-spinner name="crescent"></ion-spinner><span>Cargando partidos...</span></div>
     </section>
 
     <section class="team-panels">

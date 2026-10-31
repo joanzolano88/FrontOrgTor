@@ -46,6 +46,9 @@ const routes: Routes = [
     canActivate: [PropietarioTorneoGuard],
     loadChildren: () => import('../../../solicitudes-equipo/solicitudes-equipo.module').then(m => m.SolicitudesEquipoPageModule)
   },{
+    path: 'estadisticas',
+    loadChildren: () => import('../../../estadisticas-torneo/estadisticas-torneo.module').then(module => module.EstadisticasTorneoPageModule)
+  },{
     path: 'lista-partidos',
     loadChildren: () => import('../../../lista-partidos/lista-partidos.module').then( m => m.ListaPartidosPageModule)
   },{

@@ -1,0 +1,70 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button text="" [defaultHref]="'/auth/torneos/torneo/' + torneoId"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Estadísticas del torneo</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="statistics-page">
+  <main class="statistics-shell">
+    <header class="statistics-hero">
+      <span class="eyebrow">Rendimiento</span>
+      <h1>{{ torneo.nombre || 'Estadísticas del torneo' }}</h1>
+      <p>Clasificaciones de partidos terminados · Los 10 primeros de cada tabla</p>
+    </header>
+
+    <ion-segment *ngIf="esTorneoConFasesGrupos()" [(ngModel)]="alcance">
+      <ion-segment-button value="FASE_GRUPOS"><ion-label>Fase de grupos</ion-label></ion-segment-button>
+      <ion-segment-button value="ELIMINATORIAS"><ion-label>Eliminatorias</ion-label></ion-segment-button>
+      <ion-segment-button value="TORNEO"><ion-label>Todo el torneo</ion-label></ion-segment-button>
+    </ion-segment>
+
+    <div class="feedback" *ngIf="cargando">
+      <ion-spinner name="crescent"></ion-spinner><span>Cargando estadísticas...</span>
+    </div>
+    <ion-card color="danger" *ngIf="!cargando && error">
+      <ion-card-content>{{ error }}</ion-card-content>
+    </ion-card>
+
+    <ng-container *ngIf="!cargando && !error && tablasSeleccionadas() as tablas">
+      <section class="ranking-card">
+        <div class="ranking-heading">
+          <span class="ranking-icon"><ion-icon name="football-outline"></ion-icon></span>
+          <div><h2>Goleadores</h2><p>Máximo 10 jugadores</p></div>
+        </div>
+        <div class="table-scroll" *ngIf="tablas.goleadores.length; else sinGoleadores">
+          <table>
+            <thead><tr><th>#</th><th>Jugador</th><th>Equipo</th><th>Goles</th></tr></thead>
+            <tbody>
+              <tr *ngFor="let goleador of tablas.goleadores | slice:0:10; let i = index">
+                <td>{{ i + 1 }}</td><td>{{ goleador.jugador }}</td><td>{{ goleador.equipo || '—' }}</td><td>{{ goleador.goles }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <ng-template #sinGoleadores><p class="empty-state">Aún no hay goles registrados en esta fase.</p></ng-template>
+      </section>
+
+      <section class="ranking-card">
+        <div class="ranking-heading">
+          <span class="ranking-icon"><ion-icon name="shield-checkmark-outline"></ion-icon></span>
+          <div><h2>Valla menos vencida</h2><p>Máximo 10 arqueros</p></div>
+        </div>
+        <div class="table-scroll" *ngIf="tablas.vallasMenosVencidas.length; else sinArqueros">
+          <table>
+            <thead><tr><th>#</th><th>Arquero</th><th>Equipo</th><th>Partidos</th><th>Goles recibidos</th></tr></thead>
+            <tbody>
+              <tr *ngFor="let arquero of tablas.vallasMenosVencidas | slice:0:10; let i = index">
+                <td>{{ i + 1 }}</td><td>{{ arquero.arquero }}</td><td>{{ arquero.equipo || '—' }}</td>
+                <td>{{ arquero.partidosJugados }}</td><td>{{ arquero.golesRecibidos }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <ng-template #sinArqueros><p class="empty-state">Aún no hay arqueros con participación registrada en esta fase.</p></ng-template>
+      </section>
+    </ng-container>
+  </main>
+</ion-content>

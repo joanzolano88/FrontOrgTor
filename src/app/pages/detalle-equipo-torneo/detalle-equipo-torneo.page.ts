@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AlertController } from '@ionic/angular';
 import { CrudService } from 'src/app/services/crud.service';
 import { SesionService } from 'src/app/services/restriccion/sesion.service';
@@ -17,6 +17,8 @@ export class DetalleEquipoTorneoPage implements OnInit {
   participacion: any;
   jugadores: any[] = [];
   pagos: Pago[] = [];
+  partidos: any[] = [];
+  cargandoPartidos = false;
   nuevoPago = new Pago();
   jugadorPagoId?: number;
   jugadorInscripcionId?: number;
@@ -32,7 +34,7 @@ export class DetalleEquipoTorneoPage implements OnInit {
   readonly torneoId: number;
 
   constructor(route: ActivatedRoute, private crud: CrudService, private sesion: SesionService,
-    private alertController: AlertController) {
+    private alertController: AlertController, private router: Router) {
     this.equipoId = Number(route.snapshot.paramMap.get('idEquipoDetalle'));
     this.torneoId = Number(route.snapshot.paramMap.get('idTorneoDetalle'));
   }
@@ -48,6 +50,7 @@ export class DetalleEquipoTorneoPage implements OnInit {
         this.participacion = equipo.participacionTorneo;
         this.esDelegado = usuario.numeroCelular === equipo.delegado?.numeroCelular;
         this.esOrganizador = esTipoOrganizador && usuario.id === equipo.participacionTorneo?.torneo?.encargadoTorneo?.id;
+        this.cargarPartidos();
         this.cargarJugadores();
         this.cargando = false;
       },
@@ -56,6 +59,30 @@ export class DetalleEquipoTorneoPage implements OnInit {
         this.cargando = false;
       }
     });
+  }
+
+  private cargarPartidos() {
+    this.cargandoPartidos = true;
+    this.crud.obtenerPartidosProgramadosYTerminados(this.torneoId).subscribe({
+      next: partidos => {
+        this.partidos = (partidos || []).filter((partido: any) =>
+          Number(partido.equipoLocal?.id) === this.equipoId ||
+          Number(partido.equipoVisitante?.id) === this.equipoId);
+        this.cargandoPartidos = false;
+      },
+      error: err => {
+        this.error = err?.error?.message || 'No se pudieron cargar los partidos del equipo.';
+        this.cargandoPartidos = false;
+      }
+    });
+  }
+
+  abrirTorneo() {
+    this.router.navigateByUrl(`/auth/torneos/torneo/${this.torneoId}`);
+  }
+
+  abrirPartido(partido: any) {
+    if (partido?.id) this.router.navigateByUrl(`/auth/partidos/partido/${partido.id}`);
   }
 
   cargarJugadores() {

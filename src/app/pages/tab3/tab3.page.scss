@@ -278,6 +278,59 @@
 	font-size: 15px;
 }
 
+.scheduled-match-list {
+	display: grid;
+	gap: 10px;
+}
+
+.scheduled-match {
+	display: flex;
+	align-items: center;
+	gap: 14px;
+	width: 100%;
+	padding: 14px;
+	border: 1px solid var(--profile-line);
+	border-radius: 12px;
+	background: var(--ion-card-background);
+	color: var(--profile-ink);
+	font: inherit;
+	text-align: left;
+	cursor: pointer;
+}
+
+.scheduled-match-date {
+	flex: 0 0 132px;
+	color: var(--ion-color-primary);
+	font-size: 13px;
+	font-weight: 700;
+	text-transform: capitalize;
+}
+
+.scheduled-match-copy {
+	display: grid;
+	flex: 1;
+	min-width: 0;
+	gap: 5px;
+}
+
+.scheduled-match-copy strong {
+	overflow-wrap: anywhere;
+}
+
+.scheduled-match-copy small {
+	color: var(--profile-muted);
+}
+
+.scheduled-match-roles {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 5px;
+}
+
+.scheduled-match-roles ion-badge {
+	font-size: 11px;
+}
+
 @media (max-width: 640px) {
 	.profile-hero {
 		padding: 28px 18px 24px;
@@ -309,6 +362,17 @@
 	.profile-identity {
 		align-items: flex-start;
 		flex-wrap: wrap;
+	}
+
+	.scheduled-match {
+		align-items: flex-start;
+		gap: 8px;
+		padding: 11px;
+	}
+
+	.scheduled-match-date {
+		flex-basis: 92px;
+		font-size: 12px;
 	}
 }
 

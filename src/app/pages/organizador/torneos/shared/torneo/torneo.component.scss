@@ -11,8 +11,7 @@ ion-label small {}
 
 .status-panel,
 .tournament-actions,
-.venues-panel,
-.statistics-panel {
+.venues-panel {
     margin: 14px;
     padding: 16px;
     border-radius: 14px;
@@ -131,63 +130,11 @@ ion-label small {}
     font-size: 13px;
 }
 
-.statistics-panel ion-segment {
-    margin-bottom: 16px;
-}
-
-.statistics-loading {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 18px 4px;
-}
-
-.statistics-error {
-    color: var(--ion-color-danger);
-}
-
-.statistics-table {
-    margin-top: 18px;
-}
-
-.statistics-table h3 {
-    margin: 0 0 8px;
-    font-size: 16px;
-}
-
-.table-scroll {
-    overflow-x: auto;
-}
-
-.statistics-table table {
-    width: 100%;
-    border-collapse: collapse;
-    text-align: left;
-}
-
-.statistics-table th,
-.statistics-table td {
-    padding: 9px 8px;
-    border-bottom: 1px solid var(--ion-color-light-shade);
-    white-space: nowrap;
-}
-
-.statistics-table th {
-    font-size: 13px;
-}
-
-.statistics-empty {
-    margin: 0;
-    padding: 12px 4px;
-    font-size: 14px;
-}
-
 @media (max-width: 600px) {
 
     .status-panel,
     .tournament-actions,
-    .venues-panel,
-    .statistics-panel {
+    .venues-panel {
         margin: 10px 0;
         border-radius: 0;
     }

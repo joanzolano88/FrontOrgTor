@@ -182,6 +182,10 @@ export class CrudService {
     return this.http.get<any[]>(`${this.url}partido/torneo/${idTorneo}/sanciones`);
   }
 
+  obtenerPartidosProgramadosYTerminados(idTorneo: number) {
+    return this.http.get<any[]>(`${this.url}partido/torneo/${idTorneo}/programados-terminados`);
+  }
+
   obtenerSancionesPartido(idPartido: number) {
     return this.http.get<any[]>(`${this.url}partido/${idPartido}/sanciones`);
   }
