@@ -34,7 +34,7 @@
           <span class="ranking-icon"><ion-icon name="football-outline"></ion-icon></span>
           <div><h2>Goleadores</h2><p>Máximo 10 jugadores</p></div>
         </div>
-        <div class="table-scroll" *ngIf="tablas.goleadores.length; else sinGoleadores">
+        <div class="table-scroll scorers-table" *ngIf="tablas.goleadores.length; else sinGoleadores">
           <table>
             <thead><tr><th>#</th><th>Jugador</th><th>Equipo</th><th>Goles</th></tr></thead>
             <tbody>
@@ -52,7 +52,7 @@
           <span class="ranking-icon"><ion-icon name="shield-checkmark-outline"></ion-icon></span>
           <div><h2>Valla menos vencida</h2><p>Máximo 10 arqueros</p></div>
         </div>
-        <div class="table-scroll" *ngIf="tablas.vallasMenosVencidas.length; else sinArqueros">
+        <div class="table-scroll keepers-table" *ngIf="tablas.vallasMenosVencidas.length; else sinArqueros">
           <table>
             <thead><tr><th>#</th><th>Arquero</th><th>Equipo</th><th>Partidos</th><th>Goles recibidos</th></tr></thead>
             <tbody>
