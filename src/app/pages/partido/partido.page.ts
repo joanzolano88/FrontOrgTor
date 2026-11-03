@@ -47,6 +47,15 @@ interface SancionPartido {
   exencionPartidoId?: number | null;
 }
 
+interface ResultadoBusquedaJugadorEquipo {
+  existente: boolean;
+  elegible: boolean;
+  jugadorId: number | null;
+  nombre: string;
+  identificacion: string;
+  mensaje: string;
+}
+
 @Component({
   selector: 'app-partido',
   templateUrl: './partido.page.html',
@@ -1099,16 +1108,62 @@ export class PartidoPage implements OnInit {
     }
     this.registrandoJugador = true;
     this.mensajeRegistroJugador = '';
+    const ruta = `partido/${this.partido.id}/equipos/${equipoId}/jugadores`;
+    this.crud.obtener<ResultadoBusquedaJugadorEquipo>(
+      `${ruta}/buscar?identificacion=${encodeURIComponent(identificacion)}&nombre=${encodeURIComponent(nombre)}`
+    ).subscribe({
+      next: async resultado => {
+        let confirmarExistente = false;
+        if (resultado.existente) {
+          if (!resultado.elegible) {
+            this.registrandoJugador = false;
+            this.mostrarError({ error: { message: resultado.mensaje } });
+            return;
+          }
+          const confirmacion = await this.alertController.create({
+            header: 'Confirmar jugador existente',
+            message: `Se encontró a ${resultado.nombre || 'este jugador'} con la cédula ${resultado.identificacion}. ¿Quieres agregarlo a ${this.equipoConvocatoria?.nombre}?`,
+            buttons: [
+              { text: 'Cancelar', role: 'cancel' },
+              { text: 'Agregar jugador', role: 'confirm' }
+            ]
+          });
+          await confirmacion.present();
+          const { role } = await confirmacion.onDidDismiss();
+          if (role !== 'confirm') {
+            this.registrandoJugador = false;
+            return;
+          }
+          confirmarExistente = true;
+        }
+        this.guardarJugadorEquipo(ruta, nombre, identificacion, confirmarExistente, resultado.existente);
+      },
+      error: error => {
+        this.registrandoJugador = false;
+        this.mostrarError(error);
+      }
+    });
+  }
+
+  private guardarJugadorEquipo(
+    ruta: string,
+    nombre: string,
+    identificacion: string,
+    confirmarExistente: boolean,
+    reutilizado: boolean
+  ) {
     this.crud.crear(
-      { nombre, identificacion },
-      `partido/${this.partido.id}/equipos/${equipoId}/jugadores`
+      { nombre, identificacion, confirmarExistente },
+      ruta
     ).subscribe({
       next: () => {
         this.registrandoJugador = false;
         this.nombreNuevoJugador = '';
         this.identificacionNuevoJugador = '';
         this.registroJugadorOpen = false;
-        this.mensajeRegistroJugador = 'Jugador registrado en el plantel. La contraseña inicial de su cuenta es su cédula.';
+        this.mensajeRegistroJugador = reutilizado
+          ? 'Jugador existente agregado al equipo y al torneo.'
+          : 'Jugador registrado en el plantel. La contraseña inicial de su cuenta es su cédula.';
         this.cambiarEquipoConvocatoria();
         this.cargarJugadoresDeAmbosEquipos();
       },

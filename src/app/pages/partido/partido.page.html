@@ -410,7 +410,7 @@
                   <ion-input label="Cédula" labelPlacement="stacked" name="identificacionNuevoJugador"
                     [(ngModel)]="identificacionNuevoJugador" required maxlength="40"></ion-input>
                 </ion-item>
-                <ion-note>Se creará su cuenta de jugador; su contraseña inicial será la cédula.</ion-note>
+                <ion-note>Si la cédula ya pertenece a un jugador, podrás confirmar su incorporación. Solo se creará una cuenta si no existe.</ion-note>
                 <ion-button type="submit" expand="block" [disabled]="registrandoJugador || !puedeGestionarEquipo(equipoConvocatoria)">
                   {{ registrandoJugador ? 'Registrando...' : 'Registrar en este equipo' }}
                 </ion-button>
