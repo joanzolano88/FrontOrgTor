@@ -40,3 +40,37 @@
   -webkit-animation-name: fadeInDown;
   animation-name: fadeInDown;
 }
+
+.request-loading {
+  position: fixed;
+  z-index: 10000;
+  top: calc(env(safe-area-inset-top, 0px) + 12px);
+  left: 50%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: calc(100vw - 32px);
+  padding: 11px 16px;
+  transform: translateX(-50%);
+  border: 1px solid rgba(var(--ion-color-primary-rgb), 0.18);
+  border-radius: 999px;
+  background: var(--ion-background-color, #fff);
+  box-shadow: 0 8px 26px rgba(15, 23, 42, 0.2);
+  color: var(--ion-color-dark);
+  font-size: 0.9rem;
+  font-weight: 600;
+  pointer-events: none;
+}
+
+.request-loading ion-spinner {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 20px;
+  color: var(--ion-color-primary);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .request-loading ion-spinner {
+    animation-duration: 1.5s;
+  }
+}

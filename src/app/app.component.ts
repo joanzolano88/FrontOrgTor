@@ -2,8 +2,9 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ToastController } from '@ionic/angular';
 import { Router } from '@angular/router';
-import { Subscription, interval } from 'rxjs';
+import { Observable, Subscription, distinctUntilChanged, interval, map, of, switchMap, timer } from 'rxjs';
 import { CrudService } from './services/crud.service';
+import { LoadingService } from './services/loading.service';
 
 @Component({
   selector: 'app-root',
@@ -15,8 +16,17 @@ export class AppComponent implements OnInit, OnDestroy {
   private notificacionesSubscription?: Subscription;
   private notificandoIds = new Set<number>();
   private usuarioNotificacionesId?: number;
+  readonly mostrandoEspera$: Observable<boolean>;
 
-  constructor(private crud: CrudService, private toastController: ToastController, private router: Router) {}
+  constructor(private crud: CrudService, private toastController: ToastController, private router: Router,
+    loading: LoadingService) {
+    this.mostrandoEspera$ = loading.loading$.pipe(
+      switchMap(estaCargando => estaCargando
+        ? timer(400).pipe(map(() => true))
+        : of(false)),
+      distinctUntilChanged()
+    );
+  }
 
   ngOnInit() {
     this.consultarNotificaciones();
