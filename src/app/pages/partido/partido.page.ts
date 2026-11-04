@@ -3,7 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { CrudService } from 'src/app/services/crud.service';
 import { EstadoPartido } from 'src/enums/EstadoPartido';
 import { Partido } from 'src/models/Partido';
-import { AlertController, IonButton } from '@ionic/angular';
+import { AlertController, IonButton, ToastController } from '@ionic/angular';
 import { ModalidadFase } from 'src/enums/ModalidadFase';
 import { FaseActual } from 'src/enums/FaseActual';
 import { SesionService } from 'src/app/services/restriccion/sesion.service';
@@ -165,12 +165,14 @@ export class PartidoPage implements OnInit {
   private inicioToquePestana?: { x: number; y: number };
   modoCambiarPosiciones = false;
   golPenalti = false;
-  tarjetaRojaDobleAmarilla = false;
+  registrandoEvento = false;
+  private mensajeExitoPendiente?: string;
   partidoStartModalOpen = false;
   modoRegistroSeleccionado: 'PROFESIONAL' | 'SIMPLE' = 'SIMPLE';
 
   constructor(private crud: CrudService, private route: ActivatedRoute,
-    private router: Router, private sesionService: SesionService, private alertController: AlertController) {
+    private router: Router, private sesionService: SesionService, private alertController: AlertController,
+    private toastController: ToastController) {
     this.validarOrganizador = sesionService.validacionOrganizador();
     this.url =  router.url;
     if (!this.url.includes("auth/partidos")) {
@@ -436,7 +438,6 @@ export class PartidoPage implements OnInit {
       identificacion: convocatoria.jugador.identificacion
     };
     this.minutoEvento = 0;
-    this.tarjetaRojaDobleAmarilla = false;
     this.accionesJugadorModalOpen = true;
   }
   seleccionarJugadorParaCambiarPosicion(convocatoria: ConvocatoriaPartido) {
@@ -456,6 +457,7 @@ export class PartidoPage implements OnInit {
       
       this.cambioModalOpen = true;
     }
+    this.mostrarMensajeExitoPendiente();
   }
   clickJugadorAlineacion(convocatoria: ConvocatoriaPartido) {
     if (this.partido.estadoPartido === 'PROGRAMADO' ||
@@ -958,14 +960,16 @@ export class PartidoPage implements OnInit {
   }
   puedeModificarTactica(equipo?: Equipo): boolean {
     if (this.partido.estadoPartido === 'EN_PROCESO') {
-      return this.esDelegado() && this.puedeGestionarEquipo(equipo);
+      return this.validarOrganizador ||
+        (this.esDelegado() && this.puedeGestionarEquipo(equipo));
     }
     return this.puedeGestionarEquipo(equipo);
   }
   puedeCambiarPosicionesEnJuego(): boolean {
     return this.partido.estadoPartido === 'EN_PROCESO' &&
-      this.esDelegado() &&
-      this.equiposDelPartido().some(equipo => this.puedeGestionarEquipo(equipo));
+      (this.validarOrganizador ||
+        (this.esDelegado() &&
+          this.equiposDelPartido().some(equipo => this.puedeGestionarEquipo(equipo))));
   }
   seleccionarPosicion(convocatoria: ConvocatoriaPartido) {
     if (this.intercambiandoPosiciones || this.partido.estadoPartido === 'TERMINADO' || !convocatoria.id) return;
@@ -1254,15 +1258,24 @@ export class PartidoPage implements OnInit {
   registrarEvento(tipo: 'TARJETA_AMARILLA' | 'TARJETA_ROJA') {
     const usuarioId = this.crud.obtenerUsuario().id;
     if (!this.validarOrganizador || this.partido.estadoPartido !== 'EN_PROCESO' ||
-        !usuarioId || !this.partido.id || !this.jugadorEvento?.id) return;
-    const dobleAmarilla = tipo === 'TARJETA_ROJA' && this.tarjetaRojaDobleAmarilla;
-    this.crud.crear({}, `partido/${this.partido.id}/eventos?jugadorId=${this.jugadorEvento.id}&tipo=${tipo}&minuto=${this.minutoEvento}&dobleAmarilla=${dobleAmarilla}&usuarioId=${usuarioId}`).subscribe({
-      next: () => {
+        this.registrandoEvento || !usuarioId || !this.partido.id || !this.jugadorEvento?.id) return;
+    this.registrandoEvento = true;
+    this.crud.crear({}, `partido/${this.partido.id}/eventos?jugadorId=${this.jugadorEvento.id}&tipo=${tipo}&minuto=${this.minutoEvento}&dobleAmarilla=false&usuarioId=${usuarioId}`).subscribe({
+      next: (evento: EventoPartido) => {
+        this.registrandoEvento = false;
         this.cargarEventos();
         this.cargarSanciones();
-        this.cerrarAccionesAlineacion();
+        this.mensajeExitoPendiente = evento.dobleAmarilla
+          ? 'Segunda tarjeta amarilla registrada. Se aplicó automáticamente la tarjeta roja.'
+          : tipo === 'TARJETA_AMARILLA'
+            ? 'Tarjeta amarilla registrada correctamente.'
+            : 'Tarjeta roja registrada correctamente.';
+        this.accionesJugadorModalOpen = false;
       },
-      error: error => this.mostrarError(error)
+      error: error => {
+        this.registrandoEvento = false;
+        this.mostrarError(error);
+      },
     });
   }
   puedeRegistrarGolJugador(convocatoria?: ConvocatoriaPartido): boolean {
@@ -1279,6 +1292,11 @@ export class PartidoPage implements OnInit {
       case 'SALE_TITULAR': return 'Sale del partido';
       default: return tipo || 'Evento';
     }
+  }
+  nombreEventoCompleto(evento: EventoPartido): string {
+    return evento.dobleAmarilla
+      ? 'Roja por doble amarilla'
+      : this.nombreEvento(evento.tipo);
   }
   mostrarEscudo(imagen: any) {
     return imagen ? 'data:image/png;base64,' + imagen : '';
@@ -1377,6 +1395,7 @@ export class PartidoPage implements OnInit {
   }
   cerrarRegistroGol() {
     this.registroGolModalOpen = false;
+    this.mostrarMensajeExitoPendiente();
   }
   cambiarTipoGol(tipo: 'GOL' | 'AUTOGOL') {
     this.tipoGol = tipo;
@@ -1399,7 +1418,8 @@ export class PartidoPage implements OnInit {
   registrarGol() {
     const usuarioId = this.crud.obtenerUsuario().id;
     if (!this.validarOrganizador || this.partido.estadoPartido !== 'EN_PROCESO' ||
-        !usuarioId || !this.partido.id || !this.equipoObjetivoGol?.id || !this.jugadorGolId) {
+        this.registrandoEvento || !usuarioId || !this.partido.id ||
+        !this.equipoObjetivoGol?.id || !this.jugadorGolId) {
       this.mostrarError({ error: { message: 'No se puede registrar el gol. Selecciona un jugador en la alineación durante el partido.' } });
       return;
     }
@@ -1415,12 +1435,23 @@ export class PartidoPage implements OnInit {
       penalti: this.tipoGol === 'GOL' && this.golPenalti,
       minuto: this.minutoEvento
     };
-    this.crud.crear(solicitud, `partido/${this.partido.id}/goles`).subscribe((resp: Partido) => {
-      this.partido = resp;
-      this.registroGolModalOpen = false;
-      this.jugadorEvento = undefined;
-      this.cargarEventos();
-    }, error => this.mostrarError(error));
+    this.registrandoEvento = true;
+    this.crud.crear(solicitud, `partido/${this.partido.id}/goles`).subscribe({
+      next: (resp: Partido) => {
+        this.registrandoEvento = false;
+        this.partido = resp;
+        this.registroGolModalOpen = false;
+        this.jugadorEvento = undefined;
+        this.cargarEventos();
+        this.mensajeExitoPendiente = this.tipoGol === 'AUTOGOL'
+          ? 'Autogol registrado correctamente.'
+          : 'Gol registrado correctamente.';
+      },
+      error: error => {
+        this.registrandoEvento = false;
+        this.mostrarError(error);
+      }
+    });
   }
   gandorPenaltis(ev: any) {
     if (ev.detail.role == 'local') {
@@ -1471,6 +1502,21 @@ export class PartidoPage implements OnInit {
   mostrarError(error: any) {
     this.mensajeError = error?.error?.message || 'No se pudo actualizar el partido.';
     this.isAlertOpen = true;
+  }
+  private async mostrarExito(message: string) {
+    const toast = await this.toastController.create({
+      message,
+      duration: 3000,
+      position: 'top',
+      color: 'success'
+    });
+    await toast.present();
+  }
+  private mostrarMensajeExitoPendiente() {
+    if (!this.mensajeExitoPendiente) return;
+    const mensaje = this.mensajeExitoPendiente;
+    this.mensajeExitoPendiente = undefined;
+    void this.mostrarExito(mensaje);
   }
   cerrarError() {
     this.isAlertOpen = false;

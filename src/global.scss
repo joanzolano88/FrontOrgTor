@@ -212,6 +212,37 @@ ion-item:has(> ion-textarea) > ion-textarea {
     background: transparent;
 }
 
+.player-actions-shell,
+.goal-modal-shell {
+    position: relative;
+}
+
+.goal-modal-shell {
+    min-height: 100%;
+}
+
+.event-saving-overlay {
+    position: absolute;
+    z-index: 20;
+    inset: -8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    border-radius: 12px;
+    background: rgba(var(--ion-background-color-rgb, 255, 255, 255), .88);
+    color: var(--ion-text-color);
+    font-weight: 650;
+    text-align: center;
+}
+
+.event-saving-overlay ion-spinner {
+    width: 34px;
+    height: 34px;
+    color: var(--ion-color-primary);
+}
+
 ion-input:not(.ion-hide):not([type="file"]):not(.uniform-input).has-focus,
 ion-textarea.has-focus,
 ion-select.has-focus,
