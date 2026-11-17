@@ -123,16 +123,23 @@ export class ListaPartidosPage implements OnInit{
     if (penaltisVisitante > 0 && penaltisVisitante > penaltisLocal) return 'VISITANTE';
     return '';
   }
-  selecionarFecha(btnModal: IonButton, partido: Partido) {    
-    if (partido.estadoPartido === EstadoPartido.EN_PROCESO || partido.estadoPartido === EstadoPartido.TERMINADO) {
+  selecionarFecha(btnModal: IonButton, partido: Partido) {
+    if (partido.estadoPartido !== EstadoPartido.PENDIENTE) {
       this.abrirPartido(partido.id);
       return;
     }
+    this.validarPermisoYProgramar(btnModal, partido);
+  }
+  modificarFecha(event: Event, btnModal: IonButton, partido: Partido) {
+    event.stopPropagation();
+    this.validarPermisoYProgramar(btnModal, partido);
+  }
+  private validarPermisoYProgramar(btnModal: IonButton, partido: Partido) {
     const usuarioId = this.crud.obtenerUsuario().id;
     if (!usuarioId || !partido.id) return;
     this.crud.puedeGestionarPartido(partido.id, usuarioId).subscribe(permitido => {
       if (!permitido) {
-        this.mensajeError = 'No tienes permiso para programar este partido.';
+        this.mensajeError = 'No tienes permiso para programar o modificar este partido.';
         this.setOpen(true);
         return;
       }
@@ -143,7 +150,10 @@ export class ListaPartidosPage implements OnInit{
     });
   }
   private abrirModalProgramacion(btnModal: IonButton, partido: Partido) {
-    this.partidoSeleccionado = partido;
+    this.partidoSeleccionado = {
+      ...partido,
+      cancha: partido.cancha ? { ...partido.cancha } : new Cancha()
+    };
     if (this.partidoSeleccionado.cancha == undefined) {
       this.partidoSeleccionado.cancha = new Cancha();
     }

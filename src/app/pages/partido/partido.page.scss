@@ -6,6 +6,7 @@
         font-size: 12px;
     }
 }
+.match-tournament { margin: 8px 0 0 -12px; --color: #91c4ff; font-weight: 700; text-transform: none; }
 .match-teams { display: grid; grid-template-columns: minmax(0,1fr) auto minmax(0,1fr); align-items: center; gap: 8px; margin: 22px 0; }
 .detail-team { display: grid; justify-items: center; gap: 9px; text-align: center; min-width: 0; }
 .detail-team strong { max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 16px; text-wrap: auto; }

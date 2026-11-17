@@ -61,7 +61,12 @@
                 <ion-button fill="clear" size="small" title="Enviar programación al delegado local" (click)="$event.stopPropagation(); abrirWhatsappProgramacion(partido, partido.equipoLocal)"><ion-icon slot="icon-only" name="logo-whatsapp"></ion-icon></ion-button>
                 <ion-button fill="clear" size="small" title="Enviar programación al delegado visitante" (click)="$event.stopPropagation(); abrirWhatsappProgramacion(partido, partido.equipoVisitante)"><ion-icon slot="icon-only" name="logo-whatsapp"></ion-icon></ion-button>
               </span>
-              <span>Ver partido</span>
+              <ion-button *ngIf="partido.estadoPartido == 'PROGRAMADO'" fill="clear" size="small"
+                [attr.aria-label]="'Modificar fecha de ' + (partido.equipoLocal?.nombre || 'equipo local') + ' vs ' + (partido.equipoVisitante?.nombre || 'equipo visitante')"
+                title="Modificar fecha" (click)="modificarFecha($event, btnModalFecha, partido)">
+                <ion-icon slot="icon-only" name="calendar-outline"></ion-icon>
+              </ion-button>
+              <span>{{ partido.estadoPartido == 'PENDIENTE' ? 'Programar partido' : 'Ver partido' }}</span>
             </div>
           </ion-card>
         </ng-container>

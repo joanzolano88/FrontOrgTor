@@ -37,6 +37,11 @@
   </ion-modal>
   <ion-card class="match-hero">
     <div class="match-meta"><span>{{ partido.faseEncuentro }}</span><ion-badge color="{{colorEstadoPartido(partido)}}">{{ partido.estadoPartido }}</ion-badge></div>
+    <ion-button *ngIf="partido.torneo?.id" class="match-tournament" fill="clear"
+      [routerLink]="['/auth/torneos/torneo', partido.torneo!.id]" aria-label="Ver torneo">
+      <ion-icon slot="start" name="trophy-outline"></ion-icon>
+      Torneo: {{ partido.torneo?.nombre || 'Ver torneo' }}
+    </ion-button>
     <div class="match-teams">
       <div class="detail-team" (click)="abrirEquipo(partido.equipoLocal)"><img appImageFallback="assets/images/shield-placeholder.svg" [src]="mostrarEscudo(partido.equipoLocal?.escudo)" [alt]="'Escudo de ' + (partido.equipoLocal?.nombre || 'equipo local')"><strong>{{ partido.equipoLocal?.nombre }}</strong></div>
       <div class="detail-score"><span>{{ partido.anotacionesEquipoLocal ?? 0 }}</span><small>{{ partido.estadoPartido === 'EN_PROCESO' ? 'EN VIVO' : 'FINAL' }}</small><span>{{ partido.anotacionesEquipoVisitante ?? 0 }}</span></div>
