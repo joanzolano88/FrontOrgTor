@@ -12,7 +12,6 @@ import { DtoGrupoEquipo } from '../../../models/DTO/DtoGrupoEquipo';
 import { DtoGrupoLlave } from '../../../models/DTO/DtoGrupoLlave';
 import { GrupoLlave } from 'src/models/GrupoLlave';
 import { DtoResulatoLlave } from 'src/models/DTO/DtoResulatoLlave';
-import { Location } from '@angular/common';
 
 @Component({
   selector: 'app-cambiar-fase-torneo',
@@ -35,7 +34,7 @@ export class CambiarFaseTorneoPage implements OnInit {
   tipoContenedorSeleccionado: 'grupo' | 'llave' = 'grupo';
   indiceContenedorSeleccionado = 0;
 
-  constructor(private crud: CrudService,  private route: ActivatedRoute, private _location: Location, private router: Router) {}
+  constructor(private crud: CrudService,  private route: ActivatedRoute, private router: Router) {}
 
   ngOnInit() {
     this.crud.obtenerParametro(this.route.snapshot.paramMap.get('idTorneo'), 'torneo').subscribe((respT: Torneo) => {
@@ -220,7 +219,7 @@ export class CambiarFaseTorneoPage implements OnInit {
       if (this.organizacionInicial) {
         this.recargarDistribucion();
       } else {
-        this._location.back();
+        this.router.navigateByUrl(`/auth/torneos/torneo/${this.torneo.id}`);
       }
     }, error => {
       this.mensajeError = error?.error?.message || 'No se pudo guardar la distribución.';

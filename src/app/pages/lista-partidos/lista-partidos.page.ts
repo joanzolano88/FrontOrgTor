@@ -125,7 +125,7 @@ export class ListaPartidosPage implements OnInit{
   }
   selecionarFecha(btnModal: IonButton, partido: Partido) {    
     if (partido.estadoPartido === EstadoPartido.EN_PROCESO || partido.estadoPartido === EstadoPartido.TERMINADO) {
-      this.router.navigateByUrl('/auth/partidos/partido/' + partido.id);
+      this.abrirPartido(partido.id);
       return;
     }
     const usuarioId = this.crud.obtenerUsuario().id;
@@ -148,11 +148,17 @@ export class ListaPartidosPage implements OnInit{
       this.partidoSeleccionado.cancha = new Cancha();
     }
     if (this.partidoSeleccionado.estadoPartido == EstadoPartido.EN_PROCESO || this.partidoSeleccionado.estadoPartido == EstadoPartido.TERMINADO) {
-      this.router.navigateByUrl('/auth/partidos/partido/' + this.partidoSeleccionado.id);
+      this.abrirPartido(this.partidoSeleccionado.id);
       return;
     }
     btnModal['el'].click()
     this.textoPartido = partido.equipoLocal?.nombre + " vs " + partido.equipoVisitante?.nombre;
+  }
+  private abrirPartido(partidoId?: number) {
+    if (!partidoId) return;
+    this.router.navigate(['/auth/partidos/partido', partidoId], {
+      queryParams: { returnUrl: this.router.url }
+    });
   }
   asignarFecha() {
     const usuarioId = this.crud.obtenerUsuario().id;
@@ -194,7 +200,7 @@ export class ListaPartidosPage implements OnInit{
       return;
     }
     this.modal.dismiss(null, 'cancel');
-    this.router.navigateByUrl('/auth/partidos/partido/' + this.partidoSeleccionado.id);
+    this.abrirPartido(this.partidoSeleccionado.id);
     const usuarioId = this.crud.obtenerUsuario().id;
     this.crud.actualizar(null, `partido/iniciar/${this.partidoSeleccionado.id}?usuarioId=${usuarioId}`).subscribe((resp: Partido) => {
       this.partidoSeleccionado = resp;

@@ -120,7 +120,9 @@ export class InicioPage implements OnInit {
     return this.ciudades.find(ciudad => ciudad.id === this.ciudadId)?.nombre || 'esta ciudad';
   }
   verPartido(id: number) {
-    this.router.navigateByUrl('/auth/partidos/partido/' + id);
+    this.router.navigate(['/auth/partidos/partido', id], {
+      queryParams: { returnUrl: this.router.url }
+    });
   }
   escudoEquipo(equipo?: Equipo): string {
     return equipo?.escudo ? 'data:image/png;base64,' + equipo.escudo : '';

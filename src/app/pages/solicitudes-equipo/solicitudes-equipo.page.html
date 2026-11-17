@@ -1,7 +1,9 @@
 <ion-header class="requests-header">
   <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-back-button [defaultHref]="'/auth/torneos/torneo/' + idTorneo"></ion-back-button>
+      <ion-button fill="clear" [routerLink]="'/auth/torneos/torneo/' + idTorneo" aria-label="Volver al torneo">
+        <ion-icon slot="icon-only" name="arrow-back-outline"></ion-icon>
+      </ion-button>
     </ion-buttons>
     <ion-title>Solicitudes de equipos</ion-title>
     <ion-icon slot="end" name="notifications-outline" aria-hidden="true"></ion-icon>

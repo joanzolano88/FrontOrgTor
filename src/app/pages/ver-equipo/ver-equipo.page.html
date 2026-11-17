@@ -1,7 +1,9 @@
 <ion-header class="team-header">
   <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-back-button [defaultHref]="idTorneo && idTorneo !== '0' ? '/auth/torneos/torneo/' + idTorneo + '/tabla-equipos' : '/auth/usuario'"></ion-back-button>
+      <ion-button fill="clear" [routerLink]="idTorneo && idTorneo !== '0' ? '/auth/torneos/torneo/' + idTorneo + '/tabla-equipos' : '/auth/usuario'" aria-label="Volver">
+        <ion-icon slot="icon-only" name="arrow-back-outline"></ion-icon>
+      </ion-button>
     </ion-buttons>
     <ion-title>Equipo</ion-title>
   </ion-toolbar>

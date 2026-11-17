@@ -1,7 +1,9 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-back-button text="" defaultHref="/auth/torneos"></ion-back-button>
+      <ion-button fill="clear" [routerLink]="rutaVolver()" aria-label="Volver al torneo">
+        <ion-icon slot="icon-only" name="arrow-back-outline"></ion-icon>
+      </ion-button>
     </ion-buttons>
     <ion-title>{{tituloTab()}} Cancha</ion-title>
   </ion-toolbar>

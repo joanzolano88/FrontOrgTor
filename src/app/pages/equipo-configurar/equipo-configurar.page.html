@@ -1,7 +1,9 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-back-button text="" (click)="volverAtras()"></ion-back-button>
+      <ion-button fill="clear" (click)="volverAtras()" aria-label="Volver">
+        <ion-icon slot="icon-only" name="arrow-back-outline"></ion-icon>
+      </ion-button>
     </ion-buttons>
     <ion-title>{{ editando ? 'Editar información del equipo' : 'Crear equipo' }}</ion-title>
   </ion-toolbar>

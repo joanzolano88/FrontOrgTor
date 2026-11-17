@@ -82,7 +82,11 @@ export class DetalleEquipoTorneoPage implements OnInit {
   }
 
   abrirPartido(partido: any) {
-    if (partido?.id) this.router.navigateByUrl(`/auth/partidos/partido/${partido.id}`);
+    if (partido?.id) {
+      this.router.navigate(['/auth/partidos/partido', partido.id], {
+        queryParams: { returnUrl: this.router.url }
+      });
+    }
   }
 
   cargarJugadores() {

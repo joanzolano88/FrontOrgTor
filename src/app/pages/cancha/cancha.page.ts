@@ -15,12 +15,15 @@ import { Torneo } from 'src/models/Torneo';
 export class CanchaPage {
   
   cancha: Cancha = new Cancha();
+  idTorneo?: string;
   ubicacion: string = '';
   mensajeError = '';
   isAlertOpen = false;
 
   constructor(private route: ActivatedRoute, private router: Router,
               private extraerInf: ExtraerInfService,private crud: CrudService) {
+    this.idTorneo = route.snapshot.paramMap.get('idTorneo') ||
+      route.snapshot.parent?.paramMap.get('idTorneo') || undefined;
     if (route.snapshot.paramMap.get('idCancha') != undefined) {
       this.cancha.id = parseInt(route.snapshot.paramMap.get('idCancha')!);
       crud.obtenerParametro(this.cancha.id,'cancha').subscribe((resp: Cancha) =>{
@@ -28,13 +31,18 @@ export class CanchaPage {
         this.ubicacion = this.cancha.latitud + ', ' + this.cancha.longitud;
       })
     } else {
-      crud.obtenerParametro(route.snapshot.paramMap.get('idTorneo'),'torneo').subscribe((resp: Torneo) => {
+      crud.obtenerParametro(this.idTorneo || null,'torneo').subscribe((resp: Torneo) => {
         this.cancha.torneo = resp;
       });
     }
   }
   tituloTab() {
     return this.extraerInf.tituloTab(this.router.url.includes('crear-cancha'));
+  }
+
+  rutaVolver(): string {
+    const torneoId = this.idTorneo || this.cancha.torneo?.id;
+    return torneoId ? `/auth/torneos/torneo/${torneoId}` : '/auth/torneos';
   }
 
   usarUbicacionActual() {

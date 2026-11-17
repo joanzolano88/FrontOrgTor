@@ -7,7 +7,6 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { CrudService } from 'src/app/services/crud.service';
 import { Torneo } from 'src/models/Torneo';
 import { Ciudad } from 'src/models/Ciudad';
-import { Location } from '@angular/common';
 
 @Component({
   selector: 'app-equipo-configurar',
@@ -43,7 +42,7 @@ export class EquipoConfigurarPage{
   mensajeError: string = "";
   
   constructor(private router: Router, private crud: CrudService, private route: ActivatedRoute,
-                private location: Location, private cd: ChangeDetectorRef) {
+                private cd: ChangeDetectorRef) {
     const usuarioSesion = this.crud.obtenerUsuario();
     if (usuarioSesion) {
       this.equipo.delegado = usuarioSesion as any;
@@ -226,7 +225,7 @@ export class EquipoConfigurarPage{
   volverAtras() {
     if (this.editando && this.equipo.id) {
       const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
-      if (returnUrl) {
+      if (returnUrl?.startsWith('/auth/')) {
         this.router.navigateByUrl(returnUrl);
         return;
       }
@@ -237,7 +236,7 @@ export class EquipoConfigurarPage{
       this.router.navigateByUrl(`/auth/torneos/torneo/${this.idTorneo}/solicitar-equipo`);
       return;
     }
-    this.location.back();
+    this.router.navigateByUrl('/auth/usuario');
   }
 
   onSubmit(form: NgForm) {
@@ -262,7 +261,7 @@ export class EquipoConfigurarPage{
           this.router.navigateByUrl(`/auth/torneos/torneo/${this.idTorneo}/solicitar-equipo?equipo=${resp.id}`);
           return;
         }
-        this.location.back();
+        this.router.navigateByUrl('/auth/usuario');
       }, err=>{
         this.mensajeError = err.error.message;
         this.setOpen(true);

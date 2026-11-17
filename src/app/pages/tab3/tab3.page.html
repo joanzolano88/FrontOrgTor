@@ -1,7 +1,9 @@
 <ion-header class="profile-header" [translucent]="true">
   <ion-toolbar>
     <ion-buttons slot="start" *ngIf="validarBackBtn()">
-      <ion-back-button text="" defaultHref="/auth/login"></ion-back-button>
+      <ion-button fill="clear" routerLink="/auth/login" aria-label="Volver al inicio de sesión">
+        <ion-icon slot="icon-only" name="arrow-back-outline"></ion-icon>
+      </ion-button>
     </ion-buttons>
     <ion-title>{{ url == '/auth/usuario' ? 'Mi perfil' : 'Registrar' }}</ion-title>
     <ion-buttons slot="end" *ngIf="url == '/auth/usuario'">

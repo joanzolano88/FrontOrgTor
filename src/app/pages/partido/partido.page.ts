@@ -175,11 +175,10 @@ export class PartidoPage implements OnInit {
     private toastController: ToastController) {
     this.validarOrganizador = sesionService.validacionOrganizador();
     this.url =  router.url;
-    if (!this.url.includes("auth/partidos")) {
-      this.urlBack = "/auth/partidos"
-    } else {
-      this.urlBack = "/auth/partidos"
-    }
+    const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
+    this.urlBack = returnUrl?.startsWith('/auth/') && !returnUrl.startsWith('//')
+      ? returnUrl
+      : '/auth/partidos';
   }
   iniciarCambioVista(event: PointerEvent): void {
     this.inicioToquePestana = { x: event.clientX, y: event.clientY };

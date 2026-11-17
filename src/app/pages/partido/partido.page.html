@@ -1,7 +1,9 @@
 <ion-header class="match-header" [translucent]="true">
   <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-back-button text="" defaultHref="{{urlBack}}"></ion-back-button>
+      <ion-button fill="clear" [routerLink]="urlBack" aria-label="Volver a partidos">
+        <ion-icon slot="icon-only" name="arrow-back-outline"></ion-icon>
+      </ion-button>
     </ion-buttons>
     <ion-title>Partido</ion-title>
   </ion-toolbar>

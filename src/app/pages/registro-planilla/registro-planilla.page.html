@@ -1,7 +1,9 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-back-button text="" [defaultHref]="'/auth/torneos/torneo/' + idTorneo"></ion-back-button>
+      <ion-button fill="clear" [routerLink]="'/auth/torneos/torneo/' + idTorneo" aria-label="Volver al torneo">
+        <ion-icon slot="icon-only" name="arrow-back-outline"></ion-icon>
+      </ion-button>
     </ion-buttons>
     <ion-title>Registro de planilla</ion-title>
   </ion-toolbar>
