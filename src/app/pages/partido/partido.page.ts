@@ -135,6 +135,7 @@ export class PartidoPage implements OnInit {
   posicionVaciaModalOpen = false;
   posicionVaciaEquipo?: Equipo;
   posicionVaciaIndice?: number;
+  busquedaPosicionVacia = '';
   cargandoJugadoresPosicionVacia = false;
   jugadoresPosicionVacia: JugadorDisponiblePartido[] = [];
   jugadorPosicionVaciaSeleccionado?: JugadorDisponiblePartido;
@@ -877,6 +878,7 @@ export class PartidoPage implements OnInit {
     this.posicionVaciaEquipo = equipo;
     this.posicionVaciaIndice = posicion;
     this.posicionVaciaModalOpen = true;
+    this.busquedaPosicionVacia = '';
     this.cargandoJugadoresPosicionVacia = !this.jugadoresPorEquipo[equipo.id];
     this.jugadoresPosicionVacia = this.jugadoresPorEquipo[equipo.id] || [];
     this.jugadorPosicionVaciaSeleccionado = undefined;
@@ -896,6 +898,7 @@ export class PartidoPage implements OnInit {
     }
   }
   jugadoresParaPosicionVacia(): JugadorDisponiblePartido[] {
+    const query = this.busquedaPosicionVacia.trim().toLocaleLowerCase();
     const titularesIds = new Set(this.titularesEquipo(this.posicionVaciaEquipo)
       .map(convocatoria => Number(convocatoria.jugador?.id)));
     const sancionadosIds = new Set(this.sancionesTorneo
@@ -908,9 +911,15 @@ export class PartidoPage implements OnInit {
       .map(evento => Number(evento.jugadorId)));
     return this.jugadoresPosicionVacia.filter(jugador =>
       !!jugador.id &&
+      (!query || jugador.nombre?.toLocaleLowerCase().includes(query) ||
+        jugador.identificacion?.toLocaleLowerCase().includes(query)) &&
       !titularesIds.has(Number(jugador.id)) &&
       !sancionadosIds.has(Number(jugador.id)) &&
       !expulsadosIds.has(Number(jugador.id)));
+  }
+  limpiarSeleccionPosicionVacia() {
+    this.jugadorPosicionVaciaSeleccionado = undefined;
+    this.numeroUniformePosicionVacia = null;
   }
   seleccionarJugadorPosicionVacia(jugador: JugadorDisponiblePartido) {
     this.jugadorPosicionVaciaSeleccionado = jugador;
@@ -945,6 +954,7 @@ export class PartidoPage implements OnInit {
     this.posicionVaciaModalOpen = false;
     this.posicionVaciaEquipo = undefined;
     this.posicionVaciaIndice = undefined;
+    this.busquedaPosicionVacia = '';
     this.jugadoresPosicionVacia = [];
     this.jugadorPosicionVaciaSeleccionado = undefined;
     this.numeroUniformePosicionVacia = null;
