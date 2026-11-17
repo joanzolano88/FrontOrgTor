@@ -365,11 +365,7 @@ ion-modal.rosters-modal::part(content) { border: 1px solid #075e7e; background: 
 .pitch-player-empty > span { border: 1px dashed rgba(255,255,255,.22); background: transparent; }
 .pitch-player-empty.goalkeeper > span { border-color: rgba(255,224,138,.35); background: transparent; }
 .pitch-player-empty.late-player-slot:not(:disabled) > span { border-color: #d4ffe2; background: rgba(0, 50, 31, .52); color: #d4ffe2; font-size: 1.1rem; }
-.lineup-footer-actions {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
-}
+
 
 ion-modal.substitution-modal { --width: min(100%, 480px); --height: min(88%, 700px); --border-radius: 16px; --background: #001b2e; }
 .substitution-modal-content { --background: #001b2e; --color: #e5f1fb; }
